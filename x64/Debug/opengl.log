@@ -1,0 +1,4 @@
+﻿  model.cpp
+E:\C++\opengl\opengl\component\model.cpp(72,30): warning C4244: “初始化”: 从“__int64”转换到“unsigned int”，可能丢失数据
+E:\C++\opengl\opengl\component\model.cpp(258,35): warning C4018: “<”: 有符号/无符号不匹配
+  opengl.vcxproj -> E:\C++\opengl\x64\Debug\opengl.exe
