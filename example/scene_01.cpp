@@ -118,10 +118,6 @@ namespace scene {
         sphere.GetComponent<Transform>().Scale(2.0f);
         SetupMaterial(sphere.AddComponent<Material>(resource_manager.Get<Material>(14)), 0);
 
-        alien = CreateEntity("Alien");
-        alien.AddComponent<Model>("C:/Users/271812697/Desktop/C++/alien-1.obj", Quality::Auto);
-        alien.GetComponent<Model>().SetMaterial("DefaultMaterial", resource_manager.Get<Material>(14));
-        alien.GetComponent<Transform>().Translate(world::up * 5.0f);
        
         plane = CreateEntity("Plane");
         plane.AddComponent<Mesh>(Primitive::Plane);

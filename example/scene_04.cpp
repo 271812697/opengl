@@ -68,7 +68,7 @@ namespace scene {
         
         mingyue.GetComponent<Transform>().Scale(2.5f);
         mingyue.GetComponent<Transform>().Translate(vec3(5.0f, 0.0f, 5.0f));   
-        Model& model=mingyue.AddComponent<Model>("C:/Users/271812697/Desktop/donghua/Zhaolinger/Hero_Zhaolinger/Hero_Zhaolinger.fbx",component::Quality::High, true);
+        Model& model=mingyue.AddComponent<Model>("res/Zhaolinger/Hero_Zhaolinger/Hero_Zhaolinger.fbx",component::Quality::High, true);
         //Model& model = mingyue.AddComponent<Model>("C:/Users/271812697/Desktop/donghua/mingyue/Hero_Mingyue/Hero_Mingyue.fbx", component::Quality::High, true);
         mingyue.AddComponent<Animator>();
         SetupMaterial(model.SetMaterial("Hero_Zhaolinger_Body_Mat_Show",resource_manager.Get<Material>(06)),1);
@@ -79,7 +79,7 @@ namespace scene {
         zhaolinger.GetComponent<Transform>().Scale(2.5f);
         zhaolinger.GetComponent<Transform>().Translate(vec3(10.0f, 0.0f, 5.0f));
 
-        Model& modelz = zhaolinger.AddComponent<Model>("C:/Users/271812697/Desktop/donghua/mingyue/Hero_Mingyue/Hero_Mingyue.fbx", component::Quality::High, true);
+        Model& modelz = zhaolinger.AddComponent<Model>("res/mingyue/Hero_Mingyue/Hero_Mingyue.fbx", component::Quality::High, true);
         zhaolinger.AddComponent<Animator>();
         SetupMaterial(modelz.SetMaterial("Hero_Mingyue_Hair", resource_manager.Get<Material>(06)), 4);
         SetupMaterial(modelz.SetMaterial("Hero_Mingyue_Body_sha", resource_manager.Get<Material>(06)), 5);
