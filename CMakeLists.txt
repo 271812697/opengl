@@ -17,7 +17,7 @@ source_group(component FILES ${COMPONENT_SRC})
 source_group(core FILES ${CORE_SRC})
 source_group(util FILES ${UTIL_SRC})
 source_group(example FILES ${EXAMPLE_SRC})
-source_group(asset FILES ${SCENE_SRC})
+source_group(scene FILES ${SCENE_SRC})
 source_group(src FILES ${src_files})
 add_executable(Opengl ${ASSET_SRC} ${COMPONENT_SRC} ${CORE_SRC} ${EXAMPLE_SRC} ${SCENE_SRC} ${UTIL_SRC} ${src_files})
 include_directories(
