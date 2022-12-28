@@ -19,7 +19,10 @@ source_group(util FILES ${UTIL_SRC})
 source_group(example FILES ${EXAMPLE_SRC})
 source_group(scene FILES ${SCENE_SRC})
 source_group(src FILES ${src_files})
-add_executable(Opengl ${ASSET_SRC} ${COMPONENT_SRC} ${CORE_SRC} ${EXAMPLE_SRC} ${SCENE_SRC} ${UTIL_SRC} ${src_files})
+source_group(shader FILES ${SHADER})
+add_executable(Opengl ${ASSET_SRC} ${COMPONENT_SRC} ${CORE_SRC} ${EXAMPLE_SRC} ${SCENE_SRC} ${UTIL_SRC} ${src_files} ${SHADER})
+#设置工作目录
+set_property(TARGET Opengl PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
 include_directories(
 	${CMAKE_CURRENT_BINARY_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR}
@@ -43,9 +46,9 @@ ImGui.lib
 ImGuizmo.lib
 )
 #拷贝文件到工作目录
-foreach(list ${SHADER})
-file(COPY ${list} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-endforeach(list ${SHADER})
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/assimp-vc142-mtd.dll DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/res DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+#foreach(list ${SHADER})
+#file(COPY ${list} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+#endforeach(list ${SHADER})
+#file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/assimp-vc142-mtd.dll DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+#file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/res DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 

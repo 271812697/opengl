@@ -136,6 +136,7 @@ namespace component {
 
         // upload uniform values to the shader
         for (const auto& [location, unif_variant] : uniforms) {
+            
             std::visit(upload, unif_variant);
         }
 

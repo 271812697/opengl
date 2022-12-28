@@ -1,6 +1,5 @@
 #version 460 core
 #pragma optimize(off)
-
 layout(std140, binding = 0) uniform Camera {
     vec4 position;
     vec4 direction;

@@ -102,13 +102,6 @@ namespace core {
     float Input::GetCursorOffset(MouseAxis axis) {
         float offset = 0.0f;
 
-        // note that the cursor delta offsets are updated regularly by GLFW or freeglut
-        // callbacks, but we have no control over exactly when and how often they are
-        // called. If the scene updates much faster, we may end up calling this function
-        // multiple times, before the callback has a chance to trigger again. For this
-        // reason, we need to reset the cursor offset after every read in order to make
-        // sure that they are never read twice.
-
         if (axis == MouseAxis::Horizontal) {
             offset = cursor_delta_x;
             cursor_delta_x = 0;  // reset cursor offset

@@ -16,7 +16,7 @@ scene::Scene* attach_Scene(int cur) {
         break;
     case 2:return new scene::Scene03("03");
         break;
-    case 3:return new scene::Scene04("03");
+    case 3:return new scene::Scene04("04");
         break;
     default:break;
     }
