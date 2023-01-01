@@ -2,6 +2,8 @@ cmake_minimum_required (VERSION 2.4)
 project("opengl")
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+#设置文件夹分类
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 #收集编译的文件
 file(GLOB SHADER *.glsl)
 file(GLOB ASSET_SRC ${PROJECT_SOURCE_DIR}/asset/*.*)
@@ -21,6 +23,21 @@ source_group(scene FILES ${SCENE_SRC})
 source_group(src FILES ${src_files})
 source_group(shader FILES ${SHADER})
 add_executable(Opengl ${ASSET_SRC} ${COMPONENT_SRC} ${CORE_SRC} ${EXAMPLE_SRC} ${SCENE_SRC} ${UTIL_SRC} ${src_files} ${SHADER})
+target_link_libraries(Opengl assimp)
+#
+# Assimp
+#
+add_subdirectory("assimp")
+set(ASSIMP_BUILD_ZLIB ON)
+set(ASSIMP_BUILD_ASSIMP_TOOLS OFF)
+set(ASSIMP_BUILD_TESTS OFF)
+set(ASSIMP_INSTALL OFF)
+set(ASSIMP_INJECT_DEBUG_POSTFIX OFF)
+#分类
+set_target_properties(assimp PROPERTIES FOLDER "Assimp")
+set_target_properties(UpdateAssimpLibsDebugSymbolsAndDLLs PROPERTIES FOLDER "Assimp")
+set_target_properties(zlibstatic PROPERTIES FOLDER "Assimp")
+set_target_properties(assimp_cmd PROPERTIES FOLDER "Assimp")
 #设置工作目录
 set_property(TARGET Opengl PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
 include_directories(
@@ -41,7 +58,6 @@ winmm.lib
 user32.lib
 gdiplus.lib
 glfw3.lib
-assimp-vc142-mtd.lib
 ImGui.lib
 ImGuizmo.lib
 )
