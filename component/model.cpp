@@ -313,7 +313,7 @@ namespace component {
             aiString str;
             ai_material->GetTexture(aiTextureType_NORMALS, i, &str);
             std::string realpath = directory + str.C_Str();
-            Texture_Diffuse[matid] = MakeAsset<Texture>(realpath.c_str());
+            //Texture_Diffuse[matid] = MakeAsset<Texture>(realpath.c_str());
         }
     }
 

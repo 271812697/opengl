@@ -56,7 +56,7 @@ namespace scene {
             auto& pl = point_light.GetComponent<PointLight>();
             mat.SetUniform(3, pl.color);
             mat.SetUniform(4, pl.intensity);
-            mat.SetUniform(5, 2.0f);
+            mat.SetUniform(5, 4.0f);
         
         }
         
@@ -69,7 +69,6 @@ namespace scene {
         mingyue.GetComponent<Transform>().Scale(2.5f);
         mingyue.GetComponent<Transform>().Translate(vec3(5.0f, 0.0f, 5.0f));   
         Model& model=mingyue.AddComponent<Model>("res/Zhaolinger/Hero_Zhaolinger/Hero_Zhaolinger.fbx",component::Quality::High, true);
-        //Model& model = mingyue.AddComponent<Model>("C:/Users/271812697/Desktop/donghua/mingyue/Hero_Mingyue/Hero_Mingyue.fbx", component::Quality::High, true);
         mingyue.AddComponent<Animator>();
         SetupMaterial(model.SetMaterial("Hero_Zhaolinger_Body_Mat_Show",resource_manager.Get<Material>(06)),1);
         SetupMaterial(model.SetMaterial("Hero_Zhaolinger_Hair_Mat_Show",resource_manager.Get<Material>(06)), 2);
@@ -164,7 +163,7 @@ namespace scene {
 
         for (int i = 0; i < 6; ++i) {
             bloom_shader->SetUniform(0, i % 2 == 0);
-            bloom_shader->Dispatch(ping.width / 32, ping.width / 18);
+            bloom_shader->Dispatch(ping.width / 32, ping.height/ 18);
             bloom_shader->SyncWait(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT | GL_TEXTURE_FETCH_BARRIER_BIT);
         }
 
