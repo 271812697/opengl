@@ -351,8 +351,6 @@ void GameApp::OnResize(GLFWwindow* window, int width, int height)
 #endif // C1
 #ifdef CP2
 #include "GameApp.h"
-#include"Shader.h"
-#include"Geometry.h"
 #include"core/log.h"
 #include"core/sync.h"
 #include<type_traits>
@@ -360,10 +358,7 @@ void GameApp::OnResize(GLFWwindow* window, int width, int height)
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <imgui/imgui.h>
-#include"Quaternion.h"
-#include"VaoObject.h"
-#include"Node.h"
-#include"GameObject.h"
+
 #include"pch.h"
 #include"scene/renderer.h"
 #include"example/all.h"

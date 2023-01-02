@@ -3,7 +3,7 @@
 #include <type_traits>
 #include "../core/log.h"
 #include "shader.h"
-#include"../Matrix4.h"
+
 #include <glm/gtc/type_ptr.hpp>
 #include<../openglApp.h>
 #include<filesystem>
@@ -150,9 +150,7 @@ namespace asset {
         else if constexpr (std::is_same_v<T, mat2>)   { glProgramUniformMatrix2fv(id, location, 1, GL_FALSE, &val[0][0]); }
         else if constexpr (std::is_same_v<T, mat3>)   { glProgramUniformMatrix3fv(id, location, 1, GL_FALSE, &val[0][0]); }
         else if constexpr (std::is_same_v<T, mat4>)   { glProgramUniformMatrix4fv(id, location, 1, GL_FALSE, &val[0][0]); }
-        else if constexpr (std::is_same_v<T, Opengl::Matrix4>) {
-            glProgramUniformMatrix4fv(id, location, 1, GL_FALSE,val.Data());
-        }
+  
         else {
             static_assert(const_false<T>, "Unspecified template uniform type T ...");
         }
@@ -381,7 +379,7 @@ namespace asset {
     INSTANTIATE_TEMPLATE(mat2)
     INSTANTIATE_TEMPLATE(mat3)
     INSTANTIATE_TEMPLATE(mat4)
-    INSTANTIATE_TEMPLATE(Opengl::Matrix4)
+
 
     #undef INSTANTIATE_TEMPLATE
 
