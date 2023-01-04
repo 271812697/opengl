@@ -3,7 +3,6 @@
 
 #pragma once
 
-#include "../Base/PrimitiveTypes.h"
 
 #include <type_traits>
 
@@ -277,7 +276,7 @@ public:
     Integer& AsInteger() { return value_; }
 
     /// Return hash value.
-    hash32 ToHash() const { return static_cast<hash32>(value_); }
+    unsigned ToHash() const { return static_cast<unsigned>(value_); }
 
 protected:
     /// Value.
