@@ -24,6 +24,8 @@ source_group(src FILES ${src_files})
 source_group(shader FILES ${SHADER})
 add_executable(Opengl ${ASSET_SRC} ${COMPONENT_SRC} ${CORE_SRC} ${EXAMPLE_SRC} ${SCENE_SRC} ${UTIL_SRC} ${src_files} ${SHADER})
 target_link_libraries(Opengl assimp)
+target_link_libraries(Opengl Engine)
+add_subdirectory("Engine")
 #
 # Assimp
 #
