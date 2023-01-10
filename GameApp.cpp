@@ -17,7 +17,7 @@
 
 using namespace std;
 std::map<int, scene::Scene*>table;
-int sindex = 3;
+int sindex = 4;
 int lastindex = sindex;
 
 void SwichScene() {

@@ -53,6 +53,7 @@ layout(location = 0) out _vtx {
 };
 
 layout(location = 100) uniform mat4 bone_transform[150];  // up to 150 bones
+layout(location = 1008) uniform bool iSBone;
 mat4 CalcBoneTransform() {
     mat4 T = mat4(0.0);
     for (uint i = 0; i < 4; ++i) {
@@ -63,7 +64,7 @@ mat4 CalcBoneTransform() {
     return T;
 }
 void main() {
-    mat4 BT = CalcBoneTransform() ;
+    mat4 BT = iSBone ? CalcBoneTransform() : mat4(1.0);
     mat4 MVP = camera.projection * camera.view * self.transform;
 
     gl_Position = MVP * BT * vec4(position, 1.0);
@@ -1334,13 +1335,15 @@ layout(location = 0) in _vtx {
 
 layout(location = 0) out vec4 color;
 layout(location = 1) out vec4 bloom;
-layout(location = 0) uniform float ibl_exposure;
 
-layout(std140, binding = 1) uniform DL {
+layout(std140, binding = 1) uniform PL {
     vec4  color;
-    vec4  direction;
+    vec4  position;
     float intensity;
-} dl;
+    float linear;
+    float quadratic;
+    float range;
+} pl;
 
 layout(std140, binding = 2) uniform SL {
     vec4  color;
@@ -1351,25 +1354,32 @@ layout(std140, binding = 2) uniform SL {
     float outer_cos;
     float range;
 } sl;
-layout(std140, binding = 3) uniform PL {
+
+layout(std140, binding = 3) uniform DL {
     vec4  color;
-    vec4  position;
+    vec4  direction[5];
     float intensity;
-    float linear;
-    float quadratic;
-    float range;
-} pl;
+} dl;
+
+layout(location = 0) uniform float ibl_exposure;
+layout(location = 1) uniform bool enable_spotlight;
+layout(location = 2) uniform bool enable_moonlight;
+layout(location = 3) uniform bool enable_lantern;
+layout(location = 4) uniform bool enable_shadow;
+
+// light radius uniforms that control shadow softness
+layout(location = 5) uniform float pl_radius;
+
+// shadow map is directly controlled by scene code as it comes from the framebuffer so this
+// texture unit must be unique, otherwise it could be replaced by textures in other shaders
+layout(binding = 15) uniform samplerCube shadow_map1;
 
 void main() {
     Pixel px;
     px._position = _position;
     px._normal   = _normal;
     px._uv       = _uv;
-    px._uv2      = _uv2;
-    px._tangent  = _tangent;
-    px._binormal = _binormal;
-    px._has_tbn  = false;
-    px._has_uv2  = false;
+    px._has_tbn  = true;
 
     InitPixel(px, camera.position.xyz);
 
@@ -1377,15 +1387,31 @@ void main() {
     vec3 Le = vec3(0.0);  // emission
 
     Lo += EvaluateIBL(px) * max(ibl_exposure, 0.5);
-    Lo += EvaluateADL(px, dl.direction.xyz, 1.0) * dl.color.rgb * dl.intensity;
-    vec3 pc = EvaluateAPL(px, pl.position.xyz, pl.range, pl.linear, pl.quadratic, 1.0);
-    Lo += pc * pl.color.rgb * pl.intensity;
-    vec3 sc = EvaluateASL(px, sl.position.xyz, sl.direction.xyz, sl.range, sl.inner_cos, sl.outer_cos);
-   // Lo += sc * sl.color.rgb * sl.intensity;
+
+    if (enable_moonlight) {
+        for (uint i = 0; i < 5; ++i) {
+            Lo += EvaluateADL(px, dl.direction[i].xyz, 1.0) * dl.color.rgb * dl.intensity;
+        }
+    }
+
+    if (true) {  // the point light is always enabled
+        float visibility = 1.0;
+        if (enable_shadow) {
+            visibility -= EvalOcclusion(px, shadow_map1, pl.position.xyz, pl_radius);
+        }
+
+        vec3 pc = EvaluateAPL(px, pl.position.xyz, pl.range, pl.linear, pl.quadratic, visibility);
+        Lo += pc * pl.color.rgb * pl.intensity;
+    }
+
+
+    if (enable_spotlight) {
+        vec3 sc = EvaluateASL(px, sl.position.xyz, sl.direction.xyz, sl.range, sl.inner_cos, sl.outer_cos);
+        Lo += sc * sl.color.rgb * sl.intensity * step(-8.0, _position.z);
+    }
+
     color = vec4(Lo + Le, px.albedo.a);
-    float fade_io = 0.3 + abs(cos(rdr_in.time));
-    bloom = vec4(0,0.0,0.0, 1.0);  // make sure this is not bloomed
+    bloom = vec4(Le, 1.0);
 }
+
 #endif
-
-
