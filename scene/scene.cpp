@@ -31,6 +31,7 @@ namespace scene {
         e.AddComponent<Transform>();
         e.AddComponent<Tag>(tag);
         directory.emplace(e.id, e.name);
+        directory_Entity.push_back(e);
 
         return e;
     }

@@ -285,7 +285,7 @@ namespace scene {
 
         shadow_shader->SetUniformArray(250, 6, pl_transform);
 
-<<<<<<< HEAD
+
         shadow_shader->SetUniform(1008,true);
         Renderer::Submit(suzune.id); 
         Renderer::Render(shadow_shader);
@@ -300,15 +300,9 @@ namespace scene {
         shadow_shader->SetUniform(1008, false);
         Renderer::Submit(ball[0].id, ball[1].id, ball[2].id);
         Renderer::Submit(wall.id,floor.id);
-=======
-        shadow_shader->SetUniform(1008, true);
-        Renderer::Submit(suzune.id);
-        Renderer::Render(shadow_shader);
-        shadow_shader->SetUniform(1008, false);
-        Renderer::Submit(wall.id);
         Renderer::Submit(ball[0].id, ball[1].id, ball[2].id);
         Renderer::Submit(floor.id);
->>>>>>> 68c69067cc60f79ea2fea171f7539080ceb157e0
+
         Renderer::Render(shadow_shader);
         Renderer::SetViewport(Window::width, Window::height);
         Renderer::SetShadowPass(0);
@@ -430,11 +424,7 @@ namespace scene {
                 Checkbox("Show Gizmo SL", &show_gizmo_sl);
                 if (show_gizmo_pl && show_gizmo_sl) { show_gizmo_pl = false; }
                 Checkbox("Play Animation", &animate_suzune);
-                if (Button("Go next")) {
-                    auto& animator = suzune.GetComponent<Animator>();
-                    animator.Gonext();
-
-                }
+   
                 SliderFloat("Animation Speed", &animate_speed, 0.1f, 3.0f);
                 if (Button("Go next")) {
                     auto& animator = mingyue.GetComponent<Animator>();
@@ -446,26 +436,34 @@ namespace scene {
                 EndTabItem();
             }
 
-            if (BeginTabItem("Pillars")) {
-                tab_id = 2;
-                enable_lantern = true;
-                enable_spotlight = enable_moonlight = show_gizmo_sl = false;
-                PushItemWidth(130.0f);
-                Checkbox("Enable Shadow", &enable_shadow);
-                Checkbox("Gizmo PL", &show_gizmo_pl);
-                Checkbox("Gizmo Lantern", &show_gizmo_lt);
-                if (show_gizmo_pl && show_gizmo_lt) { show_gizmo_pl = false; }
-      
-                SliderFloat("Light Radius", &light_radius, 0.001f, 0.1f);
-               
-                PopItemWidth();
-                EndTabItem();
-            }
 
-            if (show_gizmo_pl) { ui::DrawGizmo(camera, point_light, ui::Gizmo::Translate); }
-            if (show_gizmo_sl) { ui::DrawGizmo(camera, spotlight, ui::Gizmo::Translate); }
+           
             
+          
+            
+            if (ImGui::TreeNode("Entity")) { 
+                static ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth |ImGuiTreeNodeFlags_Selected|
+                ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+                static Entity e;
+                for (auto& it : directory_Entity) {
+                    ImGui::TreeNodeEx(it.name.c_str(), base_flags);
+                    if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen()) {
+                        e = it;
+                        CORE_INFO("{0} is selected",it.name);
+                    }  
+                }
+                if (e.id != entt::null) {
+                    static int c = 0;
+                    ImGui::RadioButton("T", &c, 0); ImGui::SameLine();
+                    ImGui::RadioButton("R", &c, 1); ImGui::SameLine();
+                    ImGui::RadioButton("S", &c, 2);
+                   
+                    ui::DrawGizmo(camera,e,c==0? ui::Gizmo::Translate:c>1?ui::Gizmo::Rotate:ui::Gizmo::Scale);
+                }
 
+            
+                ImGui::TreePop();
+            }
             PushStyleColor(ImGuiCol_Tab, tab_color_off);
             PushStyleColor(ImGuiCol_TabHovered, tab_color_on);
             PushStyleColor(ImGuiCol_TabActive, tab_color_on);
@@ -586,7 +584,7 @@ namespace scene {
             pbr_mat.SetUniform(pbr_u::roughness, 0.3f);
         }
         else if (mat_id == 50) {  // hair (Nekomimi Suzune)
-            pbr_mat.SetTexture(pbr_t::albedo, MakeAsset<Texture>( "res\\model\\suzune\\Hair.png"));
+            //pbr_mat.SetTexture(pbr_t::albedo, MakeAsset<Texture>( "res\\model\\suzune\\Hair.png"));
             pbr_mat.SetUniform(pbr_u::roughness, 0.8f);
             pbr_mat.SetUniform(pbr_u::specular, 0.7f);
         }

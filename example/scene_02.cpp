@@ -402,17 +402,34 @@ namespace scene {
                 SliderFloat("Tank Roughness", &tank_roughness, 0.1f, 0.72f);
                 PopItemWidth();
             }
+            if (ImGui::TreeNode("Entity")) {
+                static ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Selected |
+                    ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+                static Entity e;
+                for (auto& it : directory_Entity) {
+                    ImGui::TreeNodeEx(it.name.c_str(), base_flags);
+                    if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen()) {
+                        e = it;
+                        CORE_INFO("{0} is selected", it.name);
+                    }
+                }
+                if (e.id != entt::null) {
+                    static int c = 0;
+                    ImGui::RadioButton("T", &c, 0); ImGui::SameLine();
+                    ImGui::RadioButton("R", &c, 1); ImGui::SameLine();
+                    ImGui::RadioButton("S", &c, 2);
 
+                    ui::DrawGizmo(camera, e, c == 0 ? ui::Gizmo::Translate : c > 1 ? ui::Gizmo::Rotate : ui::Gizmo::Scale);
+                }
+
+
+                ImGui::TreePop();
+            }
             Unindent(5.0f);
             ui::EndInspector();
         }
 
-        if (entity_id == 3 && z_mode > 0) {
-            ui::DrawGizmo(camera, motorbike, static_cast<ui::Gizmo>(z_mode));
-        }
-        else {
-            ui::DrawGizmo(camera, point_light, ui::Gizmo::Translate);
-        }
+
     }
 
 

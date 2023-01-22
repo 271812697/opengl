@@ -15,10 +15,12 @@ namespace scene {
     class Scene {
       private:
         entt::registry registry;
-        std::map<entt::entity, std::string> directory;
+       
         friend class Renderer;
         
       protected:
+        std::map<entt::entity, std::string> directory;
+        std::vector<Entity> directory_Entity;
         ResourceManager resource_manager;
         std::map<GLuint, UBO> UBOs;  // indexed by uniform buffer's binding point
         std::map<GLuint, FBO> FBOs;  // indexed by the order of creation
