@@ -64,7 +64,7 @@ namespace component {
             SP_DBG_BREAK();
             return;
         }
-        directory = filepath.substr(0, filepath.find_last_of('/')) + "/";
+        directory = std::filesystem::path(filepath).parent_path();
         ProcessTree(ai_root->mRootNode, -1);  // recursively process and store the hierarchy info
         ProcessNode(ai_root->mRootNode);      // recursively process every node before return
 
@@ -306,15 +306,11 @@ namespace component {
         for (unsigned int i = 0; i < ai_material->GetTextureCount(aiTextureType_DIFFUSE); i++) {
             aiString str;
             ai_material->GetTexture(aiTextureType_DIFFUSE,i,&str);
-            std::string realpath =  directory+str.C_Str();
-            Texture_Diffuse[matid] = MakeAsset<Texture>(realpath.c_str());
+            
+            std::filesystem::path realpath =  directory/ std::filesystem::path(str.C_Str());
+            Texture_Diffuse[matid] = MakeAsset<Texture>(realpath.generic_string());
         }
-        for (unsigned int i = 0; i < ai_material->GetTextureCount(aiTextureType_NORMALS); i++) {
-            aiString str;
-            ai_material->GetTexture(aiTextureType_NORMALS, i, &str);
-            std::string realpath = directory + str.C_Str();
-            //Texture_Diffuse[matid] = MakeAsset<Texture>(realpath.c_str());
-        }
+
     }
 
     Material& Model::SetMaterial(const std::string& matkey, asset_ref<Material>&& material) {

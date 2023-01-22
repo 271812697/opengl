@@ -55,7 +55,7 @@ namespace component {
         unsigned int n_nodes = 0, n_bones = 0;
         unsigned int n_meshes = 0, n_verts = 0, n_tris = 0;
         bool animated = false;
-        std::string directory;
+        std::filesystem::path directory;
         std::vector<Node> nodes;
         std::vector<Mesh> meshes;
         std::unordered_map<unsigned int, asset_ref<Texture>>Texture_Diffuse;

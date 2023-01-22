@@ -152,7 +152,7 @@ namespace scene {
             SetupMaterial(ball[i].AddComponent<Material>(resource_manager.Get<Material>(14)), i + 2);
         }
         suzune = CreateEntity("Nekomimi Suzune");
-        suzune.GetComponent<Transform>().Translate(vec3(0.0f, -0.9f, -3.0f));
+        suzune.GetComponent<Transform>().Translate(vec3(0.0f, -0.9f, 0.0f));
         suzune.GetComponent<Transform>().Scale(0.05f);
  
         if (std::string model_path =  "res\\model\\suzune\\suzune.fbx"; true) {
@@ -168,6 +168,21 @@ namespace scene {
             SetupMaterial(model.SetMaterial("mat_Suzune_EyeL.001", resource_manager.Get<Material>(14)), 54);
             SetupMaterial(model.SetMaterial("mat_Suzune_EyeR.001", resource_manager.Get<Material>(14)), 55);
         }
+        mingyue = CreateEntity("Mingyue");
+        mingyue.GetComponent<Transform>().Translate(vec3(2.0f, -0.9f, -3.0f));
+        mingyue.GetComponent<Transform>().Scale(5.0f);
+        if (std::string model_path = "res\\mingyue\\Hero_Mingyue\\Hero_Mingyue.fbx";true) {
+            auto& model = mingyue.AddComponent<Model>(model_path, Quality::Auto, true);
+
+            auto& animator = mingyue.AddComponent<Animator>();
+            animator.Update(Clock::delta_time);
+            SetupMaterial(model.SetMaterial("Hero_Mingyue_Hair", resource_manager.Get<Material>(14)), 56);
+            SetupMaterial(model.SetMaterial("Hero_Mingyue_Body_sha", resource_manager.Get<Material>(14)), 57);
+            SetupMaterial(model.SetMaterial("Hero_Mingyue_Face", resource_manager.Get<Material>(14)), 58);
+            SetupMaterial(model.SetMaterial("Hero_Mingyue_Body", resource_manager.Get<Material>(14)), 59);
+        }
+
+
 
         Renderer::MSAA(true);
         Renderer::DepthTest(true);
@@ -233,6 +248,7 @@ namespace scene {
         }
         auto& animator = suzune.GetComponent<Animator>();
         animator.Update( Clock::delta_time * animate_speed);
+        mingyue.GetComponent<Animator>().Update(Clock::delta_time * animate_speed);
 
         FBO& framebuffer_0 = FBOs[0];
         FBO& framebuffer_1 = FBOs[1];
@@ -269,23 +285,36 @@ namespace scene {
 
         shadow_shader->SetUniformArray(250, 6, pl_transform);
 
-        Renderer::Submit(ball[0].id, ball[1].id, ball[2].id);
+        shadow_shader->SetUniform(1008,true);
+        Renderer::Submit(suzune.id); 
+        Renderer::Render(shadow_shader);
 
-        Renderer::Submit(suzune.id, wall.id);
-        
-        Renderer::Submit(floor.id);
+        auto& bonetransforms = mingyue.GetComponent<Animator>().bone_transforms;
+        for (size_t i = 0; i < bonetransforms.size(); ++i) {
+            shadow_shader->SetUniform(100 + i, bonetransforms[i]);
+        }
+        Renderer::Submit(mingyue.id);
+        Renderer::Render(shadow_shader);
+
+        shadow_shader->SetUniform(1008, false);
+        Renderer::Submit(ball[0].id, ball[1].id, ball[2].id);
+        Renderer::Submit(wall.id,floor.id);
         Renderer::Render(shadow_shader);
         Renderer::SetViewport(Window::width, Window::height);
         Renderer::SetShadowPass(0);
         // ------------------------------ MRT render pass ------------------------------
         framebuffer_0.GetDepthTexture().Bind(15);
         framebuffer_2.Clear();
-        framebuffer_2.Bind();
+        framebuffer_2.Bind();   
+        Renderer::Submit(suzune.id);
+        Renderer::Submit(mingyue.id);
+
+        
         Renderer::Submit(floor.id);
         Renderer::Submit(point_light.id);
         Renderer::Submit(skybox.id);
         Renderer::Submit(ball[0].id, ball[1].id, ball[2].id);
-        Renderer::Submit(suzune.id);
+    
         Renderer::Submit(floor.id);
         Renderer::Submit(wall.id);
         Renderer::Submit(point_light.id);
@@ -392,6 +421,11 @@ namespace scene {
                 if (show_gizmo_pl && show_gizmo_sl) { show_gizmo_pl = false; }
                 Checkbox("Play Animation", &animate_suzune);
                 SliderFloat("Animation Speed", &animate_speed, 0.1f, 3.0f);
+                if (Button("Go next")) {
+                    auto& animator = mingyue.GetComponent<Animator>();
+                    animator.Gonext();
+
+                }
                 SliderFloat("Light Radius", &light_radius, 0.001f, 0.1f);
                 PopItemWidth();
                 EndTabItem();
@@ -542,21 +576,21 @@ namespace scene {
             pbr_mat.SetUniform(pbr_u::specular, 0.7f);
         }
         else if (mat_id == 51) {  // body (Nekomimi Suzune)
-            pbr_mat.SetTexture(pbr_t::albedo, MakeAsset<Texture>( "res\\model\\suzune\\Cloth.png"));
+            //pbr_mat.SetTexture(pbr_t::albedo, MakeAsset<Texture>( "res\\model\\suzune\\Cloth.png"));
         }
         else if (mat_id == 52) {  // cloth (Nekomimi Suzune)
-            pbr_mat.SetTexture(pbr_t::albedo, MakeAsset<Texture>( "res\\model\\suzune\\Body.png"));
+          //  pbr_mat.SetTexture(pbr_t::albedo, MakeAsset<Texture>( "res\\model\\suzune\\Body.png"));
         }
         else if (mat_id == 53) {  // head (Nekomimi Suzune)
-            pbr_mat.SetTexture(pbr_t::albedo, MakeAsset<Texture>( "res\\model\\suzune\\Head.png"));
+           // pbr_mat.SetTexture(pbr_t::albedo, MakeAsset<Texture>( "res\\model\\suzune\\Head.png"));
         }
         else if (mat_id == 54) {  // L eye (Nekomimi Suzune)
-            pbr_mat.SetTexture(pbr_t::albedo, MakeAsset<Texture>( "res\\model\\suzune\\Head.png"));
+           // pbr_mat.SetTexture(pbr_t::albedo, MakeAsset<Texture>( "res\\model\\suzune\\Head.png"));
             pbr_mat.SetUniform(pbr_u::roughness, 0.045f);
             pbr_mat.SetUniform(pbr_u::specular, 0.35f);
         }
         else if (mat_id == 55) {  // R eye (Nekomimi Suzune)
-            pbr_mat.SetTexture(pbr_t::albedo, MakeAsset<Texture>( "res\\model\\suzune\\Head2.png"));
+            //pbr_mat.SetTexture(pbr_t::albedo, MakeAsset<Texture>( "res\\model\\suzune\\Head2.png"));
             pbr_mat.SetUniform(pbr_u::roughness, 0.045f);
             pbr_mat.SetUniform(pbr_u::specular, 0.35f);
         }
@@ -565,6 +599,12 @@ namespace scene {
         if (mat_id >= 50 && mat_id <= 55) {  // Nekomimi Suzune
             auto& bone_transforms = suzune.GetComponent<Animator>().bone_transforms;
             pbr_mat.SetUniformArray(100U, bone_transforms.size(), &bone_transforms);
+            pbr_mat.SetUniform(1008,true);
+        }
+        if (mat_id > 55 && mat_id < 60) {//mingyue
+            auto& bone_transforms = mingyue.GetComponent<Animator>().bone_transforms;
+            pbr_mat.SetUniformArray(100U, bone_transforms.size(), &bone_transforms);
+            pbr_mat.SetUniform(1008, true);
         }
 
 

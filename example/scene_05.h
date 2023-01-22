@@ -21,6 +21,7 @@ namespace scene {
         Entity wall;
         Entity ball[3];
         Entity suzune;
+        Entity mingyue;
         void PrecomputeIBL(const std::string& hdri);
         void SetupMaterial(Material& mat, int id);
 
