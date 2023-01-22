@@ -285,6 +285,7 @@ namespace scene {
 
         shadow_shader->SetUniformArray(250, 6, pl_transform);
 
+<<<<<<< HEAD
         shadow_shader->SetUniform(1008,true);
         Renderer::Submit(suzune.id); 
         Renderer::Render(shadow_shader);
@@ -299,6 +300,15 @@ namespace scene {
         shadow_shader->SetUniform(1008, false);
         Renderer::Submit(ball[0].id, ball[1].id, ball[2].id);
         Renderer::Submit(wall.id,floor.id);
+=======
+        shadow_shader->SetUniform(1008, true);
+        Renderer::Submit(suzune.id);
+        Renderer::Render(shadow_shader);
+        shadow_shader->SetUniform(1008, false);
+        Renderer::Submit(wall.id);
+        Renderer::Submit(ball[0].id, ball[1].id, ball[2].id);
+        Renderer::Submit(floor.id);
+>>>>>>> 68c69067cc60f79ea2fea171f7539080ceb157e0
         Renderer::Render(shadow_shader);
         Renderer::SetViewport(Window::width, Window::height);
         Renderer::SetShadowPass(0);
@@ -420,6 +430,11 @@ namespace scene {
                 Checkbox("Show Gizmo SL", &show_gizmo_sl);
                 if (show_gizmo_pl && show_gizmo_sl) { show_gizmo_pl = false; }
                 Checkbox("Play Animation", &animate_suzune);
+                if (Button("Go next")) {
+                    auto& animator = suzune.GetComponent<Animator>();
+                    animator.Gonext();
+
+                }
                 SliderFloat("Animation Speed", &animate_speed, 0.1f, 3.0f);
                 if (Button("Go next")) {
                     auto& animator = mingyue.GetComponent<Animator>();
@@ -597,6 +612,7 @@ namespace scene {
 
 
         if (mat_id >= 50 && mat_id <= 55) {  // Nekomimi Suzune
+            pbr_mat.SetUniform(1008,true);
             auto& bone_transforms = suzune.GetComponent<Animator>().bone_transforms;
             pbr_mat.SetUniformArray(100U, bone_transforms.size(), &bone_transforms);
             pbr_mat.SetUniform(1008,true);
