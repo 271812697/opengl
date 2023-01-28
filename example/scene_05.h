@@ -22,6 +22,7 @@ namespace scene {
         Entity ball[3];
         Entity suzune;
         Entity mingyue;
+        Entity korean_fire;
         void PrecomputeIBL(const std::string& hdri);
         void SetupMaterial(Material& mat, int id);
 

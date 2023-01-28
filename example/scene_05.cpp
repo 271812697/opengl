@@ -171,6 +171,8 @@ namespace scene {
         mingyue = CreateEntity("Mingyue");
         mingyue.GetComponent<Transform>().Translate(vec3(2.0f, -0.9f, -3.0f));
         mingyue.GetComponent<Transform>().Scale(5.0f);
+        //BarberShopChair_01_4k.gltf
+        //"res\\mingyue\\Hero_Mingyue\\Hero_Mingyue.fbx"
         if (std::string model_path = "res\\mingyue\\Hero_Mingyue\\Hero_Mingyue.fbx";true) {
             auto& model = mingyue.AddComponent<Model>(model_path, Quality::Auto, true);
 
@@ -181,7 +183,15 @@ namespace scene {
             SetupMaterial(model.SetMaterial("Hero_Mingyue_Face", resource_manager.Get<Material>(14)), 58);
             SetupMaterial(model.SetMaterial("Hero_Mingyue_Body", resource_manager.Get<Material>(14)), 59);
         }
+        korean_fire = CreateEntity("korean_fire");
+        if (std::string model_path = "res\\model\\korean_fire_extinguisher_01_4k.gltf"; true) {
+            auto& model = korean_fire.AddComponent<Model>(model_path, Quality::Auto, true);
+            SetupMaterial(model.SetMaterial("korean_fire_extinguisher_01_body", resource_manager.Get<Material>(14)), 60);
+            SetupMaterial(model.SetMaterial("korean_fire_extinguisher_01_glass", resource_manager.Get<Material>(14)), 60);
+            SetupMaterial(model.SetMaterial("korean_fire_extinguisher_01_paper", resource_manager.Get<Material>(14)), 60);
 
+
+        }
 
 
         Renderer::MSAA(true);
@@ -302,6 +312,7 @@ namespace scene {
         Renderer::Submit(wall.id,floor.id);
         Renderer::Submit(ball[0].id, ball[1].id, ball[2].id);
         Renderer::Submit(floor.id);
+        Renderer::Submit(korean_fire.id);
 
         Renderer::Render(shadow_shader);
         Renderer::SetViewport(Window::width, Window::height);
@@ -313,7 +324,7 @@ namespace scene {
         Renderer::Submit(suzune.id);
         Renderer::Submit(mingyue.id);
 
-        
+        Renderer::Submit(korean_fire.id);
         Renderer::Submit(floor.id);
         Renderer::Submit(point_light.id);
         Renderer::Submit(skybox.id);
@@ -613,7 +624,7 @@ namespace scene {
             pbr_mat.SetUniform(1008,true);
             auto& bone_transforms = suzune.GetComponent<Animator>().bone_transforms;
             pbr_mat.SetUniformArray(100U, bone_transforms.size(), &bone_transforms);
-            pbr_mat.SetUniform(1008,true);
+           
         }
         if (mat_id > 55 && mat_id < 60) {//mingyue
             auto& bone_transforms = mingyue.GetComponent<Animator>().bone_transforms;
