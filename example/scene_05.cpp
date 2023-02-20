@@ -265,6 +265,8 @@ namespace scene {
         FBO& framebuffer_2 = FBOs[2];
         FBO& framebuffer_3 = FBOs[3];
         FBO& framebuffer_4 = FBOs[4];
+        
+        
         // ------------------------------ shadow pass 1 ------------------------------
 
         Renderer::SetViewport(shadow_width, shadow_height);
@@ -390,6 +392,8 @@ namespace scene {
 
         postprocess_shader->Unbind();
         bilinear_sampler->Unbind(1);
+        
+
     }
     void Scene05::OnImGuiRender() {
         using namespace ImGui;

@@ -17,7 +17,7 @@
 #include "example/scene_03.h"
 #include "example/scene_04.h"
 #include "example/scene_05.h"
-#include "example/scene_06.h"
+
 
 namespace scene::factory {
 
