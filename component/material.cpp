@@ -180,7 +180,6 @@ namespace component {
         glGetProgramInterfaceiv(id, GL_UNIFORM, GL_ACTIVE_RESOURCES, &n_uniforms);
 
         GLenum meta_data[] = { GL_NAME_LENGTH, GL_TYPE, GL_LOCATION, GL_BLOCK_INDEX };
-
         for (int i = 0; i < n_uniforms; ++i) {
             GLint unif_info[4] {};
             glGetProgramResourceiv(id, GL_UNIFORM, i, 4, meta_data, 4, NULL, unif_info);
@@ -192,7 +191,6 @@ namespace component {
             GLint name_length = unif_info[0];
             char* name = new char[name_length];
             glGetProgramResourceName(id, GL_UNIFORM, i, name_length, NULL, name);
-
             GLenum type = unif_info[1];
             GLuint loc = unif_info[2];
 

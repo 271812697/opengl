@@ -1502,7 +1502,7 @@ void main() {
     Lo += EvaluateIBL(px) * max(ibl_exposure, 0.5);
 
     vec3 pc = EvaluateAPL(px, pl.position.xyz, pl.range, pl.linear, pl.quadratic, 1.0);
-    Lo += pc * pl.color.rgb * pl.intensity;
+   // Lo += pc * pl.color.rgb * pl.intensity;
 
     // if (self.material_id == 123) {
     //     Le = CircularEaseInOut(abs(sin(rdr_in.time))) * px.emission.rgb;
