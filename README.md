@@ -2,7 +2,7 @@
 
 This is a simple renderer built with OpenGL 4.6 and C++17 ,and this is inspired by **[sketchpad](https://github.com/neo-mashiro/sketchpad)**
 
-Watch [demo](https://www.bilibili.com/video/BV18Y4y1973W/?spm_id_from=333.1007.top_right_bar_window_history.content.click&vd_source=7975919d79e304e89435052729a5f4d9) on bilibili
+Watch [demo](https://www.bilibili.com/video/BV18Y4y1973W/) on bilibili
 
 ## How to build (Windows only)
 
