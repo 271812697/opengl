@@ -402,7 +402,7 @@ namespace scene {
 
                 PushItemWidth(130.0f);
                 SliderFloat("Light Cluster Intensity", &light_cluster_intensity, 3.0f, 20.0f); Separator();
-                SliderFloat("Skybox Exposure", &skybox_exposure, 1.2f, 8.0f); Separator();
+                SliderFloat("Skybox Exposure", &skybox_exposure, 0.1f, 8.0f); Separator();
                 SliderFloat("Skybox LOD", &skybox_lod, 0.0f, 7.0f); Separator();
                 PopItemWidth();
                 Spacing();

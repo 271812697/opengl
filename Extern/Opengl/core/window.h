@@ -13,12 +13,11 @@ namespace core {
 
     class Window {
       public:
-        static inline std::string title = "sketchpad";
+        static inline std::string title = "Opengl";
         static inline GLuint width = 0, height = 0;
         static inline GLuint pos_x = 0, pos_y = 0;
         static inline float aspect_ratio = 16.0f / 9.0f;
 
-        static inline unsigned int window_id = 0;        // GLUT window handle
         static inline GLFWwindow* window_ptr = nullptr;  // GLFW window handle
 
         static inline Layer layer = Layer::Scene;
@@ -30,10 +29,7 @@ namespace core {
         static void Rename(const std::string& new_title);
         static void Resize();
 
-        static void OnLayerSwitch();
-        static void OnScreenshots();
-        static void OnOpenBrowser();
-        static bool OnExitRequest();
+
     };
 
 }

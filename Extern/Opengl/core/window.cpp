@@ -88,60 +88,8 @@ namespace core {
         glViewport(0, 0, width, height);
     }
 
-    void Window::OnLayerSwitch() {
-        layer = (layer == Layer::ImGui) ? Layer::Scene : Layer::ImGui;
-        if (layer == Layer::ImGui) {
-            Input::ShowCursor();
-        }
-        else {
-            Input::HideCursor();
-            Input::Clear();
-        }
-    }
 
-    void Window::OnScreenshots() {
 
-    }
 
-    void Window::OnOpenBrowser() {
-        static const std::string repo_link = "https://github.com/neo-mashiro/sketchpad";
-        std::string command = "start " + repo_link;  // for linux use "xdg-open"
-        std::system(command.c_str());
-    }
-
-    bool Window::OnExitRequest() {
-        // remember the current layer
-        auto cache_layer = layer;
-
-        // change layer to windows api, let the operating system take over
-        layer = Layer::Win32;
-        Input::ShowCursor();
-
-        // move cursor to the position of cancel button before the message box pops up
-        {
-            glfwSetCursorPos(Window::window_ptr, 892, 515);
-        }
-
-        // pop up the windows exit message box
-        int button_id = MessageBox(NULL,
-            (LPCWSTR)L"Do you want to close the window?",
-            (LPCWSTR)L"Sketchpad.exe",
-            MB_OKCANCEL | MB_ICONQUESTION | MB_DEFBUTTON1 | MB_SETFOREGROUND
-        );
-
-        if (button_id == IDOK) {
-            // return control to the app and exit there, so that we have a chance to
-            // clean things up, if we exit here directly, there will be memory leaks
-            return true;
-        }
-        else if (button_id == IDCANCEL) {
-            layer = cache_layer;  // recover layer
-            if (cache_layer == Layer::Scene) {
-                Input::HideCursor();
-            }
-        }
-        
-        return false;
-    }
 
 }

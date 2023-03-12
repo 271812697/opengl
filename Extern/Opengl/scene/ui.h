@@ -28,7 +28,6 @@ namespace scene::ui {
     // scene-level helper functions
     void DrawVerticalLine(void);
     void DrawTooltip(const char* desc, float spacing = 5.0f);
-    void DrawRainbowBar(const ImVec2& offset, float height);
     void DrawGizmo(scene::Entity& camera, scene::Entity& target, Gizmo z);
     void PushRotation();
     void PopRotation(float radians, bool ccw = false);
@@ -36,11 +35,5 @@ namespace scene::ui {
     int DrawPopupModal(const char* title, const char* message, const ImVec2& size);
     glm::ivec2 GetCursorPosition();
 
-    // application-level drawing functions
-    void DrawMenuBar(std::string& new_title);
-    void DrawStatusBar(void);
-    void DrawWelcomeScreen(ImTextureID id);
-    void DrawLoadingScreen(void);
-    void DrawCrosshair(void);
 
 }

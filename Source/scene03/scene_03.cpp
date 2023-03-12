@@ -269,7 +269,7 @@ namespace scene {
             Indent(5.0f);
             Text(ICON_FK_SUN_O "  Directional Light Vector");
             DragFloat3("###", val_ptr(dl_direction), 0.01f, -1.0f, 1.0f, "%.3f");
-            ui::DrawRainbowBar(rainbow_offset, 2.0f);
+           
             Spacing();
 
             PushItemWidth(130.0f);

@@ -1,3 +1,12 @@
 # opengl
 opengl渲染器
 
+![image-20230312104122727](README.assets/image-20230312104122727.png)
+
+![image-20230312104507897](README.assets/image-20230312104507897.png)
+
+
+
+![image-20230312104658699](README.assets/image-20230312104658699.png)
+
+![image-20230312103650700](README.assets/image-20230312103650700.png)
