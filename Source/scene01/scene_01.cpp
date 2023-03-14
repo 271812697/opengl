@@ -363,7 +363,8 @@ namespace scene {
 
         Renderer::Clear();
         Mesh::DrawQuad();
-
+        std::string a;
+       
         postprocess_shader->Unbind();
         bilinear_sampler->Unbind(1);
     }
