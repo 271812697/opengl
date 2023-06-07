@@ -11,24 +11,21 @@ GameApp::GameApp() :openglApp()
 {
 
 }
-scene::Scene* sc = nullptr;
+
 void GameApp::attachScene(scene::Scene* s)
 {
-    sc = s;
+    sc.reset(s);
 }
 
 bool GameApp::Init()
 {
     openglApp::Init();
-   
     sc->Init();
-
-
     return true;
 }
 void GameApp::UpdateScene(float dt)
 {
-   
+    this->dt = dt;
     sc->OnImGuiRender(); 
 }
 void GameApp::DrawScene()

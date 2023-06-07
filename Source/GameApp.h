@@ -5,9 +5,9 @@
 class GameApp:public openglApp
 {
 public:
-	
-	
 	GameApp();
+	
+	std::shared_ptr<scene::Scene> sc;
 	void attachScene(scene::Scene* s);
     bool Init();                         // 该父类方法需要初始化窗口和Direct3D部分			   
     void UpdateScene(float dt);   // 子类需要实现该方法，完成每一帧的更新

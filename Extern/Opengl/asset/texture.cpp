@@ -233,9 +233,7 @@ namespace asset {
 
     Texture::~Texture() {
         if (id == 0) return;
-
         glDeleteTextures(1, &id);  // texture 0 (a fallback texture that is all black) is silently ignored
-
         for (int i = 0; i < n_texture_units; i++) {
             if (textures_binding_table[i] = id) {
                 textures_binding_table[i] = 0;

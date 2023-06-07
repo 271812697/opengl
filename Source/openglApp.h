@@ -19,6 +19,8 @@ class openglApp
 {
 public:
 	openglApp();
+	
+	virtual ~openglApp();
 	float     AspectRatio()const;
 	int Run();                                // 运行程序，进行游戏主循环									  // 框架方法。客户派生类需要重载这些方法以实现特定的应用需求
 	virtual bool Init();                      // 该父类方法需要初始化窗口和Direct3D部分
@@ -29,7 +31,9 @@ public:
     std::pair<int,int> GetWindowSize() {
         return std::make_pair(m_ClientWidth, m_ClientHeight);
     }
-
+	float GetDeltaTime() {
+		return dt;
+	}
 protected:
 	bool InitMainWindow();
 	bool InitOpengl();
@@ -40,5 +44,6 @@ protected:
 	std::wstring m_MainWndCaption;                       // 主窗口标题
 	int m_ClientWidth;                                   // 视口宽度
 	int m_ClientHeight;
+	float dt;
 };
 

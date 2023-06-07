@@ -23,6 +23,10 @@ openglApp::openglApp():m_ClientWidth(1600),m_ClientHeight(900)
 	
    
 }
+openglApp::~openglApp()
+{
+    ::core::Log::Shutdown();
+}
 float openglApp::AspectRatio() const
 {
     return 1.0f*m_ClientWidth/m_ClientHeight;
@@ -35,9 +39,9 @@ int openglApp::Run()
     {
        
         CalculateFrameStats();
-        float nowtime = glfwGetTime();
         ::core::Clock::Update();
         ::scene::ui::NewFrame();
+        float nowtime = glfwGetTime();
         UpdateScene(nowtime-time);
         time = nowtime;
         DrawScene();
