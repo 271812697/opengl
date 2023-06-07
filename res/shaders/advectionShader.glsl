@@ -60,13 +60,13 @@ void main()
     #else
         vec2 coord = vUv - dt * texture2D(uVelocity, vUv).xy * texelSize;
         vec4 result;
-        if(choice>0)
+        if(choice==1)
            result = texture2D(uVelocity, coord);
         else
            result = texture2D(uSource, coord);
 
     #endif
-        float decay = 1.0 + dissipation * dt;
+        float decay = 1.0+ dissipation * dt;
         FragColor = result / decay;
 }
 #endif

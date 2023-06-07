@@ -20,44 +20,59 @@ using namespace utils;
 
 namespace scene {
     openglApp* instance =nullptr;
-  
-
-    struct FrameBuffer{ 
-        std::shared_ptr<FBO> fbo;
+    struct FrameBuffer{
         int width;
         int height;
         float texelSizeX;
         float texelSizeY;
+        GLuint tid = 0;
+        GLuint id = 0;
         int attach(int id) {
-            fbo->GetColorTexture(0).Bind(id);
+            glBindTextureUnit(id, tid);
             return id;
         }
-        FrameBuffer(int w, int h) {
+        void Bind() {
+            glBindFramebuffer(GL_FRAMEBUFFER, id);
+        }
+        void UnBind() {
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        }
+        FrameBuffer(int w, int h,uint internalFormat,uint param,uint format) {
+            glGenFramebuffers(1, &id);
+            glBindFramebuffer(GL_FRAMEBUFFER, id);  
+            glGenTextures(1, &tid);
+            glBindTexture(GL_TEXTURE_2D, tid);
+            glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, w, h, 0, format, GL_HALF_FLOAT, NULL);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, param);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, param);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tid, 0);
+            auto status=glCheckNamedFramebufferStatus(id, GL_FRAMEBUFFER);
             width = w;
             height = h;
             texelSizeX = 1.0 / width;
             texelSizeY = 1.0 / height;
-            fbo = std::make_shared<FBO>(w,h);
-            fbo->AddColorTexture(1);
         }
     };
     struct FrameBufferDouble {
         std::shared_ptr<FrameBuffer> read;
         std::shared_ptr<FrameBuffer> write;
-        FrameBufferDouble(int w, int h) {
-            read = std::make_shared<FrameBuffer>(w,h);
-            write = std::make_shared<FrameBuffer>(w, h);
+        FrameBufferDouble(int w, int h,uint internalFormat, uint param, uint format) {
+            read = std::make_shared<FrameBuffer>(w,h, internalFormat,param,format);
+            write = std::make_shared<FrameBuffer>(w, h,internalFormat,param,format);
         }
         void swap() {
             std::swap(read,write);
         }
     };
+    //缓冲
     std::shared_ptr<FrameBufferDouble>velocity;
     std::shared_ptr<FrameBufferDouble>dye;
     std::shared_ptr<FrameBuffer>divergence;
     std::shared_ptr<FrameBuffer>curl;
     std::shared_ptr<FrameBufferDouble>pressure;
-
+    //着色计算
     std::shared_ptr<Shader>copyProgram;
     std::shared_ptr<Shader>clearProgram;
     std::shared_ptr<Shader>fulscreenProgram;
@@ -69,7 +84,6 @@ namespace scene {
     std::shared_ptr<Shader>pressureProgram;
     std::shared_ptr<Shader>gradienSubtractProgram;
     std::shared_ptr<Shader>displayMaterial;
-
 
     Scene06::~Scene06()
     {
@@ -90,8 +104,6 @@ namespace scene {
         velocity.reset();
         dye.reset();
     }
-
-
     struct {
         int SIM_RESOLUTION = 256;
         int DYE_RESOLUTION = 1024;
@@ -99,8 +111,8 @@ namespace scene {
         float CURL = 30.0f;
         float PRESSURE = 0.8f;
         int PRESSURE_ITERATIONS = 20;
-        float VELOCITY_DISSIPATION = 4;
-        float DENSITY_DISSIPATION = 4;
+        float VELOCITY_DISSIPATION = 0;
+        float DENSITY_DISSIPATION = 0;
         float SPLAT_FORCE = 6000;
 
     }Config;
@@ -116,7 +128,6 @@ namespace scene {
         glm::vec3 color = { 30.0f,0.0f,300.0f };
     }pointer;
     inline float random_double() {
-        // Returns a random real in [0,1).
         return rand() / (RAND_MAX + 1.0);
     }
     glm::vec3 HSVtoRGB(float h, float s, float v) {
@@ -135,7 +146,6 @@ namespace scene {
         case 4: r = t, g = p, b = v; break;
         case 5: r = v, g = p, b = q; break;
         }
-
         return {
             r,
             g,
@@ -149,15 +159,14 @@ namespace scene {
         c.b *= 0.15;
         return c;
     }
-
-    void blit(const FrameBuffer*f,bool clear=false) {
+    void blit( FrameBuffer*f,bool clear=false) {
         if (f == nullptr) {
             auto  Window = instance->GetWindowSize();
             glViewport(0,0,Window.first,Window.second);
         }
         else {
             glViewport(0,0,f->width,f->height);
-            f->fbo->Bind();
+            f->Bind();
         }
         if (clear) {
             glClearColor(0.0,0.0,0.0,1.0);
@@ -165,15 +174,13 @@ namespace scene {
         }
         Mesh::DrawQuad();
         if (f) {
-            f->fbo->Unbind();
+            f->UnBind();
         }
     }
-    void render(const FrameBuffer* f=nullptr) {
+    void render( FrameBuffer* f=nullptr) {
         displayMaterial->Bind();
         dye->read->attach(0);
-        //velocity->read->attach(0);
         blit(f);
-
     }
     void splat(float x,float y,float dx,float dy,glm::vec3 color) {
         splatProgram->Bind();
@@ -209,10 +216,8 @@ namespace scene {
             splat(x,y,dx,dy,color);
         }
     }
-
-
     void update(float dt) {
-       
+
         //根据速度来算旋度
         curlProgram->Bind();
         curlProgram->SetUniform(3,glm::vec2(velocity->read->texelSizeX,velocity->read->texelSizeY));
@@ -254,9 +259,9 @@ namespace scene {
         velocity->read->attach(1);
         blit(velocity->write.get());
         velocity->swap();
-        //由前一时刻的速度来更新这一刻的速度
+        //对流由前一时刻的速度来更新这一刻的速度
 
-        
+
         advectionProgram->Bind();
         advectionProgram->SetUniform(3, glm::vec2(velocity->read->texelSizeX, velocity->read->texelSizeY));
         advectionProgram->SetUniform(7,1);
@@ -271,17 +276,14 @@ namespace scene {
         advectionProgram->SetUniform(7, 0);
         advectionProgram->SetUniform(6, Config.DENSITY_DISSIPATION);
         blit(dye->write.get());
-        dye->swap();  
+        dye->swap();
     }
-
     // this is called before the first frame, use this function to initialize your scene
     void Scene06::Init() {
         instance = GetOpenglApp();
         Renderer::SetScene(this);
-        this->title = "Tiled Forward Renderer";
-
-
-      
+        this->title = "Fluid";
+        //初始化
         fulscreenProgram = MakeAsset<Shader>("res\\shaders\\fullscreen.glsl");
         copyProgram= MakeAsset<Shader>("res\\shaders\\copyShader.glsl");
         clearProgram = MakeAsset<Shader>("res\\shaders\\clearShader.glsl");
@@ -293,44 +295,46 @@ namespace scene {
         pressureProgram= MakeAsset<Shader>("res\\shaders\\pressureShader.glsl");
         gradienSubtractProgram = MakeAsset<Shader>("res\\shaders\\gradientSubtractShader.glsl");
         advectionProgram = MakeAsset<Shader>("res\\shaders\\advectionShader.glsl");
-
-
        openglApp* instance= GetOpenglApp();
        auto  Window = instance->GetWindowSize();
 
         //velocity
-        velocity = std::make_shared<FrameBufferDouble>(16.0f / 9.0 * Config.SIM_RESOLUTION, Config.SIM_RESOLUTION);
-        dye = std::make_shared<FrameBufferDouble>(16.0f / 9.0 * Config.DYE_RESOLUTION, Config.DYE_RESOLUTION);
-        divergence = std::make_shared<FrameBuffer>(16.0f / 9.0 * Config.SIM_RESOLUTION, Config.SIM_RESOLUTION);
-        curl = std::make_shared<FrameBuffer>(16.0f / 9.0 * Config.SIM_RESOLUTION, Config.SIM_RESOLUTION);
-        pressure = std::make_shared<FrameBufferDouble>(16.0f / 9.0 * Config.SIM_RESOLUTION, Config.SIM_RESOLUTION);
+        velocity = std::make_shared<FrameBufferDouble>(16.0f / 9.0 * Config.SIM_RESOLUTION, Config.SIM_RESOLUTION,GL_RG16F,GL_LINEAR,GL_RG);
+        dye = std::make_shared<FrameBufferDouble>(16.0f / 9.0 * Config.DYE_RESOLUTION, Config.DYE_RESOLUTION,GL_RGBA16F, GL_LINEAR,GL_RGBA);
+        divergence = std::make_shared<FrameBuffer>(16.0f / 9.0 * Config.SIM_RESOLUTION, Config.SIM_RESOLUTION, GL_R16F, GL_NEAREST, GL_RED);
+        curl = std::make_shared<FrameBuffer>(16.0f / 9.0 * Config.SIM_RESOLUTION, Config.SIM_RESOLUTION, GL_R16F, GL_NEAREST, GL_RED);
+        pressure = std::make_shared<FrameBufferDouble>(16.0f / 9.0 * Config.SIM_RESOLUTION, Config.SIM_RESOLUTION, GL_R16F, GL_NEAREST, GL_RED);
 
         Renderer::FaceCulling(true);
         Renderer::AlphaBlend(false);
         Renderer::SeamlessCubemap(true);
         multipleSplats(15);
     }
-
     // this is called every frame, update your scene here and submit entities to the renderer
     void Scene06::OnSceneRender() {
-
         Renderer::Clear();
         render();
-
-
     }
-
     // this is called every frame, update your ImGui widgets here to control entities in the scene
     void Scene06::OnImGuiRender() {
         float dt = instance->GetDeltaTime();
-        update(dt);
-        ImVec2 mousePos = ImGui::GetMousePos();
-        auto wsize = instance->GetWindowSize();
-        float x = mousePos.x / wsize.first;
-        float y = mousePos.y / wsize.second;
-        y = 1 - y;        
-        if (!pointer.down&&ImGui::IsMouseDown(0)) {
-                pointer.down=true;
+        static float interval = 0;
+        interval += dt;
+        if (interval >=0.016) {
+            
+            update(interval);interval = 0;
+        }
+        if (ImGui::IsKeyPressed(ImGuiKey_::ImGuiKey_Space)) {
+            multipleSplats(15);
+        }
+        if (ImGui::IsKeyDown(ImGuiKey_::ImGuiKey_W)) {
+            ImVec2 mousePos = ImGui::GetMousePos();
+            auto wsize = instance->GetWindowSize();
+            float x = mousePos.x / wsize.first;
+            float y = mousePos.y / wsize.second;
+            y = 1 - y;
+            if (!pointer.down && ImGui::IsMouseDown(0)) {
+                pointer.down = true;
                 pointer.move = false;
                 pointer.texcoordX = x;
                 pointer.texcoordY = y;
@@ -339,35 +343,32 @@ namespace scene {
                 pointer.deltaX = 0;
                 pointer.deltaY = 0;
                 pointer.color = generateColor();
-        }
-        if (pointer.down) {
+            }
+            if (pointer.down) {
                 pointer.prevTexcoordX = pointer.texcoordX;
                 pointer.prevTexcoordY = pointer.texcoordY;
                 pointer.texcoordX = x;
                 pointer.texcoordY = y;
-                pointer.deltaX = 16.0f/9.0f * (pointer.texcoordX - pointer.prevTexcoordX);
-                pointer.deltaY = 16.0f/9.0f * (pointer.texcoordY - pointer.prevTexcoordY);
-                pointer.move =abs(pointer.deltaX) > 0 || abs(pointer.deltaY) > 0;
-        }
-        if (ImGui::IsMouseReleased(0)) {
+                pointer.deltaX = 16.0f / 9.0f * (pointer.texcoordX - pointer.prevTexcoordX);
+                pointer.deltaY = 16.0f / 9.0f * (pointer.texcoordY - pointer.prevTexcoordY);
+                pointer.move = abs(pointer.deltaX) > 0 || abs(pointer.deltaY) > 0;
+            }
+            if (ImGui::IsMouseReleased(0)) {
                 pointer.down = false;
-        }
-        if (pointer.move) {
-            pointer.move = false;
-            splatPointer(pointer);
+            }
+            if (pointer.move) {
+                pointer.move = false;
+                splatPointer(pointer);
+            }
         }
         ImGui::Begin("Settings");
-        ImGui::DragFloat("density diffusion",&Config.DENSITY_DISSIPATION,0,4);
-        ImGui::DragFloat("velocity diffusion", &Config.VELOCITY_DISSIPATION, 0, 4);
-        ImGui::DragFloat("pressure", &Config.PRESSURE, 0, 1);
-        ImGui::DragFloat("vorticity", &Config.CURL, 0, 50);
-        ImGui::DragFloat("splat radius", &Config.SPLAT_RADIUS, 0.01, 1);
-
-
+        ImGui::SliderFloat("density diffusion",&Config.DENSITY_DISSIPATION,0,4);
+        ImGui::SliderFloat("velocity diffusion", &Config.VELOCITY_DISSIPATION, 0, 4);
+        ImGui::SliderFloat("pressure", &Config.PRESSURE, 0, 1);
+        ImGui::SliderFloat("vorticity", &Config.CURL, 0, 50);
+        ImGui::SliderFloat("splat radius", &Config.SPLAT_RADIUS, 0.01, 1);
         ImGui::End();
     }
 }
-
 #include"../all.h"
-
 MAINSCENE(scene::Scene06,"01")
