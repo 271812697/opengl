@@ -105,7 +105,7 @@ namespace scene {
         dye.reset();
     }
     struct {
-        int SIM_RESOLUTION = 256;
+        int SIM_RESOLUTION = 1024;
         int DYE_RESOLUTION = 1024;
         float SPLAT_RADIUS = 0.25;
         float CURL = 30.0f;
@@ -320,9 +320,11 @@ namespace scene {
         float dt = instance->GetDeltaTime();
         static float interval = 0;
         interval += dt;
-        if (interval >=0.016) {
+        //update(dt);
+        if (interval >=0.01667) {
             
-            update(interval);interval = 0;
+            update(interval);
+            interval = 0;
         }
         if (ImGui::IsKeyPressed(ImGuiKey_::ImGuiKey_Space)) {
             multipleSplats(15);
