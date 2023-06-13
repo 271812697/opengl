@@ -54,6 +54,12 @@ namespace scene {
             texelSizeX = 1.0 / width;
             texelSizeY = 1.0 / height;
         }
+        ~FrameBuffer() {
+            glDeleteFramebuffers(1,&id);
+            glDeleteTextures(1,&tid);
+        
+        
+        }
     };
     struct FrameBufferDouble {
         std::shared_ptr<FrameBuffer> read;
@@ -105,13 +111,13 @@ namespace scene {
         dye.reset();
     }
     struct {
-        int SIM_RESOLUTION = 1024;
+        int SIM_RESOLUTION =256;
         int DYE_RESOLUTION = 1024;
         float SPLAT_RADIUS = 0.25;
         float CURL = 30.0f;
         float PRESSURE = 0.8f;
         int PRESSURE_ITERATIONS = 20;
-        float VELOCITY_DISSIPATION = 0;
+        float VELOCITY_DISSIPATION = 4;
         float DENSITY_DISSIPATION = 0;
         float SPLAT_FORCE = 6000;
 
@@ -179,6 +185,8 @@ namespace scene {
     }
     void render( FrameBuffer* f=nullptr) {
         displayMaterial->Bind();
+        //velocity->read->attach(0);
+       // pressure->read->attach(0);
         dye->read->attach(0);
         blit(f);
     }
@@ -295,8 +303,8 @@ namespace scene {
         pressureProgram= MakeAsset<Shader>("res\\shaders\\pressureShader.glsl");
         gradienSubtractProgram = MakeAsset<Shader>("res\\shaders\\gradientSubtractShader.glsl");
         advectionProgram = MakeAsset<Shader>("res\\shaders\\advectionShader.glsl");
-       openglApp* instance= GetOpenglApp();
-       auto  Window = instance->GetWindowSize();
+        openglApp* instance= GetOpenglApp();
+        auto  Window = instance->GetWindowSize();
 
         //velocity
         velocity = std::make_shared<FrameBufferDouble>(16.0f / 9.0 * Config.SIM_RESOLUTION, Config.SIM_RESOLUTION,GL_RG16F,GL_LINEAR,GL_RG);
@@ -318,12 +326,14 @@ namespace scene {
     // this is called every frame, update your ImGui widgets here to control entities in the scene
     void Scene06::OnImGuiRender() {
         float dt = instance->GetDeltaTime();
+        static int fps = 60.0f;
         static float interval = 0;
         interval += dt;
         //update(dt);
-        if (interval >=0.01667) {
+        if (interval >=1.0f/fps) {
             
-            update(interval);
+            update(interval); 
+            //update(interval);
             interval = 0;
         }
         if (ImGui::IsKeyPressed(ImGuiKey_::ImGuiKey_Space)) {
@@ -363,7 +373,22 @@ namespace scene {
                 splatPointer(pointer);
             }
         }
+        static int cur = 1;
+        const char* quality[3] = {"low 128","meidum 256","high 1024"};
+        int res[3] = {128,256,1024};
         ImGui::Begin("Settings");
+        ImGui::SliderInt("fps", &fps, 60, 1000);
+        if (ImGui::Combo("Render Quality", &cur, quality, 3)) {
+            velocity.reset();
+            divergence.reset();
+            curl.reset();
+            pressure.reset();
+            velocity = std::make_shared<FrameBufferDouble>(16.0f / 9.0 * res[cur], res[cur], GL_RG16F, GL_LINEAR, GL_RG);
+            divergence = std::make_shared<FrameBuffer>(16.0f / 9.0 * res[cur], res[cur], GL_R16F, GL_NEAREST, GL_RED);
+            curl = std::make_shared<FrameBuffer>(16.0f / 9.0 * res[cur], res[cur], GL_R16F, GL_NEAREST, GL_RED);
+            pressure = std::make_shared<FrameBufferDouble>(16.0f / 9.0 * res[cur], res[cur], GL_R16F, GL_NEAREST, GL_RED);
+
+        }
         ImGui::SliderFloat("density diffusion",&Config.DENSITY_DISSIPATION,0,4);
         ImGui::SliderFloat("velocity diffusion", &Config.VELOCITY_DISSIPATION, 0, 4);
         ImGui::SliderFloat("pressure", &Config.PRESSURE, 0, 1);
