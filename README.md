@@ -1,6 +1,6 @@
 # opengl - physically-based renderer
 
-This is a simple renderer built with OpenGL 4.6 and C++17 ,and this is inspired by **[sketchpad](https://github.com/neo-mashiro/sketchpad)**
+This is a simple renderer built with OpenGL 4.6 and C++17 
 
 Watch [demo](https://www.bilibili.com/video/BV18Y4y1973W/) on bilibili
 
