@@ -394,6 +394,15 @@ namespace scene {
         ImGui::SliderFloat("pressure", &Config.PRESSURE, 0, 1);
         ImGui::SliderFloat("vorticity", &Config.CURL, 0, 50);
         ImGui::SliderFloat("splat radius", &Config.SPLAT_RADIUS, 0.01, 1);
+        ImGui::Image((void*)velocity->read->tid, ImVec2(16 / 9.0f * 100, 100), ImVec2(0.f, 1.f), ImVec2(1.f, 0.f));
+        ImGui::SameLine();ImGui::Text("velocity");
+        ImGui::Image((void*)divergence->tid, ImVec2(16 / 9.0f * 100, 100), ImVec2(0.f, 1.f), ImVec2(1.f, 0.f));
+        ImGui::SameLine();ImGui::Text("divergence");
+        ImGui::Image((void*)curl->tid, ImVec2(16 / 9.0f * 100, 100), ImVec2(0.f, 1.f), ImVec2(1.f, 0.f));
+        ImGui::SameLine();ImGui::Text("curl");
+        ImGui::Image((void*)pressure->read->tid, ImVec2(16 / 9.0f * 100, 100), ImVec2(0.f, 1.f), ImVec2(1.f, 0.f));
+        ImGui::SameLine();ImGui::Text("pressure"); 
+
         ImGui::End();
     }
 }
