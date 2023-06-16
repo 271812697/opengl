@@ -99,6 +99,31 @@ if(NOT TARGET opengl)
     set_target_properties(opengl PROPERTIES FOLDER ${third_party_folder}/opengl)
 endif()
 
+if(NOT TARGET tools)   
+    set(tools_SOURCE_DIR_ ${CMAKE_CURRENT_SOURCE_DIR}/tools)
+    file(GLOB_RECURSE tools_impl CONFIGURE_DEPENDS  
+    "${tools_SOURCE_DIR_}/*.cpp")
+    file(GLOB_RECURSE tools_head CONFIGURE_DEPENDS  
+    "${tools_SOURCE_DIR_}/*.h")
+    source_group(TREE "${tools_SOURCE_DIR_}" FILES ${tools_impl} ${tools_head})
+    add_library(tools STATIC ${tools_impl} ${tools_head})
+    set_target_properties(tools PROPERTIES FOLDER ${third_party_folder}/tools)
+endif()
+
+if(NOT TARGET window)
+    set(window_SOURCE_DIR_ ${CMAKE_CURRENT_SOURCE_DIR}/Window)
+    file(GLOB_RECURSE window_impl CONFIGURE_DEPENDS  
+    "${window_SOURCE_DIR_}/*.cpp")
+    file(GLOB_RECURSE window_head CONFIGURE_DEPENDS  
+    "${window_SOURCE_DIR_}/*.h")
+    source_group(TREE "${window_SOURCE_DIR_}" FILES ${window_impl} ${window_head})
+    add_library(window STATIC ${window_impl} ${window_head})
+    target_link_libraries(window PUBLIC glfw)
+    target_link_libraries(window PUBLIC tools)
+    target_link_libraries(window PUBLIC std_image)
+    set_target_properties(window PROPERTIES FOLDER ${third_party_folder}/window)
+endif()
+
 
 
 

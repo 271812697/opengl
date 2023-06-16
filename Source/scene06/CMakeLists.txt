@@ -9,7 +9,7 @@ file(GLOB SCENE_HEAD ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
 file(GLOB SCENE_SRC ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 add_executable(${TARGET_NAME} ${SCENE_HEAD} ${SCENE_SRC})
 # Link dependencies    
-target_link_libraries(${TARGET_NAME} PUBLIC Window)
+target_link_libraries(${TARGET_NAME} PUBLIC Scene)
 
 set_property(TARGET ${TARGET_NAME} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}")
 

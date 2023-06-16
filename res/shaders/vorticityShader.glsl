@@ -50,7 +50,7 @@ void main()
 
         vec2 velocity = texture2D(uVelocity, vUv).xy;
         velocity += force * dt;
-        velocity = min(max(velocity, -1000.0), 1000.0);
+        velocity = min(max(velocity, -2000.0), 2000.0);
         FragColor = vec4(velocity, 0.0, 1.0);
 }
 #endif

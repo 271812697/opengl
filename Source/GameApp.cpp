@@ -3,7 +3,6 @@
 #endif // C1
 #ifdef CP2
 #include "GameApp.h"
-
 using namespace std;
 
 
