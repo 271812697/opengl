@@ -5,8 +5,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # ---- Create library ----
 
-file(GLOB Path_HEAD ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
-file(GLOB Path_SRC ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
+file(GLOB_RECURSE Path_HEAD ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
+file(GLOB_RECURSE Path_SRC ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${Path_SRC} ${Path_HEAD})
 add_executable(${TARGET_NAME} ${Path_HEAD} ${Path_SRC})
 # Link dependencies    
 target_link_libraries(${TARGET_NAME} PUBLIC window)
