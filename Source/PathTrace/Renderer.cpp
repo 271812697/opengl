@@ -26,6 +26,7 @@ namespace PathTrace
         return fullSourceCode;
     }
 
+
     Renderer::Renderer(Scene* scene, const std::string& shadersDirectory)
         : scene(scene)
         , BVHBuffer(0)
@@ -48,7 +49,7 @@ namespace PathTrace
         , tileOutputTexture()
         , denoisedTexture(0)
         , shadersDirectory(shadersDirectory)
-       // , pathTraceShader(nullptr)
+        // , pathTraceShader(nullptr)
         , pathTraceShaderLowRes(nullptr)
         , outputShader(nullptr)
         , tonemapShader(nullptr)
@@ -63,7 +64,7 @@ namespace PathTrace
             scene->ProcessScene();
 
         InitGPUDataBuffers();
-
+        quad = new Quad();
         pixelRatio = 0.25f;
 
         InitFBOs();
@@ -72,7 +73,7 @@ namespace PathTrace
 
     Renderer::~Renderer()
     {
-        
+        delete quad;
 
         // Delete textures
         glDeleteTextures(1, &BVHTex);
@@ -99,10 +100,7 @@ namespace PathTrace
         glDeleteBuffers(1, &normalsBuffer);
 
         // Delete shaders
-       // delete pathTraceShader;
-       // delete pathTraceShaderLowRes;
-       //delete outputShader;
-       // delete tonemapShader;
+
 
         // Delete denoiser data
         delete[] denoiserInputFramePtr;
@@ -248,11 +246,7 @@ namespace PathTrace
         delete[] denoiserInputFramePtr;
         delete[] frameOutputPtr;
 
-        // Delete shaders
-       // delete pathTraceShader;
-       // delete pathTraceShaderLowRes;
-       // delete outputShader;
-       // delete tonemapShader;
+
 
         InitFBOs();
         InitShaders();
@@ -287,7 +281,7 @@ namespace PathTrace
         accumFBO = std::make_shared<asset::FBO>(renderSize.x, renderSize.y);
         outputFBO.reset();
         outputFBO = std::make_shared<asset::FBO>(renderSize.x, renderSize.y);
-       
+
 
         // Create FBOs for path trace shader 
 
@@ -323,7 +317,7 @@ namespace PathTrace
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glBindTexture(GL_TEXTURE_2D, 0);
-        
+
         accumFBO->SetColorTexture(0, accumTexture);
 
         // Create FBOs for tile output shader
@@ -364,27 +358,17 @@ namespace PathTrace
 
     void Renderer::ReloadShaders()
     {
-        // Delete shaders
-        //delete pathTraceShader;
-        //delete pathTraceShaderLowRes;
-       // delete outputShader;
-       // delete tonemapShader;
-
         InitShaders();
     }
 
     void Renderer::InitShaders()
     {
         //初始化shader
-        //ShaderInclude::ShaderSource vertexShaderSrcObj = ShaderInclude::load(shadersDirectory + "common/vertex.glsl");
-        //std::string pathTraceShaderSrcObj = RawShaders::GetPathTrace();
         std::string pathTraceShaderSrcObj = loadShaderSource(shadersDirectory + "PathTrace.glsl");
-        std::string pathTraceShaderLowResSrcObj = loadShaderSource(shadersDirectory + "preview.glsl");
-        std::string outputShaderSrcObj = loadShaderSource(shadersDirectory + "output.glsl");
-        std::string tonemapShaderSrcObj = loadShaderSource(shadersDirectory + "tonemap.glsl");
-       // OutputShaders("./res.glsl", pathTraceShaderLowResSrcObj, outputShaderSrcObj, tonemapShaderSrcObj);
+        std::string pathTraceShaderLowResSrcObj = loadShaderSource(shadersDirectory + "PathTraceLowRes.glsl");
+        std::string outputShaderSrcObj = loadShaderSource(shadersDirectory + "OutputShader.glsl");
+        std::string tonemapShaderSrcObj = loadShaderSource(shadersDirectory + "ToneMapShader.glsl");
         //分析renderOptions添加向源码中预定义宏
-        // Add preprocessor defines for conditional compilation
         std::string pathtraceDefines = "";
         std::string tonemapDefines = "";
 
@@ -454,7 +438,7 @@ namespace PathTrace
                 idx = 0;
             pathTraceShaderSrcObj.insert(idx + 1, pathtraceDefines);
 
-            idx = pathTraceShaderLowResSrcObj.find("#version");
+            idx = pathTraceShaderLowResSrcObj.find("#ifdef fragment_shader");
             if (idx != -1)
                 idx = pathTraceShaderLowResSrcObj.find("\n", idx);
             else
@@ -464,7 +448,7 @@ namespace PathTrace
 
         if (tonemapDefines.size() > 0)
         {
-            size_t idx = tonemapShaderSrcObj.find("#version");
+            size_t idx = tonemapShaderSrcObj.find("#ifdef fragment_shader");
             if (idx != -1)
                 idx = tonemapShaderSrcObj.find("\n", idx);
             else
@@ -483,8 +467,9 @@ namespace PathTrace
         pathTraceShaderLowRes = std::make_shared<asset::Shader>();
         outputShader = std::make_shared<asset::Shader>();
         tonemapShader = std::make_shared<asset::Shader>();
+
         pathTraceShader->LoadFromSource(pathTraceShaderSrcObj);
-        pathTraceShaderLowRes->LoadFromSource( pathTraceShaderLowResSrcObj);
+        pathTraceShaderLowRes->LoadFromSource(pathTraceShaderLowResSrcObj);
         outputShader->LoadFromSource(outputShaderSrcObj);
         tonemapShader->LoadFromSource(tonemapShaderSrcObj);
 
@@ -499,7 +484,7 @@ namespace PathTrace
             glUniform2f(glGetUniformLocation(shaderObject, "envMapRes"), (float)scene->envMap->width, (float)scene->envMap->height);
             glUniform1f(glGetUniformLocation(shaderObject, "envMapTotalSum"), scene->envMap->totalSum);
         }
-        
+
         glUniform1i(glGetUniformLocation(shaderObject, "topBVHIndex"), scene->bvhTranslator.topLevelIndex);
         glUniform2f(glGetUniformLocation(shaderObject, "resolution"), float(renderSize.x), float(renderSize.y));
         glUniform2f(glGetUniformLocation(shaderObject, "invNumTiles"), invNumTiles.x, invNumTiles.y);
@@ -557,7 +542,7 @@ namespace PathTrace
             // Renders a low res preview if camera/instances are modified
             pathTraceFBOLowRes->Bind();
             glViewport(0, 0, windowSize.x * pixelRatio, windowSize.y * pixelRatio);
-            //quad->Draw(pathTraceShaderLowRes);
+            quad->Draw(pathTraceShaderLowRes.get());
             pathTraceFBOLowRes->Unbind();
 
             scene->instancesModified = false;
@@ -569,11 +554,11 @@ namespace PathTrace
             // Renders to pathTraceTexture while using previously accumulated samples from accumTexture
             // Rendering is done a tile per frame, so if a 500x500 image is rendered with a tileWidth and tileHeight of 250 then, all tiles (for a single sample) 
             // get rendered after 4 frames
- 
+
             pathTracefbo->Bind();
             glViewport(0, 0, tileWidth, tileHeight);
             glBindTexture(GL_TEXTURE_2D, accumTexture);
-           // quad->Draw(pathTraceShader.get());
+            quad->Draw(pathTraceShader.get());
             pathTracefbo->Unbind();
 
             // pathTraceTexture is copied to accumTexture and re-used as input for the first step.
@@ -581,7 +566,7 @@ namespace PathTrace
             glNamedFramebufferReadBuffer(pathTracefbo->ID(), GL_COLOR_ATTACHMENT0);
             glNamedFramebufferDrawBuffer(accumFBO->ID(), GL_COLOR_ATTACHMENT0);
             glBlitNamedFramebuffer(pathTracefbo->ID(), accumFBO->ID(), 0, 0, tileWidth, tileHeight, tileWidth * tile.x, tileHeight * tile.y,
-                tileWidth * tile.x+tileWidth, tileHeight * tile.y+ tileHeight, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+                tileWidth * tile.x + tileWidth, tileHeight * tile.y + tileHeight, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
 
             // Here we render to tileOutputTexture[currentBuffer] but display tileOutputTexture[1-currentBuffer] until all tiles are done rendering
@@ -590,7 +575,7 @@ namespace PathTrace
             outputFBO->SetColorTexture(0, tileOutputTexture[currentBuffer]);
             glViewport(0, 0, renderSize.x, renderSize.y);
             glBindTexture(GL_TEXTURE_2D, accumTexture);
-           // quad->Draw(tonemapShader);
+            quad->Draw(tonemapShader.get());
             outputFBO->Unbind();
         }
     }
@@ -603,7 +588,7 @@ namespace PathTrace
         if (scene->dirty || sampleCounter == 1)
         {
             glBindTexture(GL_TEXTURE_2D, pathTraceTextureLowRes);
-           // quad->Draw(tonemapShader);
+            quad->Draw(tonemapShader.get());
         }
         else
         {
@@ -612,7 +597,7 @@ namespace PathTrace
             else
                 glBindTexture(GL_TEXTURE_2D, tileOutputTexture[1 - currentBuffer]);
 
-           // quad->Draw(outputShader);
+            quad->Draw(outputShader.get());
         }
     }
 
@@ -784,7 +769,7 @@ namespace PathTrace
         glUniform2f(glGetUniformLocation(shaderObject, "tileOffset"), (float)tile.x * invNumTiles.x, (float)tile.y * invNumTiles.y);
         glUniform3f(glGetUniformLocation(shaderObject, "uniformLightCol"), scene->renderOptions.uniformLightCol.x, scene->renderOptions.uniformLightCol.y, scene->renderOptions.uniformLightCol.z);
         glUniform1f(glGetUniformLocation(shaderObject, "roughnessMollificationAmt"), scene->renderOptions.roughnessMollificationAmt);
-        glUniform1i(glGetUniformLocation(shaderObject, "frameNum"), frameCounter);   
+        glUniform1i(glGetUniformLocation(shaderObject, "frameNum"), frameCounter);
         pathTraceShader->Unbind();
 
         pathTraceShaderLowRes->Bind();
@@ -814,4 +799,6 @@ namespace PathTrace
         glUniform3f(glGetUniformLocation(shaderObject, "backgroundCol"), scene->renderOptions.backgroundCol.x, scene->renderOptions.backgroundCol.y, scene->renderOptions.backgroundCol.z);
         tonemapShader->Unbind();
     }
+
+
 }

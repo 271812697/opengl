@@ -1,10 +1,9 @@
 #pragma once
 #include <vector>
-
+#include "Quad.h"
 #include"Opengl/asset/fbo.h"
 #include"Opengl/asset/shader.h"
 #include "MathUtil.h"
-
 namespace PathTrace
 {
 
@@ -79,6 +78,7 @@ namespace PathTrace
     class Renderer
     {
     protected:
+        Quad* quad;
         Scene* scene;
 
         // Opengl buffer objects and textures for storing scene data on the GPU
@@ -109,7 +109,6 @@ namespace PathTrace
         std::string shadersDirectory;
 
         std::shared_ptr<asset::Shader> pathTraceShader;
-        //Program* pathTraceShader;
         std::shared_ptr<asset::Shader> pathTraceShaderLowRes;
         std::shared_ptr<asset::Shader> outputShader;
         std::shared_ptr<asset::Shader> tonemapShader;
