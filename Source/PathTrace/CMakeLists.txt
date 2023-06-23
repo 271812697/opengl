@@ -28,6 +28,8 @@ target_link_libraries(${TARGET_NAME} PUBLIC window)
 target_link_libraries(${TARGET_NAME} PUBLIC opengl)
 target_link_libraries(${TARGET_NAME} PUBLIC imgui)
 target_link_libraries(${TARGET_NAME} PUBLIC glad)
+target_link_libraries(${TARGET_NAME} PUBLIC ui)
+target_link_libraries(${TARGET_NAME} PUBLIC tools)
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/oidn/lib/OpenImageDenoise.dll DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/oidn/lib/tbb.dll DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

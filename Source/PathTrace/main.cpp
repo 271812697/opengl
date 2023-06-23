@@ -1,4 +1,4 @@
-#define TESTMAIN
+Ôªø#define TESTMAIN
 #ifdef TESTMAIN
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
@@ -7,29 +7,34 @@
 #include<iostream>
 #include<glad/glad.h>
 #include <GLFW/glfw3.h>
+
+#include"Window/Device.h"
+#include"Window/WindowSettings.h"
+#include"Window/Window.h"
+#include"Window/InputManager.h"
+#include"UI/Core/UIManager.h"
+#include"UI/Styling/EStyle.h"
+#include"tools/Clock.h"
+#include"Panels/PanelsManager.h"
+#include"Panels/AView.h"
+
 #include"Opengl/core/log.h"
 #include"ImGuizmo.h"
+#include<string>
 #include"Scene.h"
 #include"LoadScene.h"
 #include"Renderer.h"
-
-
 using namespace std;
 using namespace PathTrace;
-
-Scene* scene = nullptr;
-Renderer* renderer = nullptr;
-
-std::vector<string> sceneFiles;
-std::vector<string> envMaps;
-
 float mouseSensitivity = 0.01f;
 bool keyPressed = false;
+Scene* scene = nullptr;
+Renderer* renderer = nullptr;
+std::vector<string> sceneFiles;
+std::vector<string> envMaps;
 int sampleSceneIdx = 0;
 int selectedInstance = 0;
-double lastTime = 0.0;
 int envMapIdx = 0;
-bool done = false;
 
 std::string shadersDir = "../../../res/PathTrace/shaders/";
 std::string assetsDir = "../../../res/PathTrace/assets/";
@@ -37,6 +42,16 @@ std::string envMapDir = "../../../res/PathTrace/assets/HDR/";
 
 RenderOptions renderOptions;
 
+Scene* GetScene() {
+
+    return scene;
+}
+Renderer* GetRenderer() {
+    return renderer;
+}
+RenderOptions& GetRenderOptions() {
+    return renderOptions;
+}
 void GetSceneFiles()
 {
     std::filesystem::directory_entry p_directory(assetsDir);
@@ -96,6 +111,8 @@ bool InitRenderer()
     renderer = new Renderer(scene, shadersDir);
     return true;
 }
+double lastTime = 0.0;
+bool done = false;
 #if defined(_MSC_VER) && (_MSC_VER >= 1900) && !defined(IMGUI_DISABLE_WIN32_FUNCTIONS)
 #pragma comment(lib, "legacy_stdio_definitions")
 #endif
@@ -104,21 +121,28 @@ static void glfw_error_callback(int error, const char* description)
     fprintf(stderr, "Glfw  %d: %s\n", error, description);
 }
 
+
+Windowing::Settings::WindowSettings windowSettings;
+Windowing::Settings::DeviceSettings deviceSettings;
+std::unique_ptr<Windowing::Context::Device>	device ;
+std::unique_ptr<Windowing::Window> window ;
+std::unique_ptr<Windowing::Inputs::InputManager>inputManager;
+std::unique_ptr<UI::Core::UIManager>uiManager;
+UI::Settings::PanelWindowSettings settings;
+std::unique_ptr<PanelsManager>m_panelsManager;
+
+
 void Render()
 {
-    renderer->Render();
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glViewport(0, 0, renderOptions.windowResolution.x, renderOptions.windowResolution.y);
-    renderer->Present();
-    ImGui::Render();
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+   GetRenderer()->Render();
+
 }
 void Update(float secondsElapsed)
 {
     keyPressed = false;
-
-    //œ‡ª˙ ”Ω«Ωªª•¬ﬂº≠
-    if (!ImGui::IsWindowFocused(ImGuiFocusedFlags_AnyWindow) && ImGui::IsAnyMouseDown() && !ImGuizmo::IsOver())
+    Scene* scene = GetScene();
+    //Áõ∏Êú∫ËßÜËßí‰∫§‰∫íÈÄªËæë
+    if (m_panelsManager->GetPanelAs<AView>("Scene View").IsFocused() && ImGui::IsAnyMouseDown() && !ImGuizmo::IsOver())
     {
         if (ImGui::IsMouseDown(0))
         {
@@ -141,7 +165,7 @@ void Update(float secondsElapsed)
         scene->dirty = true;
     }
 
-    renderer->Update(secondsElapsed);
+    GetRenderer()->Update(secondsElapsed);
 }
 
 void EditTransform(const float* view, const float* projection, float* matrix)
@@ -194,16 +218,15 @@ void EditTransform(const float* view, const float* projection, float* matrix)
 void MainLoop()
 {
 
-
-    //‰÷»æui
-
+    Scene* scene = GetScene();
+    //Ê∏≤Êüìui
     ImGuizmo::SetOrthographic(false);
 
     ImGuizmo::BeginFrame();
     {
         ImGui::Begin("Settings");
 
-        ImGui::Text("Samples: %d ", renderer->GetSampleCount());
+        ImGui::Text("Samples: %d ", GetRenderer()->GetSampleCount());
 
         ImGui::BulletText("LMB + drag to rotate");
         ImGui::BulletText("MMB + drag to pan");
@@ -212,7 +235,7 @@ void MainLoop()
 
         if (ImGui::Button("Save Screenshot"))
         {
-           // SaveFrame("./img_" + to_string(renderer->GetSampleCount()) + ".png");
+             //SaveFrame("./img_" + to_string(renderer->GetSampleCount()) + ".png");
         }
 
         // Scenes
@@ -220,15 +243,15 @@ void MainLoop()
         for (int i = 0; i < sceneFiles.size(); ++i)
             scenes.push_back(sceneFiles[i].c_str());
 
-        //≥°æ∞«–ªª¬ﬂº≠
+        //ÎÅùÏíºÌïôÎª£Ï≠âÏÑú
         if (ImGui::Combo("Scene", &sampleSceneIdx, scenes.data(), scenes.size()))
         {
-            int w = renderOptions.windowResolution.x;
-            int h = renderOptions.windowResolution.y;
+            int w = GetRenderOptions().windowResolution.x;
+            int h = GetRenderOptions().windowResolution.y;
 
             LoadScene(sceneFiles[sampleSceneIdx]);
-            renderOptions.windowResolution.x = w;
-            renderOptions.windowResolution.y = h;
+            GetRenderOptions().windowResolution.x = w;
+            GetRenderOptions().windowResolution.y = h;
             InitRenderer();
         }
 
@@ -249,11 +272,11 @@ void MainLoop()
 
         if (ImGui::CollapsingHeader("Render Settings"))
         {
-            optionsChanged |= ImGui::SliderInt("Max Spp", &renderOptions.maxSpp, -1, 256);
-            optionsChanged |= ImGui::SliderInt("Max Depth", &renderOptions.maxDepth, 1, 10);
+            optionsChanged |= ImGui::SliderInt("Max Spp", &GetRenderOptions().maxSpp, -1, 256);
+            optionsChanged |= ImGui::SliderInt("Max Depth", &GetRenderOptions().maxDepth, 1, 10);
 
-            reloadShaders |= ImGui::Checkbox("Enable Russian Roulette", &renderOptions.enableRR);
-            reloadShaders |= ImGui::SliderInt("Russian Roulette Depth", &renderOptions.RRDepth, 1, 10);
+            reloadShaders |= ImGui::Checkbox("Enable Russian Roulette", &GetRenderOptions().enableRR);
+            reloadShaders |= ImGui::SliderInt("Russian Roulette Depth", &GetRenderOptions().RRDepth, 1, 10);
             reloadShaders |= ImGui::Checkbox("Enable Roughness Mollification", &renderOptions.enableRoughnessMollification);
             optionsChanged |= ImGui::SliderFloat("Roughness Mollification Amount", &renderOptions.roughnessMollificationAmt, 0, 1);
             reloadShaders |= ImGui::Checkbox("Enable Volume MIS", &renderOptions.enableVolumeMIS);
@@ -261,38 +284,38 @@ void MainLoop()
 
         if (ImGui::CollapsingHeader("Environment"))
         {
-            reloadShaders |= ImGui::Checkbox("Enable Uniform Light", &renderOptions.enableUniformLight);
+            reloadShaders |= ImGui::Checkbox("Enable Uniform Light", &GetRenderOptions().enableUniformLight);
 
-            Vec3 uniformLightCol = Vec3::Pow(renderOptions.uniformLightCol, 1.0 / 2.2);
+            Vec3 uniformLightCol = Vec3::Pow(GetRenderOptions().uniformLightCol, 1.0 / 2.2);
             optionsChanged |= ImGui::ColorEdit3("Uniform Light Color (Gamma Corrected)", (float*)(&uniformLightCol), 0);
-            renderOptions.uniformLightCol = Vec3::Pow(uniformLightCol, 2.2);
+            GetRenderOptions().uniformLightCol = Vec3::Pow(uniformLightCol, 2.2);
 
-            reloadShaders |= ImGui::Checkbox("Enable Environment Map", &renderOptions.enableEnvMap);
-            optionsChanged |= ImGui::SliderFloat("Enviornment Map Intensity", &renderOptions.envMapIntensity, 0.1f, 10.0f);
-            optionsChanged |= ImGui::SliderFloat("Enviornment Map Rotation", &renderOptions.envMapRot, 0.0f, 360.0f);
-            reloadShaders |= ImGui::Checkbox("Hide Emitters", &renderOptions.hideEmitters);
-            reloadShaders |= ImGui::Checkbox("Enable Background", &renderOptions.enableBackground);
-            optionsChanged |= ImGui::ColorEdit3("Background Color", (float*)&renderOptions.backgroundCol, 0);
-            reloadShaders |= ImGui::Checkbox("Transparent Background", &renderOptions.transparentBackground);
+            reloadShaders |= ImGui::Checkbox("Enable Environment Map", &GetRenderOptions().enableEnvMap);
+            optionsChanged |= ImGui::SliderFloat("Enviornment Map Intensity", &GetRenderOptions().envMapIntensity, 0.1f, 10.0f);
+            optionsChanged |= ImGui::SliderFloat("Enviornment Map Rotation", &GetRenderOptions().envMapRot, 0.0f, 360.0f);
+            reloadShaders |= ImGui::Checkbox("Hide Emitters", &GetRenderOptions().hideEmitters);
+            reloadShaders |= ImGui::Checkbox("Enable Background", &GetRenderOptions().enableBackground);
+            optionsChanged |= ImGui::ColorEdit3("Background Color", (float*)&GetRenderOptions().backgroundCol, 0);
+            reloadShaders |= ImGui::Checkbox("Transparent Background", &GetRenderOptions().transparentBackground);
         }
 
         if (ImGui::CollapsingHeader("Tonemapping"))
         {
-            ImGui::Checkbox("Enable Tonemap", &renderOptions.enableTonemap);
+            ImGui::Checkbox("Enable Tonemap", &GetRenderOptions().enableTonemap);
 
-            if (renderOptions.enableTonemap)
+            if (GetRenderOptions().enableTonemap)
             {
-                ImGui::Checkbox("Enable ACES", &renderOptions.enableAces);
-                if (renderOptions.enableAces)
-                    ImGui::Checkbox("Simple ACES Fit", &renderOptions.simpleAcesFit);
+                ImGui::Checkbox("Enable ACES", &GetRenderOptions().enableAces);
+                if (GetRenderOptions().enableAces)
+                    ImGui::Checkbox("Simple ACES Fit", &GetRenderOptions().simpleAcesFit);
             }
         }
 
         if (ImGui::CollapsingHeader("Denoiser"))
         {
 
-            ImGui::Checkbox("Enable Denoiser", &renderOptions.enableDenoiser);
-            ImGui::SliderInt("Number of Frames to skip", &renderOptions.denoiserFrameCnt, 5, 50);
+            ImGui::Checkbox("Enable Denoiser", &GetRenderOptions().enableDenoiser);
+            ImGui::SliderInt("Number of Frames to skip", &GetRenderOptions().denoiserFrameCnt, 5, 50);
         }
 
         if (ImGui::CollapsingHeader("Camera"))
@@ -428,78 +451,108 @@ void MainLoop()
 
     Update((float)(curtime - lasttime));
     lastTime = curtime;
-    glClearColor(0., 0., 0., 0.);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glDisable(GL_DEPTH_TEST);
+
     Render();
 
 }
 
 int main(int, char**)
 {
-    // ≥ı ºªØGL¥¥Ω®¥∞ø⁄
-    glfwSetErrorCallback(glfw_error_callback);
-    if (!glfwInit())
-        return 1;
-    // GL 4.6 + GLSL 130
-    const char* glsl_version = "#version 130";
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-    GLFWwindow* window = glfwCreateWindow(renderOptions.windowResolution.x, renderOptions.windowResolution.y, "PathTrace", NULL, NULL);
-    if (window == NULL)
-        return 1;
-    glfwMakeContextCurrent(window);
+    {
+
+    deviceSettings.contextMajorVersion = 4;
+    deviceSettings.contextMinorVersion = 6;
+    windowSettings.title = "PathTrace";
+    windowSettings.width = renderOptions.windowResolution.x;
+    windowSettings.height = renderOptions.windowResolution.y;
+    windowSettings.maximized = true;
+  	device = std::make_unique<Windowing::Context::Device>(deviceSettings);
+    window = std::make_unique<Windowing::Window>(*device, windowSettings);
+    window->SetIcon("../../../res/texture/awesomeface.png");
+    inputManager= std::make_unique<Windowing::Inputs::InputManager>(*window);;
+    window->MakeCurrentContext();
+
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         return -1;
     }
-    auto resizeCallback = [](GLFWwindow* p_window, int p_width, int p_height)
-    {
+    device->SetVsync(true);
 
+
+    uiManager=std::make_unique<UI::Core::UIManager>(window->GetGlfwWindow(), UI::Styling::EStyle::CUSTOM);;
+    uiManager->LoadFont("Ruda_Big",  "../../../res/font/Ruda-Bold.ttf", 18);
+    uiManager->LoadFont("Ruda_Small", "../../../res/font/Ruda-Bold.ttf", 12);
+    uiManager->LoadFont("Ruda_Medium",  "../../../res/font/Ruda-Bold.ttf", 14);
+    uiManager->UseFont("Ruda_Big");
+    uiManager->SetEditorLayoutSaveFilename(std::string(getenv("APPDATA")) + "\\OverloadTech\\OvEditor\\layout.ini");
+    uiManager->SetEditorLayoutAutosaveFrequency(60.0f);
+    uiManager->EnableEditorLayoutSave(true);
+    uiManager->EnableDocking(true);
+
+    settings.closable = true;
+    settings.collapsable = true;
+    settings.dockable = true;
+    UI::Modules::Canvas m_canvas;
+    m_panelsManager= std::make_unique<PanelsManager>(m_canvas);
+
+    m_panelsManager->CreatePanel<MenuBar>("Menu Bar");
+    m_panelsManager->CreatePanel<AView>("Scene View", true, settings);
+    m_panelsManager->GetPanelAs<AView>("Scene View").ResizeEvent+= [](int p_width, int p_height) {
         renderOptions.windowResolution.x = p_width;
         renderOptions.windowResolution.y = p_height;
-
         if (!renderOptions.independentRenderSize)
             renderOptions.renderResolution = renderOptions.windowResolution;
-
         scene->renderOptions = renderOptions;
         renderer->ResizeRenderer();
     };
 
-    glfwSetWindowSizeCallback(window, resizeCallback);
-    glfwSwapInterval(1); // Enable vsync
-    // ≥ı ºªØImGui
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGui::StyleColorsClassic();
-    ImGuiStyle& style = ImGui::GetStyle();
-    ImGui_ImplGlfw_InitForOpenGL(window, true);
-    ImGui_ImplOpenGL3_Init(glsl_version);
-    //≥ı ºªØ≥°æ∞
+    m_canvas.MakeDockspace(true);
+    uiManager->SetCanvas(m_canvas);
+
+    //ÂàùÂßãÂåñÂú∫ÊôØ
     ::core::Log::Init();
     GetSceneFiles();
     GetEnvMaps();
     LoadScene(sceneFiles[sampleSceneIdx]);
     if (!InitRenderer())
         return 1;
-    //÷˜—≠ª∑
-    while (!glfwWindowShouldClose(window))
+    //‰∏ªÂæ™ÁéØ
+    Tools::Time::Clock clock;
+    while (!window->ShouldClose())
     {
-
+        glClearColor(0., 0., 0., 0.);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glDisable(GL_DEPTH_TEST);
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
         MainLoop();
+        
+        uiManager->Render();
+        m_panelsManager->GetPanelAs<AView>("Scene View").Update(1);
+        m_panelsManager->GetPanelAs<AView>("Scene View").Bind();
+        
+        
+        renderer->Present();
+        m_panelsManager->GetPanelAs<AView>("Scene View").UnBind();
+
+        
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-        glfwPollEvents();
-        glfwSwapBuffers(window);
+        device->PollEvents();
+        window->SwapBuffers();
+        inputManager->ClearEvents();
+        clock.Update();
     }
-    //ªÿ ’◊ ‘¥
+    //ÂõûÊî∂ËµÑÊ∫ê
     delete renderer;
     delete scene;
+    device.reset();
     ::core::Log::Shutdown();
-    glfwDestroyWindow(window);
-    glfwTerminate();
+    uiManager.reset();
+    m_panelsManager.reset();
+    inputManager.reset();
+    window.reset();
+    } 
     return 0;
 }
 #endif // TESTMAIN

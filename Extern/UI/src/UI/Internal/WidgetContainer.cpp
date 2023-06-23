@@ -3,6 +3,7 @@
 
 #include "UI/Internal/WidgetContainer.h"
 
+//如果是内部管理，则需要回收内存
 void UI::Internal::WidgetContainer::RemoveWidget(Widgets::AWidget& p_widget)
 {
 	auto found = std::find_if(m_widgets.begin(), m_widgets.end(), [&p_widget](std::pair<UI::Widgets::AWidget*, Internal::EMemoryMode>& p_pair)

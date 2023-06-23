@@ -102,6 +102,7 @@ void UI::Panels::APanelTransformable::Update()
 {
 	if (!m_firstFrame)
 	{
+		//copy是为了从imgui回读pos size
 		if (!autoSize)
 			UpdateSize();
 		CopyImGuiSize();

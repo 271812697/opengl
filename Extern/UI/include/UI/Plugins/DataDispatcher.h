@@ -7,9 +7,7 @@
 
 namespace UI::Plugins
 {
-	/**
-	* Plugin that allow automatic data update of any DataWidget
-	*/
+
 	template <typename T>
 	class DataDispatcher : public IPlugin
 	{

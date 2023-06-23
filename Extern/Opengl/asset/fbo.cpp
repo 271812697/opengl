@@ -18,9 +18,11 @@ namespace asset {
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
     RBO::RBO(GLuint width, GLuint height, bool multisample) : IAsset() {
+        is_multisample = multisample;
         glCreateRenderbuffers(1, &id);
 
         if (multisample) {
+
             glNamedRenderbufferStorageMultisample(id, 4, GL_DEPTH24_STENCIL8, width, height);
         }
         else {
@@ -30,6 +32,18 @@ namespace asset {
 
     RBO::~RBO() {
         glDeleteRenderbuffers(1, &id);
+    }
+
+    void RBO::Resize(GLuint width, GLuint height)
+    {
+        glDeleteRenderbuffers(1, &id);
+        glCreateRenderbuffers(1, &id);
+        if (is_multisample) {
+            glNamedRenderbufferStorageMultisample(id, 4, GL_DEPTH24_STENCIL8, width, height);
+        }
+        else {
+            glNamedRenderbufferStorage(id, GL_DEPTH24_STENCIL8, width, height);
+        }
     }
 
     void RBO::Bind() const {
@@ -130,9 +144,17 @@ void main() {
         Unbind();
         glDeleteFramebuffers(1, &id);
     }
+    void FBO::Resize(GLuint width, GLuint height) {
+        this->width = width;
+        this->height = width;
+        int cnt = color_attachments.size();
+        color_attachments.clear();
+        AddColorTexture(cnt,false);
+
+    }
 
     void FBO::AddColorTexture(GLuint count, bool multisample) {
-       
+
         size_t n_color_buffs = color_attachments.size();
 
 
@@ -162,10 +184,10 @@ void main() {
     }
 
     void FBO::SetColorTexture(GLenum index, GLuint texture_2d) {
-       
+
         size_t n_color_buffs = color_attachments.size();
 
-      
+
         CORE_ASERT(index >= n_color_buffs, "Color attachment {0} is already occupied!", index);
 
         // texture_2d can be a multisampled texture
@@ -176,10 +198,10 @@ void main() {
     }
 
     void FBO::SetColorTexture(GLenum index, GLuint texture_cubemap, GLuint face) {
-       
+
         size_t n_color_buffs = color_attachments.size();
 
-       
+
         CORE_ASERT(index >= n_color_buffs, "Color attachment {0} is already occupied!", index);
         CORE_ASERT(face < 6, "Invalid cubemap face id, must be a number between 0 and 5!");
 
@@ -223,7 +245,7 @@ void main() {
         glTextureParameteri(stencil_view->ID(), GL_DEPTH_STENCIL_TEXTURE_MODE, GL_STENCIL_INDEX);
 
         glNamedFramebufferTexture(id, GL_DEPTH_STENCIL_ATTACHMENT, depst_texture->ID(), 0);
-       
+
         status = glCheckNamedFramebufferStatus(id, GL_FRAMEBUFFER);
     }
 
@@ -243,6 +265,7 @@ void main() {
         // we can't read it later so there's no need to create a stencil texture view
 
         status = glCheckNamedFramebufferStatus(id, GL_FRAMEBUFFER);
+        depst_renderbuffer->Unbind();
     }
 
     void FBO::AddDepthCubemap() {
@@ -394,10 +417,10 @@ void main() {
         // an empty buffer just doesn't have any textures attached to it, but the buffer is
         // still there. It's ok to clear a buffer even if there's no textures attached
 
-      
+
 
         // clear one of the color attachments
-        if (index >= 0 ) {
+        if (index >= 0) {
             glClearNamedFramebufferfv(id, GL_COLOR, index, clear_color);
         }
         // clear the depth buffer
@@ -410,7 +433,7 @@ void main() {
         }
         else {
             CORE_ERROR("Buffer index {0} is not valid in the framebuffer!", index);
-           
+
         }
     }
 

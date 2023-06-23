@@ -30,7 +30,6 @@ void UI::Modules::Canvas::Draw()
 
 		for (auto& panel : m_panels)
 			panel.get().Draw();
-        ImGui::Render();
 		
 	}
 }

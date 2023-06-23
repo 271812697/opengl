@@ -8,10 +8,11 @@
 
 namespace asset {
 
+
     class Texture;  // forward declaration
 
     class TexView : public IAsset {
-      public:
+    public:
         const Texture& host;
         TexView(const Texture& texture);
         TexView(const Texture&& texture) = delete;  // prevent rvalue references to temporary objects
@@ -28,13 +29,13 @@ namespace asset {
     };
 
     class Texture : public IAsset {
-      private:
+    public:
         friend class TexView;
         GLenum target;
         GLenum format, i_format;  // internal format
         void SetSampleState() const;
 
-      public:
+    public:
         GLuint width, height, depth;
         GLuint n_levels;
 
@@ -48,7 +49,7 @@ namespace asset {
         Texture& operator=(const Texture&) = delete;
         Texture(Texture&& other) noexcept = default;
         Texture& operator=(Texture&& other) noexcept = default;
-
+        void Resize(GLuint width, GLuint height);
         void Bind(GLuint index) const override;
         void Unbind(GLuint index) const override;
         void BindILS(GLuint level, GLuint index, GLenum access) const;

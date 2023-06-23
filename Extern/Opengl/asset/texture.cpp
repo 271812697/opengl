@@ -47,9 +47,9 @@ namespace asset {
     {
         auto image = utils::Image(img_path);
 
-        this->width    = image.Width();
-        this->height   = image.Height();
-        this->format   = image.Format();
+        this->width = image.Width();
+        this->height = image.Height();
+        this->format = image.Format();
         this->i_format = image.IFormat();
 
         // if levels is 0, automatic compute the number of mipmap levels needed
@@ -100,7 +100,7 @@ namespace asset {
         // load the equirectangular image into a temporary 2D texture (base level, no mipmaps)
         GLuint equirectangle = 0;
         glCreateTextures(GL_TEXTURE_2D, 1, &equirectangle);
-        
+
         if (equirectangle > 0) {
             auto image = utils::Image(img_path, 3);
 
@@ -153,7 +153,7 @@ namespace asset {
 
     Texture::Texture(const std::string& directory, const std::string& extension, GLuint resolution, GLuint levels)
         : IAsset(), target(GL_TEXTURE_CUBE_MAP), width(resolution), height(resolution),
-          depth(6), format(GL_RGBA), i_format(GL_RGBA16F), n_levels(levels)
+        depth(6), format(GL_RGBA), i_format(GL_RGBA16F), n_levels(levels)
     {
         // resolution must be a power of 2 in order to achieve high-fidelity visual effects
         if (!utils::math::IsPowerOfTwo(resolution)) {
@@ -162,7 +162,7 @@ namespace asset {
         }
 
         // this ctor expects 6 HDR images for the 6 cubemap faces, named as follows
-        static const std::vector<std::string> faces { "px", "nx", "py", "ny", "pz", "nz" };
+        static const std::vector<std::string> faces{ "px", "nx", "py", "ny", "pz", "nz" };
 
         // the stb image library currently does not support ".exr" format ...
         CORE_ASERT(extension == ".hdr", "Invalid file extension, expected HDR-format faces...");
@@ -194,7 +194,7 @@ namespace asset {
 
     Texture::Texture(GLenum target, GLuint width, GLuint height, GLuint depth, GLenum i_format, GLuint levels)
         : IAsset(), target(target), width(width), height(height), depth(depth),
-          n_levels(levels), format(0), i_format(i_format)
+        n_levels(levels), format(0), i_format(i_format)
     {
         if (levels == 0) {
             n_levels = 1 + static_cast<GLuint>(floor(std::log2(std::max(width, height))));
@@ -205,27 +205,27 @@ namespace asset {
         glCreateTextures(target, 1, &id);
 
         switch (target) {
-            case GL_TEXTURE_2D:
-            case GL_TEXTURE_CUBE_MAP: {  // depth must = 6
-                glTextureStorage2D(id, n_levels, i_format, width, height);
-                break;
-            }
-            case GL_TEXTURE_2D_MULTISAMPLE: {
-                glTextureStorage2DMultisample(id, 4, i_format, width, height, GL_TRUE);
-                break;
-            }
-            case GL_TEXTURE_2D_ARRAY:
-            case GL_TEXTURE_CUBE_MAP_ARRAY: {  // depth must = 6 * n_layers
-                glTextureStorage3D(id, n_levels, i_format, width, height, depth);
-                break;
-            }
-            case GL_TEXTURE_2D_MULTISAMPLE_ARRAY: {
-                glTextureStorage3DMultisample(id, 4, i_format, width, height, depth, GL_TRUE);
-                break;
-            }
-            default: {
-                throw ("Unsupported texture target...");
-            }
+        case GL_TEXTURE_2D:
+        case GL_TEXTURE_CUBE_MAP: {  // depth must = 6
+            glTextureStorage2D(id, n_levels, i_format, width, height);
+            break;
+        }
+        case GL_TEXTURE_2D_MULTISAMPLE: {
+            glTextureStorage2DMultisample(id, 4, i_format, width, height, GL_TRUE);
+            break;
+        }
+        case GL_TEXTURE_2D_ARRAY:
+        case GL_TEXTURE_CUBE_MAP_ARRAY: {  // depth must = 6 * n_layers
+            glTextureStorage3D(id, n_levels, i_format, width, height, depth);
+            break;
+        }
+        case GL_TEXTURE_2D_MULTISAMPLE_ARRAY: {
+            glTextureStorage3DMultisample(id, 4, i_format, width, height, depth, GL_TRUE);
+            break;
+        }
+        default: {
+            throw ("Unsupported texture target...");
+        }
         }
 
         SetSampleState();
@@ -233,12 +233,23 @@ namespace asset {
 
     Texture::~Texture() {
         if (id == 0) return;
+
         glDeleteTextures(1, &id);  // texture 0 (a fallback texture that is all black) is silently ignored
+
         for (int i = 0; i < n_texture_units; i++) {
             if (textures_binding_table[i] = id) {
                 textures_binding_table[i] = 0;
             }
         }
+    }
+
+    void Texture::Resize(GLuint width, GLuint height)
+    {
+        CORE_ASERT(target == GL_TEXTURE_2D || target == GL_TEXTURE_2D_MULTISAMPLE, "Invalid Format to Resize");
+        if (target == GL_TEXTURE_2D)
+            glTextureStorage2D(id, n_levels, i_format, width, height);
+        else
+            glTextureStorage2DMultisample(id, 4, i_format, width, height, GL_TRUE);
     }
 
     void Texture::Bind(GLuint index) const {
@@ -271,15 +282,15 @@ namespace asset {
 
     void Texture::Clear(GLuint level) const {
         switch (i_format) {
-            case GL_RG16F: case GL_RGB16F: case GL_RGBA16F:
-            case GL_RG32F: case GL_RGB32F: case GL_RGBA32F: {
-                glClearTexSubImage(id, level, 0, 0, 0, width, height, depth, format, GL_FLOAT, NULL);
-                break;
-            }
-            default: {
-                glClearTexSubImage(id, level, 0, 0, 0, width, height, depth, format, GL_UNSIGNED_BYTE, NULL);
-                return;
-            }
+        case GL_RG16F: case GL_RGB16F: case GL_RGBA16F:
+        case GL_RG32F: case GL_RGB32F: case GL_RGBA32F: {
+            glClearTexSubImage(id, level, 0, 0, 0, width, height, depth, format, GL_FLOAT, NULL);
+            break;
+        }
+        default: {
+            glClearTexSubImage(id, level, 0, 0, 0, width, height, depth, format, GL_UNSIGNED_BYTE, NULL);
+            return;
+        }
         }
     }
 
@@ -301,62 +312,62 @@ namespace asset {
         }
 
         switch (target) {
-            case GL_TEXTURE_2D:
-            case GL_TEXTURE_2D_ARRAY: {
-                if (i_format == GL_RG16F) {  // 2D BRDF LUT, inverse LUT, fake BRDF maps, etc
-                    glTextureParameteri(id, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-                    glTextureParameteri(id, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-                }
-                else if (i_format == GL_RGB16F) {  // 3D BRDF LUT, cloth DFG LUT, etc
-                    glTextureParameteri(id, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-                    glTextureParameteri(id, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-                    glTextureParameteri(id, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-                }
-                else if (i_format == GL_RGBA16F) {  // 3D BRDF DFG LUT used as ILS (uniform image2D)
-                    glTextureParameteri(id, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-                    glTextureParameteri(id, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-                    glTextureParameteri(id, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-                }
-                else if (i_format == GL_DEPTH_COMPONENT) {  // depth texture and shadow maps
-                    glTextureParameteri(id, GL_TEXTURE_WRAP_S, GL_REPEAT);
-                    glTextureParameteri(id, GL_TEXTURE_WRAP_T, GL_REPEAT);
-                    glTextureParameteri(id, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-                    glTextureParameteri(id, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-                }
-                else {
-                    // the rest of 2D textures are mostly normal and seamless so just repeat, but be aware
-                    // that some of those with a GL_RGBA format are intended for alpha blending so must be
-                    // clamped to edge instead. However, checking `format == GL_RGBA` and alpha < 1 is not
-                    // enough to conclude, it all depends, in that case we need to set wrap mode manually
-                    glTextureParameteri(id, GL_TEXTURE_WRAP_S, GL_REPEAT);
-                    glTextureParameteri(id, GL_TEXTURE_WRAP_T, GL_REPEAT);
-                    glTextureParameteri(id, GL_TEXTURE_MIN_FILTER, min_filter);
-                    glTextureParameteri(id, GL_TEXTURE_MAG_FILTER, mag_filter);
-                    glTextureParameterf(id, GL_TEXTURE_MAX_ANISOTROPY, anisotropy);
-                }
-                break;
+        case GL_TEXTURE_2D:
+        case GL_TEXTURE_2D_ARRAY: {
+            if (i_format == GL_RG16F) {  // 2D BRDF LUT, inverse LUT, fake BRDF maps, etc
+                glTextureParameteri(id, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+                glTextureParameteri(id, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
             }
-            case GL_TEXTURE_2D_MULTISAMPLE:
-            case GL_TEXTURE_2D_MULTISAMPLE_ARRAY: {
-                // multisampled textures are not filtered at all, there's nothing we need to do here because
-                // we'll never sample them, the hardware takes care of all the multisample operations for us
-                // in fact, trying to set any of the sampler states will cause a `GL_INVALID_ENUM` error.
-                return;
+            else if (i_format == GL_RGB16F) {  // 3D BRDF LUT, cloth DFG LUT, etc
+                glTextureParameteri(id, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+                glTextureParameteri(id, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+                glTextureParameteri(id, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
             }
-            case GL_TEXTURE_CUBE_MAP:  // skybox and IBL maps
-            case GL_TEXTURE_CUBE_MAP_ARRAY: {
+            else if (i_format == GL_RGBA16F) {  // 3D BRDF DFG LUT used as ILS (uniform image2D)
+                glTextureParameteri(id, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+                glTextureParameteri(id, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+                glTextureParameteri(id, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+            }
+            else if (i_format == GL_DEPTH_COMPONENT) {  // depth texture and shadow maps
+                glTextureParameteri(id, GL_TEXTURE_WRAP_S, GL_REPEAT);
+                glTextureParameteri(id, GL_TEXTURE_WRAP_T, GL_REPEAT);
+                glTextureParameteri(id, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+                glTextureParameteri(id, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            }
+            else {
+                // the rest of 2D textures are mostly normal and seamless so just repeat, but be aware
+                // that some of those with a GL_RGBA format are intended for alpha blending so must be
+                // clamped to edge instead. However, checking `format == GL_RGBA` and alpha < 1 is not
+                // enough to conclude, it all depends, in that case we need to set wrap mode manually
+                glTextureParameteri(id, GL_TEXTURE_WRAP_S, GL_REPEAT);
+                glTextureParameteri(id, GL_TEXTURE_WRAP_T, GL_REPEAT);
                 glTextureParameteri(id, GL_TEXTURE_MIN_FILTER, min_filter);
                 glTextureParameteri(id, GL_TEXTURE_MAG_FILTER, mag_filter);
-                glTextureParameteri(id, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-                glTextureParameteri(id, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-                glTextureParameteri(id, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER);
-                const float border[] = { 0.0f, 0.0f, 0.0f, 1.0f };
-                glTextureParameterfv(id, GL_TEXTURE_BORDER_COLOR, border);
-                break;
+                glTextureParameterf(id, GL_TEXTURE_MAX_ANISOTROPY, anisotropy);
             }
-            default: {
-                throw ("Unsupported texture target...");
-            }
+            break;
+        }
+        case GL_TEXTURE_2D_MULTISAMPLE:
+        case GL_TEXTURE_2D_MULTISAMPLE_ARRAY: {
+            // multisampled textures are not filtered at all, there's nothing we need to do here because
+            // we'll never sample them, the hardware takes care of all the multisample operations for us
+            // in fact, trying to set any of the sampler states will cause a `GL_INVALID_ENUM` error.
+            return;
+        }
+        case GL_TEXTURE_CUBE_MAP:  // skybox and IBL maps
+        case GL_TEXTURE_CUBE_MAP_ARRAY: {
+            glTextureParameteri(id, GL_TEXTURE_MIN_FILTER, min_filter);
+            glTextureParameteri(id, GL_TEXTURE_MAG_FILTER, mag_filter);
+            glTextureParameteri(id, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+            glTextureParameteri(id, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+            glTextureParameteri(id, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER);
+            const float border[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+            glTextureParameterfv(id, GL_TEXTURE_BORDER_COLOR, border);
+            break;
+        }
+        default: {
+            throw ("Unsupported texture target...");
+        }
         }
     }
 
@@ -387,5 +398,6 @@ namespace asset {
 
         glCopyImageSubData(fr.id, fr.target, fr_level, 0, 0, 0, to.id, to.target, to_level, 0, 0, 0, fw, fh, fd);
     }
+
 
 }
