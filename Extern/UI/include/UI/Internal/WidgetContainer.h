@@ -11,7 +11,7 @@ namespace UI::Internal
 	public:
 
 		void RemoveWidget(Widgets::AWidget& p_widget);
-
+		
 
 		void RemoveAllWidgets();
 
@@ -38,7 +38,6 @@ namespace UI::Internal
 			instance.SetParent(this);
 			return instance;
 		}
-
 
 		std::vector<std::pair<UI::Widgets::AWidget*, Internal::EMemoryMode>>& GetWidgets();
 

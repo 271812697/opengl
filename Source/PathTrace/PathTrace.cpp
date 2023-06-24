@@ -1,6 +1,6 @@
 #include"PathTrace.h"
 namespace PathTrace {
-    /*
+    
     
 
     Scene* scene = nullptr;
@@ -10,6 +10,7 @@ namespace PathTrace {
     int sampleSceneIdx = 0;
     int selectedInstance = 0;
     int envMapIdx = 0;
+    float mouseSensitivity = 0.01f;
 
     std::string shadersDir = "../../../res/PathTrace/shaders/";
     std::string assetsDir = "../../../res/PathTrace/assets/";
@@ -86,5 +87,9 @@ namespace PathTrace {
         renderer = new Renderer(scene, shadersDir);
         return true;
     }
-    */
+    void Ret() {
+        delete renderer;
+        delete scene;
+    }
+    
 }

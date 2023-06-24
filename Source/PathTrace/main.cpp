@@ -17,6 +17,7 @@
 #include"tools/Clock.h"
 #include"Panels/PanelsManager.h"
 #include"Panels/AView.h"
+#include "Panels/Inspector.h"
 
 #include"Opengl/core/log.h"
 #include"ImGuizmo.h"
@@ -24,93 +25,13 @@
 #include"Scene.h"
 #include"LoadScene.h"
 #include"Renderer.h"
+#include"PathTrace.h"
 using namespace std;
 using namespace PathTrace;
-float mouseSensitivity = 0.01f;
-bool keyPressed = false;
-Scene* scene = nullptr;
-Renderer* renderer = nullptr;
-std::vector<string> sceneFiles;
-std::vector<string> envMaps;
-int sampleSceneIdx = 0;
-int selectedInstance = 0;
-int envMapIdx = 0;
 
-std::string shadersDir = "../../../res/PathTrace/shaders/";
-std::string assetsDir = "../../../res/PathTrace/assets/";
-std::string envMapDir = "../../../res/PathTrace/assets/HDR/";
 
-RenderOptions renderOptions;
 
-Scene* GetScene() {
 
-    return scene;
-}
-Renderer* GetRenderer() {
-    return renderer;
-}
-RenderOptions& GetRenderOptions() {
-    return renderOptions;
-}
-void GetSceneFiles()
-{
-    std::filesystem::directory_entry p_directory(assetsDir);
-    for (auto& item : std::filesystem::directory_iterator(p_directory))
-        if (!item.is_directory()) {
-            auto ext = item.path().extension();
-            if (ext == ".scene")
-            {
-                sceneFiles.push_back(item.path().generic_string());
-            }
-        }
-}
-void GetEnvMaps()
-{
-    std::filesystem::directory_entry p_directory(envMapDir);
-    for (auto& item : std::filesystem::directory_iterator(p_directory)) {
-        if (item.path().extension() == ".hdr")
-        {
-            envMaps.push_back(item.path().generic_string());
-
-        }
-    }
-}
-
-void LoadScene(std::string sceneName)
-{
-    delete scene;
-    scene = new Scene();
-    std::string ext = sceneName.substr(sceneName.find_last_of(".") + 1);
-
-    bool success = false;
-    Mat4 xform;
-
-    if (ext == "scene")
-        success = LoadSceneFromFile(sceneName, scene, renderOptions);
-
-    if (!success)
-    {
-        printf("Unable to load scene\n");
-        exit(0);
-    }
-
-    selectedInstance = 0;
-    // Add a default HDR if there are no lights in the scene
-    if (!scene->envMap && !envMaps.empty())
-    {
-        scene->AddEnvMap(envMaps[envMapIdx]);
-        renderOptions.enableEnvMap = scene->lights.empty() ? true : false;
-        renderOptions.envMapIntensity = 1.5f;
-    }
-
-    scene->renderOptions = renderOptions;
-}
-bool InitRenderer()
-{
-    delete renderer;
-    renderer = new Renderer(scene, shadersDir);
-    return true;
-}
 double lastTime = 0.0;
 bool done = false;
 #if defined(_MSC_VER) && (_MSC_VER >= 1900) && !defined(IMGUI_DISABLE_WIN32_FUNCTIONS)
@@ -139,11 +60,12 @@ void Render()
 }
 void Update(float secondsElapsed)
 {
-    keyPressed = false;
+   // keyPressed = false;
     Scene* scene = GetScene();
     //相机视角交互逻辑
     if (m_panelsManager->GetPanelAs<AView>("Scene View").IsFocused() && ImGui::IsAnyMouseDown() && !ImGuizmo::IsOver())
     {
+        
         if (ImGui::IsMouseDown(0))
         {
             ImVec2 mouseDelta = ImGui::GetMouseDragDelta(0, 0);
@@ -168,107 +90,22 @@ void Update(float secondsElapsed)
     GetRenderer()->Update(secondsElapsed);
 }
 
-void EditTransform(const float* view, const float* projection, float* matrix)
-{
-    static ImGuizmo::OPERATION mCurrentGizmoOperation(ImGuizmo::TRANSLATE);
-    static ImGuizmo::MODE mCurrentGizmoMode(ImGuizmo::WORLD);
 
-    if (ImGui::RadioButton("Translate", mCurrentGizmoOperation == ImGuizmo::TRANSLATE))
-    {
-        mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
-    }
-
-    ImGui::SameLine();
-    if (ImGui::RadioButton("Rotate", mCurrentGizmoOperation == ImGuizmo::ROTATE))
-    {
-        mCurrentGizmoOperation = ImGuizmo::ROTATE;
-    }
-
-    ImGui::SameLine();
-    if (ImGui::RadioButton("Scale", mCurrentGizmoOperation == ImGuizmo::SCALE))
-    {
-        mCurrentGizmoOperation = ImGuizmo::SCALE;
-    }
-
-    float matrixTranslation[3], matrixRotation[3], matrixScale[3];
-    ImGuizmo::DecomposeMatrixToComponents(matrix, matrixTranslation, matrixRotation, matrixScale);
-    ImGui::InputFloat3("Tr", matrixTranslation);
-    ImGui::InputFloat3("Rt", matrixRotation);
-    ImGui::InputFloat3("Sc", matrixScale);
-    ImGuizmo::RecomposeMatrixFromComponents(matrixTranslation, matrixRotation, matrixScale, matrix);
-
-    if (mCurrentGizmoOperation != ImGuizmo::SCALE)
-    {
-        if (ImGui::RadioButton("Local", mCurrentGizmoMode == ImGuizmo::LOCAL))
-        {
-            mCurrentGizmoMode = ImGuizmo::LOCAL;
-        }
-
-        ImGui::SameLine();
-        if (ImGui::RadioButton("World", mCurrentGizmoMode == ImGuizmo::WORLD))
-        {
-            mCurrentGizmoMode = ImGuizmo::WORLD;
-        }
-    }
-
-    ImGuiIO& io = ImGui::GetIO();
-    ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
-    ImGuizmo::Manipulate(view, projection, mCurrentGizmoOperation, mCurrentGizmoMode, matrix, NULL, NULL);
-}
 void MainLoop()
 {
 
     Scene* scene = GetScene();
-    //渲染ui
+
     ImGuizmo::SetOrthographic(false);
 
     ImGuizmo::BeginFrame();
     {
         ImGui::Begin("Settings");
 
-        ImGui::Text("Samples: %d ", GetRenderer()->GetSampleCount());
-
-        ImGui::BulletText("LMB + drag to rotate");
-        ImGui::BulletText("MMB + drag to pan");
-        ImGui::BulletText("RMB + drag to zoom in/out");
-        ImGui::BulletText("CTRL + click on a slider to edit its value");
-
-        if (ImGui::Button("Save Screenshot"))
-        {
-             //SaveFrame("./img_" + to_string(renderer->GetSampleCount()) + ".png");
-        }
-
-        // Scenes
-        std::vector<const char*> scenes;
-        for (int i = 0; i < sceneFiles.size(); ++i)
-            scenes.push_back(sceneFiles[i].c_str());
-
-        //끝쒼학뻣쭉서
-        if (ImGui::Combo("Scene", &sampleSceneIdx, scenes.data(), scenes.size()))
-        {
-            int w = GetRenderOptions().windowResolution.x;
-            int h = GetRenderOptions().windowResolution.y;
-
-            LoadScene(sceneFiles[sampleSceneIdx]);
-            GetRenderOptions().windowResolution.x = w;
-            GetRenderOptions().windowResolution.y = h;
-            InitRenderer();
-        }
-
-        // Environment maps
-        std::vector<const char*> envMapsList;
-        for (int i = 0; i < envMaps.size(); ++i)
-            envMapsList.push_back(envMaps[i].c_str());
-
-        if (ImGui::Combo("EnvMaps", &envMapIdx, envMapsList.data(), envMapsList.size()))
-        {
-            scene->AddEnvMap(envMaps[envMapIdx]);
-        }
 
         bool optionsChanged = false;
         bool reloadShaders = false;
 
-        optionsChanged |= ImGui::SliderFloat("Mouse Sensitivity", &mouseSensitivity, 0.001f, 1.0f);
 
         if (ImGui::CollapsingHeader("Render Settings"))
         {
@@ -404,26 +241,6 @@ void MainLoop()
             if (alphaMode != AlphaMode::Opaque)
                 objectPropChanged |= ImGui::SliderFloat("Opacity", &mat->opacity, 0.0f, 1.0f);
 
-            // Transforms
-            ImGui::Separator();
-            ImGui::Text("Transforms");
-            {
-                float viewMatrix[16];
-                float projMatrix[16];
-
-                auto io = ImGui::GetIO();
-                scene->camera->ComputeViewProjectionMatrix(viewMatrix, projMatrix, io.DisplaySize.x / io.DisplaySize.y);
-                Mat4 xform = scene->meshInstances[selectedInstance].transform;
-
-                EditTransform(viewMatrix, projMatrix, (float*)&xform);
-
-                if (memcmp(&xform, &scene->meshInstances[selectedInstance].transform, sizeof(float) * 16))
-                {
-                    scene->meshInstances[selectedInstance].transform = xform;
-                    objectPropChanged = true;
-                }
-            }
-
             if (objectPropChanged)
                 scene->RebuildInstances();
         }
@@ -436,7 +253,7 @@ void MainLoop()
         if (reloadShaders)
         {
             scene->dirty = true;
-            renderer->ReloadShaders();
+            GetRenderer()->ReloadShaders();
         }
 
         ImGui::End();
@@ -476,8 +293,14 @@ int main(int, char**)
         return -1;
     }
     device->SetVsync(true);
-
-
+    //初始化场景
+    ::core::Log::Init();
+    GetSceneFiles();
+    GetEnvMaps();
+    LoadScene(sceneFiles[sampleSceneIdx]);
+    if (!InitRenderer())
+        return 1;
+    //初始化UI
     uiManager=std::make_unique<UI::Core::UIManager>(window->GetGlfwWindow(), UI::Styling::EStyle::CUSTOM);;
     uiManager->LoadFont("Ruda_Big",  "../../../res/font/Ruda-Bold.ttf", 18);
     uiManager->LoadFont("Ruda_Small", "../../../res/font/Ruda-Bold.ttf", 12);
@@ -495,26 +318,22 @@ int main(int, char**)
     m_panelsManager= std::make_unique<PanelsManager>(m_canvas);
 
     m_panelsManager->CreatePanel<MenuBar>("Menu Bar");
+    m_panelsManager->CreatePanel<Inspector>("Inspector",true, settings);
+
     m_panelsManager->CreatePanel<AView>("Scene View", true, settings);
     m_panelsManager->GetPanelAs<AView>("Scene View").ResizeEvent+= [](int p_width, int p_height) {
         renderOptions.windowResolution.x = p_width;
         renderOptions.windowResolution.y = p_height;
         if (!renderOptions.independentRenderSize)
             renderOptions.renderResolution = renderOptions.windowResolution;
-        scene->renderOptions = renderOptions;
-        renderer->ResizeRenderer();
+        GetScene()->renderOptions = renderOptions;
+        GetRenderer()->ResizeRenderer();
     };
 
     m_canvas.MakeDockspace(true);
     uiManager->SetCanvas(m_canvas);
 
-    //初始化场景
-    ::core::Log::Init();
-    GetSceneFiles();
-    GetEnvMaps();
-    LoadScene(sceneFiles[sampleSceneIdx]);
-    if (!InitRenderer())
-        return 1;
+
     //主循环
     Tools::Time::Clock clock;
     while (!window->ShouldClose())
@@ -532,7 +351,7 @@ int main(int, char**)
         m_panelsManager->GetPanelAs<AView>("Scene View").Bind();
         
         
-        renderer->Present();
+        GetRenderer()->Present();
         m_panelsManager->GetPanelAs<AView>("Scene View").UnBind();
 
         
@@ -544,8 +363,7 @@ int main(int, char**)
         clock.Update();
     }
     //回收资源
-    delete renderer;
-    delete scene;
+    Ret();
     device.reset();
     ::core::Log::Shutdown();
     uiManager.reset();

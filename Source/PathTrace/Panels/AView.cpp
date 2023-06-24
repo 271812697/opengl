@@ -1,6 +1,3 @@
-
-
-#include <glad/glad.h>
 #include"Maths/FVector2.h"
 #include "AView.h"
 
@@ -45,13 +42,9 @@ void AView::_Draw_Impl()
 
 void AView::Render()
 {
-
 	auto [winWidth, winHeight] = GetSafeSize();
-
-
 	_Render_Impl();
 }
-
 
 std::pair<uint16_t, uint16_t> AView::GetSafeSize() const
 {
@@ -61,7 +54,6 @@ std::pair<uint16_t, uint16_t> AView::GetSafeSize() const
 
 void AView::Bind()
 {
-	
 	m_fbo->Bind();
 	glViewport(0, 0,m_fbo->width, m_fbo->height);
 }
