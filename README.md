@@ -20,6 +20,8 @@ cmake ..
 
 ## Screenshots
 
+![image-20230703001754290](README.assets/image-20230703001754290.png)
+
 ![fluid3](README.assets/fluid3.png)
 
 ![fluid3](D:\Others\opengl\fluid3.png

@@ -49,13 +49,13 @@ namespace PathTrace
         , tileOutputTexture()
         , denoisedTexture(0)
         , shadersDirectory(shadersDirectory)
-        // , pathTraceShader(nullptr)
         , pathTraceShaderLowRes(nullptr)
         , outputShader(nullptr)
         , tonemapShader(nullptr)
     {
         if (scene == nullptr)
         {
+            
             printf("No Scene Found\n");
             return;
         }
@@ -110,14 +110,10 @@ namespace PathTrace
 
     void Renderer::InitGPUDataBuffers()
     {
-        /*
-        GL_PACK_ALIGNMENT
-        Specifies the alignment requirements for the start of each pixel row in memory. The allowable values are 1 (byte-alignment), 2 (rows aligned to even-numbered bytes), 4 (word-alignment), and 8 (rows start on double-word boundaries).
-        The other storage parameter affects how pixel data is read from client memory:
-        */
+
         glPixelStorei(GL_PACK_ALIGNMENT, 1);
 
-        // Create buffer and texture for BVH
+        // BVH
         //纹理缓冲对象
         glGenBuffers(1, &BVHBuffer);
         glBindBuffer(GL_TEXTURE_BUFFER, BVHBuffer);
@@ -126,7 +122,7 @@ namespace PathTrace
         glBindTexture(GL_TEXTURE_BUFFER, BVHTex);
         glTexBuffer(GL_TEXTURE_BUFFER, GL_RGB32F, BVHBuffer);
 
-        // Create buffer and texture for vertex indices
+        //顶点索引
         glGenBuffers(1, &vertexIndicesBuffer);
         glBindBuffer(GL_TEXTURE_BUFFER, vertexIndicesBuffer);
         glBufferData(GL_TEXTURE_BUFFER, sizeof(Indices) * scene->vertIndices.size(), &scene->vertIndices[0], GL_STATIC_DRAW);
@@ -134,7 +130,7 @@ namespace PathTrace
         glBindTexture(GL_TEXTURE_BUFFER, vertexIndicesTex);
         glTexBuffer(GL_TEXTURE_BUFFER, GL_RGB32I, vertexIndicesBuffer);
 
-        // Create buffer and texture for vertices
+        // 顶点坐标 U
         glGenBuffers(1, &verticesBuffer);
         glBindBuffer(GL_TEXTURE_BUFFER, verticesBuffer);
         glBufferData(GL_TEXTURE_BUFFER, sizeof(Vec4) * scene->verticesUVX.size(), &scene->verticesUVX[0], GL_STATIC_DRAW);
@@ -142,7 +138,7 @@ namespace PathTrace
         glBindTexture(GL_TEXTURE_BUFFER, verticesTex);
         glTexBuffer(GL_TEXTURE_BUFFER, GL_RGBA32F, verticesBuffer);
 
-        // Create buffer and texture for normals
+        // 顶点法线 V
         glGenBuffers(1, &normalsBuffer);
         glBindBuffer(GL_TEXTURE_BUFFER, normalsBuffer);
         glBufferData(GL_TEXTURE_BUFFER, sizeof(Vec4) * scene->normalsUVY.size(), &scene->normalsUVY[0], GL_STATIC_DRAW);
@@ -150,7 +146,7 @@ namespace PathTrace
         glBindTexture(GL_TEXTURE_BUFFER, normalsTex);
         glTexBuffer(GL_TEXTURE_BUFFER, GL_RGBA32F, normalsBuffer);
 
-        // Create texture for materials
+        //材质
         glGenTextures(1, &materialsTex);
         glBindTexture(GL_TEXTURE_2D, materialsTex);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, (sizeof(Material) / sizeof(Vec4)) * scene->materials.size(), 1, 0, GL_RGBA, GL_FLOAT, &scene->materials[0]);
@@ -158,7 +154,7 @@ namespace PathTrace
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glBindTexture(GL_TEXTURE_2D, 0);
 
-        // Create texture for transforms
+        // Transform
         glGenTextures(1, &transformsTex);
         glBindTexture(GL_TEXTURE_2D, transformsTex);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, (sizeof(Mat4) / sizeof(Vec4)) * scene->transforms.size(), 1, 0, GL_RGBA, GL_FLOAT, &scene->transforms[0]);
@@ -166,7 +162,7 @@ namespace PathTrace
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glBindTexture(GL_TEXTURE_2D, 0);
 
-        // Create texture for lights
+        // 光源信息
         if (!scene->lights.empty())
         {
             //Create texture for lights
@@ -178,7 +174,7 @@ namespace PathTrace
             glBindTexture(GL_TEXTURE_2D, 0);
         }
 
-        // Create texture for scene textures
+        // 场景的贴图数组
         if (!scene->textures.empty())
         {
             glGenTextures(1, &textureMapsArrayTex);
@@ -190,7 +186,7 @@ namespace PathTrace
             glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
         }
 
-        // Create texture for environment map
+        //环境贴图，包括累加和
         if (scene->envMap != nullptr)
         {
             glGenTextures(1, &envMapTex);
@@ -208,7 +204,7 @@ namespace PathTrace
             glBindTexture(GL_TEXTURE_2D, 0);
         }
 
-        // Bind textures to texture slots as they will not change slots during the lifespan of the renderer
+        // 绑定到对应的槽位
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_BUFFER, BVHTex);
         glActiveTexture(GL_TEXTURE2);
