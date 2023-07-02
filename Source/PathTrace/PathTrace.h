@@ -5,7 +5,7 @@
 #include"Renderer.h"
 using namespace std;
 namespace PathTrace{
-    extern RenderOptions renderOptions;
+
     extern int sampleSceneIdx;
     extern std::vector<string> sceneFiles;
     extern int envMapIdx;

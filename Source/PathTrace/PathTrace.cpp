@@ -13,8 +13,8 @@ namespace PathTrace {
     float mouseSensitivity = 0.01f;
 
     std::string shadersDir = "../../../res/PathTrace/shaders/";
-    std::string assetsDir = "../../../res/PathTrace/assets/";
-    std::string envMapDir = "../../../res/PathTrace/assets/HDR/";
+    std::string assetsDir = "../../../res/PathTrace/Scenes/";
+    std::string envMapDir = "../../../res/PathTrace/Scenes/HDR/";
 
     RenderOptions renderOptions;
 

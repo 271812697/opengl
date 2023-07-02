@@ -7,7 +7,6 @@
 #include<iostream>
 #include<glad/glad.h>
 #include <GLFW/glfw3.h>
-
 #include"Window/Device.h"
 #include"Window/WindowSettings.h"
 #include"Window/Window.h"
@@ -18,7 +17,6 @@
 #include"Panels/PanelsManager.h"
 #include"Panels/AView.h"
 #include "Panels/Inspector.h"
-
 #include"Opengl/core/log.h"
 #include"ImGuizmo.h"
 #include<string>
@@ -28,9 +26,6 @@
 #include"PathTrace.h"
 using namespace std;
 using namespace PathTrace;
-
-
-
 
 double lastTime = 0.0;
 bool done = false;
@@ -51,13 +46,6 @@ std::unique_ptr<Windowing::Inputs::InputManager>inputManager;
 std::unique_ptr<UI::Core::UIManager>uiManager;
 UI::Settings::PanelWindowSettings settings;
 std::unique_ptr<PanelsManager>m_panelsManager;
-
-
-void Render()
-{
-   GetRenderer()->Render();
-
-}
 void Update(float secondsElapsed)
 {
    // keyPressed = false;
@@ -86,192 +74,11 @@ void Update(float secondsElapsed)
         }
         scene->dirty = true;
     }
-
     GetRenderer()->Update(secondsElapsed);
 }
 
 
-void MainLoop()
-{
 
-    Scene* scene = GetScene();
-
-    ImGuizmo::SetOrthographic(false);
-
-    ImGuizmo::BeginFrame();
-    {
-        ImGui::Begin("Settings");
-
-
-        bool optionsChanged = false;
-        bool reloadShaders = false;
-
-
-        if (ImGui::CollapsingHeader("Render Settings"))
-        {
-            optionsChanged |= ImGui::SliderInt("Max Spp", &GetRenderOptions().maxSpp, -1, 256);
-            optionsChanged |= ImGui::SliderInt("Max Depth", &GetRenderOptions().maxDepth, 1, 10);
-
-            reloadShaders |= ImGui::Checkbox("Enable Russian Roulette", &GetRenderOptions().enableRR);
-            reloadShaders |= ImGui::SliderInt("Russian Roulette Depth", &GetRenderOptions().RRDepth, 1, 10);
-            reloadShaders |= ImGui::Checkbox("Enable Roughness Mollification", &renderOptions.enableRoughnessMollification);
-            optionsChanged |= ImGui::SliderFloat("Roughness Mollification Amount", &renderOptions.roughnessMollificationAmt, 0, 1);
-            reloadShaders |= ImGui::Checkbox("Enable Volume MIS", &renderOptions.enableVolumeMIS);
-        }
-
-        if (ImGui::CollapsingHeader("Environment"))
-        {
-            reloadShaders |= ImGui::Checkbox("Enable Uniform Light", &GetRenderOptions().enableUniformLight);
-
-            Vec3 uniformLightCol = Vec3::Pow(GetRenderOptions().uniformLightCol, 1.0 / 2.2);
-            optionsChanged |= ImGui::ColorEdit3("Uniform Light Color (Gamma Corrected)", (float*)(&uniformLightCol), 0);
-            GetRenderOptions().uniformLightCol = Vec3::Pow(uniformLightCol, 2.2);
-
-            reloadShaders |= ImGui::Checkbox("Enable Environment Map", &GetRenderOptions().enableEnvMap);
-            optionsChanged |= ImGui::SliderFloat("Enviornment Map Intensity", &GetRenderOptions().envMapIntensity, 0.1f, 10.0f);
-            optionsChanged |= ImGui::SliderFloat("Enviornment Map Rotation", &GetRenderOptions().envMapRot, 0.0f, 360.0f);
-            reloadShaders |= ImGui::Checkbox("Hide Emitters", &GetRenderOptions().hideEmitters);
-            reloadShaders |= ImGui::Checkbox("Enable Background", &GetRenderOptions().enableBackground);
-            optionsChanged |= ImGui::ColorEdit3("Background Color", (float*)&GetRenderOptions().backgroundCol, 0);
-            reloadShaders |= ImGui::Checkbox("Transparent Background", &GetRenderOptions().transparentBackground);
-        }
-
-        if (ImGui::CollapsingHeader("Tonemapping"))
-        {
-            ImGui::Checkbox("Enable Tonemap", &GetRenderOptions().enableTonemap);
-
-            if (GetRenderOptions().enableTonemap)
-            {
-                ImGui::Checkbox("Enable ACES", &GetRenderOptions().enableAces);
-                if (GetRenderOptions().enableAces)
-                    ImGui::Checkbox("Simple ACES Fit", &GetRenderOptions().simpleAcesFit);
-            }
-        }
-
-        if (ImGui::CollapsingHeader("Denoiser"))
-        {
-
-            ImGui::Checkbox("Enable Denoiser", &GetRenderOptions().enableDenoiser);
-            ImGui::SliderInt("Number of Frames to skip", &GetRenderOptions().denoiserFrameCnt, 5, 50);
-        }
-
-        if (ImGui::CollapsingHeader("Camera"))
-        {
-            float fov = Math::Degrees(scene->camera->fov);
-            float aperture = scene->camera->aperture * 1000.0f;
-            optionsChanged |= ImGui::SliderFloat("Fov", &fov, 10, 90);
-            scene->camera->SetFov(fov);
-            optionsChanged |= ImGui::SliderFloat("Aperture", &aperture, 0.0f, 10.8f);
-            scene->camera->aperture = aperture / 1000.0f;
-            optionsChanged |= ImGui::SliderFloat("Focal Distance", &scene->camera->focalDist, 0.01f, 50.0f);
-            ImGui::Text("Pos: %.2f, %.2f, %.2f", scene->camera->position.x, scene->camera->position.y, scene->camera->position.z);
-        }
-
-        if (ImGui::CollapsingHeader("Objects"))
-        {
-            bool objectPropChanged = false;
-
-            std::vector<std::string> listboxItems;
-            for (int i = 0; i < scene->meshInstances.size(); i++)
-            {
-                listboxItems.push_back(scene->meshInstances[i].name);
-            }
-
-            // Object Selection
-            if (ImGui::ListBoxHeader("Instances")) {
-                for (int i = 0; i < scene->meshInstances.size(); i++)
-                {
-                    bool is_selected = selectedInstance == i;
-                    if (ImGui::Selectable(listboxItems[i].c_str(), is_selected))
-                    {
-                        selectedInstance = i;
-                    }
-                }
-                ImGui::ListBoxFooter();
-            }
-            ImGui::Separator();
-            ImGui::Text("Materials");
-            // Material Properties
-            Material* mat = &scene->materials[scene->meshInstances[selectedInstance].materialID];
-            // Gamma correction for color picker. Internally, the renderer uses linear RGB values for colors
-            Vec3 albedo = Vec3::Pow(mat->baseColor, 1.0 / 2.2);
-            objectPropChanged |= ImGui::ColorEdit3("Albedo (Gamma Corrected)", (float*)(&albedo), 0);
-            mat->baseColor = Vec3::Pow(albedo, 2.2);
-
-            objectPropChanged |= ImGui::SliderFloat("Metallic", &mat->metallic, 0.0f, 1.0f);
-            objectPropChanged |= ImGui::SliderFloat("Roughness", &mat->roughness, 0.001f, 1.0f);
-            objectPropChanged |= ImGui::SliderFloat("SpecularTint", &mat->specularTint, 0.0f, 1.0f);
-            objectPropChanged |= ImGui::SliderFloat("Subsurface", &mat->subsurface, 0.0f, 1.0f);
-            objectPropChanged |= ImGui::SliderFloat("Anisotropic", &mat->anisotropic, 0.0f, 1.0f);
-            objectPropChanged |= ImGui::SliderFloat("Sheen", &mat->sheen, 0.0f, 1.0f);
-            objectPropChanged |= ImGui::SliderFloat("SheenTint", &mat->sheenTint, 0.0f, 1.0f);
-            objectPropChanged |= ImGui::SliderFloat("Clearcoat", &mat->clearcoat, 0.0f, 1.0f);
-            objectPropChanged |= ImGui::SliderFloat("ClearcoatGloss", &mat->clearcoatGloss, 0.0f, 1.0f);
-            objectPropChanged |= ImGui::SliderFloat("SpecTrans", &mat->specTrans, 0.0f, 1.0f);
-            objectPropChanged |= ImGui::SliderFloat("Ior", &mat->ior, 1.001f, 2.0f);
-
-            int mediumType = (int)mat->mediumType;
-            if (ImGui::Combo("Medium Type", &mediumType, "None\0Absorb\0Scatter\0Emissive\0"))
-            {
-                reloadShaders = true;
-                objectPropChanged = true;
-                mat->mediumType = mediumType;
-            }
-
-            if (mediumType != MediumType::None)
-            {
-                Vec3 mediumColor = Vec3::Pow(mat->mediumColor, 1.0 / 2.2);
-                objectPropChanged |= ImGui::ColorEdit3("Medium Color (Gamma Corrected)", (float*)(&mediumColor), 0);
-                mat->mediumColor = Vec3::Pow(mediumColor, 2.2);
-
-                objectPropChanged |= ImGui::SliderFloat("Medium Density", &mat->mediumDensity, 0.0f, 5.0f);
-
-                if (mediumType == MediumType::Scatter)
-                    objectPropChanged |= ImGui::SliderFloat("Medium Anisotropy", &mat->mediumAnisotropy, -0.9f, 0.9f);
-            }
-
-            int alphaMode = (int)mat->alphaMode;
-            if (ImGui::Combo("Alpha Mode", &alphaMode, "Opaque\0Blend"))
-            {
-                reloadShaders = true;
-                objectPropChanged = true;
-                mat->alphaMode = alphaMode;
-            }
-
-            if (alphaMode != AlphaMode::Opaque)
-                objectPropChanged |= ImGui::SliderFloat("Opacity", &mat->opacity, 0.0f, 1.0f);
-
-            if (objectPropChanged)
-                scene->RebuildInstances();
-        }
-
-        scene->renderOptions = renderOptions;
-
-        if (optionsChanged)
-            scene->dirty = true;
-
-        if (reloadShaders)
-        {
-            scene->dirty = true;
-            GetRenderer()->ReloadShaders();
-        }
-
-        ImGui::End();
-
-
-    }
-    static double lasttime = glfwGetTime();
-    static double curtime = glfwGetTime();
-
-    curtime = glfwGetTime();
-
-
-    Update((float)(curtime - lasttime));
-    lastTime = curtime;
-
-    Render();
-
-}
 
 int main(int, char**)
 {
@@ -280,8 +87,8 @@ int main(int, char**)
     deviceSettings.contextMajorVersion = 4;
     deviceSettings.contextMinorVersion = 6;
     windowSettings.title = "PathTrace";
-    windowSettings.width = renderOptions.windowResolution.x;
-    windowSettings.height = renderOptions.windowResolution.y;
+    windowSettings.width = GetRenderOptions().windowResolution.x;
+    windowSettings.height = GetRenderOptions().windowResolution.y;
     windowSettings.maximized = true;
   	device = std::make_unique<Windowing::Context::Device>(deviceSettings);
     window = std::make_unique<Windowing::Window>(*device, windowSettings);
@@ -322,11 +129,11 @@ int main(int, char**)
 
     m_panelsManager->CreatePanel<AView>("Scene View", true, settings);
     m_panelsManager->GetPanelAs<AView>("Scene View").ResizeEvent+= [](int p_width, int p_height) {
-        renderOptions.windowResolution.x = p_width;
-        renderOptions.windowResolution.y = p_height;
-        if (!renderOptions.independentRenderSize)
-            renderOptions.renderResolution = renderOptions.windowResolution;
-        GetScene()->renderOptions = renderOptions;
+        GetRenderOptions().windowResolution.x = p_width;
+        GetRenderOptions().windowResolution.y = p_height;
+        if (!GetRenderOptions().independentRenderSize)
+            GetRenderOptions().renderResolution = GetRenderOptions().windowResolution;
+        GetScene()->renderOptions = GetRenderOptions();
         GetRenderer()->ResizeRenderer();
     };
 
@@ -344,13 +151,13 @@ int main(int, char**)
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
-        MainLoop();
+        
+        Update(clock.GetDeltaTime());
+        GetRenderer()->Render();
         
         uiManager->Render();
         m_panelsManager->GetPanelAs<AView>("Scene View").Update(1);
         m_panelsManager->GetPanelAs<AView>("Scene View").Bind();
-        
-        
         GetRenderer()->Present();
         m_panelsManager->GetPanelAs<AView>("Scene View").UnBind();
 
