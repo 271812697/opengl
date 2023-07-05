@@ -16,7 +16,7 @@
 #include"tools/Clock.h"
 #include"Panels/PanelsManager.h"
 #include"Panels/AView.h"
-#include "Panels/Inspector.h"
+#include "Panels/PathInspector.h"
 #include"Opengl/core/log.h"
 #include"ImGuizmo.h"
 #include<string>
@@ -125,8 +125,8 @@ int main(int, char**)
     m_panelsManager= std::make_unique<PanelsManager>(m_canvas);
 
     m_panelsManager->CreatePanel<MenuBar>("Menu Bar");
-    m_panelsManager->CreatePanel<Inspector>("Inspector",true, settings);
-
+    m_panelsManager->CreatePanel<PathInspector>("Inspector",true, settings);
+    m_panelsManager->GetPanelAs<PathInspector>("Inspector").InstallUI();
     m_panelsManager->CreatePanel<AView>("Scene View", true, settings);
     m_panelsManager->GetPanelAs<AView>("Scene View").ResizeEvent+= [](int p_width, int p_height) {
         GetRenderOptions().windowResolution.x = p_width;

@@ -1,4 +1,4 @@
-#include"Inspector.h"
+#include"PathInspector.h"
 #include"UI/Widgets/Texts/TextColored.h"
 #include"UI/Widgets/Sliders/SliderFloat.h"
 #include"UI/Widgets/Sliders/SliderInt.h"
@@ -9,14 +9,24 @@
 using namespace UI::Widgets;
 using namespace PathTrace;
 
-Inspector::Inspector
+PathInspector::PathInspector
 (
 	const std::string& p_title,
 	bool p_opened,
 	const UI::Settings::PanelWindowSettings& p_windowSettings
-) : PanelWindow(p_title, p_opened, p_windowSettings)
+) :UI::Panels::Inspector(p_title, p_opened, p_windowSettings)
 {
 
+
+}
+
+PathInspector::~PathInspector()
+{
+
+}
+
+void PathInspector::InstallUI()
+{
 	m_inspectorHeader = &CreateWidget<UI::Widgets::Layout::Group>();
 	m_inspectorHeader->CreateWidget<UI::Widgets::Visual::Separator>();
 	m_inspectorHeader->enabled = true;
@@ -24,9 +34,9 @@ Inspector::Inspector
 		GetScene()->renderOptions = GetRenderOptions();
 		GetScene()->dirty = true;
 		GetRenderer()->ReloadShaders();
-		
+
 	};
-	auto& Sample=(CreateWidget<UI::Widgets::Texts::TextColored>("Samples", UI::Types::Color(1.0f, 1.0f, 0.0f, 1.0f))).AddPlugin<UI::Plugins::DataDispatcher<std::string>>();
+	auto& Sample = (CreateWidget<UI::Widgets::Texts::TextColored>("Samples", UI::Types::Color(1.0f, 1.0f, 0.0f, 1.0f))).AddPlugin<UI::Plugins::DataDispatcher<std::string>>();
 	Sample.RegisterGatherer([]() {
 		std::string a = "Samples: ";
 		a = a + to_string(GetRenderer()->GetSampleCount());
@@ -34,7 +44,7 @@ Inspector::Inspector
 		});
 
 
-	
+
 	//ÇÐ»»³¡¾°
 	auto& sceneSelectorWidget = CreateWidget<UI::Widgets::Selection::ComboBox>(0);
 	//sceneSelectorWidget.lineBreak = false;
@@ -43,34 +53,34 @@ Inspector::Inspector
 
 	}
 	sceneSelectorWidget.ValueChangedEvent += [](int cur) {
-			LoadScene(sceneFiles[cur]);
-			InitRenderer();
+		LoadScene(sceneFiles[cur]);
+		InitRenderer();
 	};
 	//ÇÐ»»»·¾³ÌùÍ¼
 	auto& envSelectorWidget = CreateWidget<UI::Widgets::Selection::ComboBox>(0);
 	//envSelectorWidget.lineBreak = false;
 	for (int i = 0; i < envMaps.size(); i++) {
-		envSelectorWidget.choices.emplace(i,envMaps[i]);
+		envSelectorWidget.choices.emplace(i, envMaps[i]);
 	}
 	envSelectorWidget.ValueChangedEvent += [](int cur) {
 		GetScene()->AddEnvMap(envMaps[cur]);
 	};
 
-	auto& mouseDelta=CreateWidget<UI::Widgets::Sliders::SliderFloat>(0.001f,1.0f,0.5f,UI::Widgets::Sliders::ESliderOrientation::HORIZONTAL,"Mouse sensitivity").AddPlugin<UI::Plugins::DataDispatcher<float>>();
+	auto& mouseDelta = CreateWidget<UI::Widgets::Sliders::SliderFloat>(0.001f, 1.0f, 0.5f, UI::Widgets::Sliders::ESliderOrientation::HORIZONTAL, "Mouse sensitivity").AddPlugin<UI::Plugins::DataDispatcher<float>>();
 	mouseDelta.RegisterReference(mouseSensitivity);
 
 	bool optionsChanged = false;
 	bool reloadShaders = false;
-	auto render=&CreateWidget<UI::Widgets::Layout::GroupCollapsable>("Render");
-	render->CreateWidget<UI::Widgets::Sliders::SliderInt>(-1,256,-1, UI::Widgets::Sliders::ESliderOrientation::HORIZONTAL,"Spp").AddPlugin<UI::Plugins::DataDispatcher<int>>().RegisterReference(GetRenderOptions().maxSpp);
+	auto render = &CreateWidget<UI::Widgets::Layout::GroupCollapsable>("Render");
+	render->CreateWidget<UI::Widgets::Sliders::SliderInt>(-1, 256, -1, UI::Widgets::Sliders::ESliderOrientation::HORIZONTAL, "Spp").AddPlugin<UI::Plugins::DataDispatcher<int>>().RegisterReference(GetRenderOptions().maxSpp);
 	render->CreateWidget<UI::Widgets::Sliders::SliderInt>(1, 10, 1, UI::Widgets::Sliders::ESliderOrientation::HORIZONTAL, "Depth").AddPlugin<UI::Plugins::DataDispatcher<int>>().RegisterReference(GetRenderOptions().maxDepth);
-	render->CreateWidget<UI::Widgets::Selection::CheckBox>(false,"Roulette").AddPlugin<UI::Plugins::DataDispatcher<bool>>().RegisterReference(GetRenderOptions().enableRR);
+	render->CreateWidget<UI::Widgets::Selection::CheckBox>(false, "Roulette").AddPlugin<UI::Plugins::DataDispatcher<bool>>().RegisterReference(GetRenderOptions().enableRR);
 	render->CreateWidget<UI::Widgets::Sliders::SliderInt>(1, 10, 1, UI::Widgets::Sliders::ESliderOrientation::HORIZONTAL, "Rouletee Depth").AddPlugin<UI::Plugins::DataDispatcher<int>>().RegisterReference(GetRenderOptions().RRDepth);
-	render->CreateWidget<UI::Widgets::Selection::CheckBox>(false,"Roughness Mollification").AddPlugin<UI::Plugins::DataDispatcher<bool>>().RegisterReference(GetRenderOptions().enableRoughnessMollification);
-	render->CreateWidget<UI::Widgets::Sliders::SliderFloat>(0,1,0, UI::Widgets::Sliders::ESliderOrientation::HORIZONTAL,"Roughness Mollification Amount").AddPlugin<UI::Plugins::DataDispatcher<float>>().RegisterReference(GetRenderOptions().roughnessMollificationAmt);
+	render->CreateWidget<UI::Widgets::Selection::CheckBox>(false, "Roughness Mollification").AddPlugin<UI::Plugins::DataDispatcher<bool>>().RegisterReference(GetRenderOptions().enableRoughnessMollification);
+	render->CreateWidget<UI::Widgets::Sliders::SliderFloat>(0, 1, 0, UI::Widgets::Sliders::ESliderOrientation::HORIZONTAL, "Roughness Mollification Amount").AddPlugin<UI::Plugins::DataDispatcher<float>>().RegisterReference(GetRenderOptions().roughnessMollificationAmt);
 	render->CreateWidget<UI::Widgets::Selection::CheckBox>(false, "Enable Volume MIS").AddPlugin<UI::Plugins::DataDispatcher<bool>>().RegisterReference(GetRenderOptions().enableVolumeMIS);
-	
-	
+
+
 	auto envir = &CreateWidget<UI::Widgets::Layout::GroupCollapsable>("Environment");
 	envir->CreateWidget<UI::Widgets::Selection::CheckBox>(false, "Uniform Light").AddPlugin<UI::Plugins::DataDispatcher<bool>>().RegisterReference(GetRenderOptions().enableUniformLight);
 	auto& uniform = envir->CreateWidget<UI::Widgets::Selection::ColorEdit>().AddPlugin<UI::Plugins::DataDispatcher<UI::Types::Color>>();
@@ -82,8 +92,8 @@ Inspector::Inspector
 		GetRenderOptions().uniformLightCol = Vec3(pow(a.r, 2.2), pow(a.g, 2.2), pow(a.b, 2.2));
 		});
 	envir->CreateWidget<UI::Widgets::Selection::CheckBox>(false, "Environment Map").AddPlugin<UI::Plugins::DataDispatcher<bool>>().RegisterReference(GetRenderOptions().enableEnvMap);
-	envir->CreateWidget<UI::Widgets::Sliders::SliderFloat>(0.1,10,0.1, UI::Widgets::Sliders::ESliderOrientation::HORIZONTAL,"Intensity").AddPlugin<UI::Plugins::DataDispatcher<float>>().RegisterReference(GetRenderOptions().envMapIntensity);
-	envir->CreateWidget<UI::Widgets::Sliders::SliderFloat>(0,360, 0, UI::Widgets::Sliders::ESliderOrientation::HORIZONTAL, "Rotation").AddPlugin<UI::Plugins::DataDispatcher<float>>().RegisterReference(GetRenderOptions().envMapRot);
+	envir->CreateWidget<UI::Widgets::Sliders::SliderFloat>(0.1, 10, 0.1, UI::Widgets::Sliders::ESliderOrientation::HORIZONTAL, "Intensity").AddPlugin<UI::Plugins::DataDispatcher<float>>().RegisterReference(GetRenderOptions().envMapIntensity);
+	envir->CreateWidget<UI::Widgets::Sliders::SliderFloat>(0, 360, 0, UI::Widgets::Sliders::ESliderOrientation::HORIZONTAL, "Rotation").AddPlugin<UI::Plugins::DataDispatcher<float>>().RegisterReference(GetRenderOptions().envMapRot);
 	envir->CreateWidget<UI::Widgets::Selection::CheckBox>(false, "Emitters").AddPlugin<UI::Plugins::DataDispatcher<bool>>().RegisterReference(GetRenderOptions().hideEmitters);
 	envir->CreateWidget<UI::Widgets::Selection::CheckBox>(false, "BackGround").AddPlugin<UI::Plugins::DataDispatcher<bool>>().RegisterReference(GetRenderOptions().enableBackground);
 	envir->CreateWidget<UI::Widgets::Selection::ColorEdit>().AddPlugin<UI::Plugins::DataDispatcher<UI::Types::Color>>().RegisterReference(*((UI::Types::Color*)(&GetRenderOptions().backgroundCol)));
@@ -96,17 +106,17 @@ Inspector::Inspector
 
 	auto denoiser = &CreateWidget<UI::Widgets::Layout::GroupCollapsable>("Denoiser");
 	denoiser->CreateWidget<UI::Widgets::Selection::CheckBox>(false, "Enbale").AddPlugin<UI::Plugins::DataDispatcher<bool>>().RegisterReference(GetRenderOptions().enableDenoiser);
-	denoiser->CreateWidget<UI::Widgets::Sliders::SliderInt>(5,50 , -1, UI::Widgets::Sliders::ESliderOrientation::HORIZONTAL, "Skip Frames").AddPlugin<UI::Plugins::DataDispatcher<int>>().RegisterReference(GetRenderOptions().denoiserFrameCnt);
-	 
+	denoiser->CreateWidget<UI::Widgets::Sliders::SliderInt>(5, 50, -1, UI::Widgets::Sliders::ESliderOrientation::HORIZONTAL, "Skip Frames").AddPlugin<UI::Plugins::DataDispatcher<int>>().RegisterReference(GetRenderOptions().denoiserFrameCnt);
+
 	auto camera = &CreateWidget<UI::Widgets::Layout::GroupCollapsable>("Camera settings");
-	auto& fov=camera->CreateWidget<UI::Widgets::Sliders::SliderFloat>(10,90,60,UI::Widgets::Sliders::ESliderOrientation::HORIZONTAL,"Fov").AddPlugin<UI::Plugins::DataDispatcher<float>>();
+	auto& fov = camera->CreateWidget<UI::Widgets::Sliders::SliderFloat>(10, 90, 60, UI::Widgets::Sliders::ESliderOrientation::HORIZONTAL, "Fov").AddPlugin<UI::Plugins::DataDispatcher<float>>();
 	fov.RegisterGatherer([]() {
 		return Math::Degrees(GetScene()->camera->fov);
 		});
 	fov.RegisterProvider([](float a) {
 		GetScene()->camera->SetFov(a);
 		});
-	auto& aperture=camera->CreateWidget<UI::Widgets::Sliders::SliderFloat>(0.0f,10.8f,0.01f,UI::Widgets::Sliders::ESliderOrientation::HORIZONTAL,"Aperture").AddPlugin<UI::Plugins::DataDispatcher<float>>();
+	auto& aperture = camera->CreateWidget<UI::Widgets::Sliders::SliderFloat>(0.0f, 10.8f, 0.01f, UI::Widgets::Sliders::ESliderOrientation::HORIZONTAL, "Aperture").AddPlugin<UI::Plugins::DataDispatcher<float>>();
 	aperture.RegisterGatherer([]() {
 		return GetScene()->camera->aperture * 1000.0f;
 		});
@@ -119,14 +129,14 @@ Inspector::Inspector
 		std::string  temp;
 		temp.reserve(30);
 		sprintf(temp.data(), "Pos: %.2f, %.2f, %.2f", GetScene()->camera->position.x, GetScene()->camera->position.y, GetScene()->camera->position.z);
-		return temp;	
+		return temp;
 		});
 	auto object = &CreateWidget<UI::Widgets::Layout::GroupCollapsable>("Mesh Instance");
-	auto& MeshInstance=object->CreateWidget<UI::Widgets::Selection::ComboBox>(0);
-	for (int i = 0; i < GetScene()->meshInstances.size();i++) {
+	auto& MeshInstance = object->CreateWidget<UI::Widgets::Selection::ComboBox>(0);
+	for (int i = 0; i < GetScene()->meshInstances.size(); i++) {
 		MeshInstance.choices.emplace(i, GetScene()->meshInstances[i].name);
 	}
-	
+
 	object->CreateWidget<UI::Widgets::CustomWidget>().DrawIn += [&MeshInstance]() {
 
 		bool objectPropChanged = false;
@@ -179,10 +189,5 @@ Inspector::Inspector
 		if (objectPropChanged)
 			GetScene()->RebuildInstances();
 	};
-
-}
-
-Inspector::~Inspector()
-{
 
 }
