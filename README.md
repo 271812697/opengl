@@ -22,7 +22,7 @@ cmake ..
 
 ![image-20230703001754290](README.assets/image-20230703001754290.png)
 
-![fluid3](README.assets/fluid3.png)
+![image-20230706192959316](README.assets/image-20230706192959316.png)![image-20230706192957271](README.assets/image-20230706192957271.png
 
 ![fluid3](D:\Others\opengl\fluid3.png
 
