@@ -69,12 +69,19 @@ namespace scene {
 
     }
 
-    void Scene::OnSceneRender() {
+    void Scene::OnSceneRender(float dt) {
         Renderer::Clear();
     }
 
-    void Scene::OnImGuiRender() {
+    void Scene::OnImGuiRender(float dt) {
 
+    }
+    void Scene::UpdateScene(float dt) {
+
+    }
+    void Scene::Resize(int w,int h) {
+        width = w;
+        height = h;
     }
 
 }

@@ -200,7 +200,7 @@ namespace scene {
         Renderer::FaceCulling(true);
 
     }
-    void Scene05::OnSceneRender() {
+    void Scene05::OnSceneRender(float dt) {
         auto& main_camera = camera.GetComponent<Camera>();
         main_camera.Update();
 
@@ -395,7 +395,7 @@ namespace scene {
         
 
     }
-    void Scene05::OnImGuiRender() {
+    void Scene05::OnImGuiRender(float dt) {
         using namespace ImGui;
         const ImVec4 tab_color_off = ImVec4(0.0f, 0.3f, 0.6f, 1.0f);
         const ImVec4 tab_color_on = ImVec4(0.0f, 0.4f, 0.8f, 1.0f);

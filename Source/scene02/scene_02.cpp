@@ -168,7 +168,7 @@ namespace scene {
     
     }
 
-    void Scene02::OnSceneRender() {
+    void Scene02::OnSceneRender(float dt ) {
         auto& main_camera = camera.GetComponent<Camera>();
         main_camera.Update();
 
@@ -251,7 +251,7 @@ namespace scene {
         postprocess_shader->Unbind();
         bilinear_sampler->Unbind(1);
     }
-    void Scene02::OnImGuiRender() {
+    void Scene02::OnImGuiRender(float dt ) {
         using namespace ImGui;
         const ImGuiColorEditFlags color_flags = ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoAlpha;
         static bool edit_sphere_metalness = false;

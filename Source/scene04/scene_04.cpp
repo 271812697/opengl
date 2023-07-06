@@ -103,7 +103,7 @@ namespace scene {
         Renderer::AlphaBlend(true);
         Renderer::FaceCulling(true);
     }
-    void Scene04::OnSceneRender() {
+    void Scene04::OnSceneRender(float dt) {
         //
         auto& animator=mingyue.GetComponent<Animator>();
         auto& animatorz = zhaolinger.GetComponent<Animator>();
@@ -175,7 +175,7 @@ namespace scene {
         Renderer::Clear();
         Mesh::DrawQuad();
     }
-    void Scene04::OnImGuiRender() {
+    void Scene04::OnImGuiRender(float dt) {
         using namespace ImGui;
         if (ui::NewInspector()) {
             Indent(5.0f);

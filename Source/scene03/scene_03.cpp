@@ -168,7 +168,7 @@ namespace scene {
         }
     }
 
-    void Scene03::OnSceneRender() {
+    void Scene03::OnSceneRender(float dt) {
         auto& e = GetEntity(entity_id);
         auto& main_camera = camera.GetComponent<Camera>();
         main_camera.Update();
@@ -258,7 +258,7 @@ namespace scene {
         postprocess_shader->Unbind();
     }
 
-    void Scene03::OnImGuiRender() {
+    void Scene03::OnImGuiRender(float dt = 0) {
         using namespace ImGui;
         const ImGuiColorEditFlags color_flags = ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoAlpha;
         const ImVec2 rainbow_offset = ImVec2(5.0f, 105.0f);

@@ -11,8 +11,8 @@ namespace scene {
 
       
         void Init() override;
-        void OnSceneRender() override;
-        void OnImGuiRender() override;
+        void OnSceneRender(float dt = 0) override;
+        void OnImGuiRender(float dt = 0) override;
 
 
 

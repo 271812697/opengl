@@ -73,6 +73,8 @@ void UI::Panels::APanelTransformable::UpdatePosition()
 		m_positionChanged = false;
 		m_alignmentChanged = false;
 	}
+	//ImVec2 mousePos = ImGui::GetMousePos();
+
 }
 
 void UI::Panels::APanelTransformable::UpdateSize()

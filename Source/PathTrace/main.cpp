@@ -76,7 +76,7 @@ int main(int, char**)
     uiManager->LoadFont("Ruda_Small", "../../../res/font/Ruda-Bold.ttf", 12);
     uiManager->LoadFont("Ruda_Medium",  "../../../res/font/Ruda-Bold.ttf", 14);
     uiManager->UseFont("Ruda_Big");
-    uiManager->SetEditorLayoutSaveFilename(std::string(getenv("APPDATA")) + "\\OverloadTech\\OvEditor\\layout.ini");
+    uiManager->SetEditorLayoutSaveFilename(std::string(getenv("APPDATA")) + "\\PathTrace\\layout.ini");
     uiManager->SetEditorLayoutAutosaveFrequency(60.0f);
     uiManager->EnableEditorLayoutSave(true);
     uiManager->EnableDocking(true);

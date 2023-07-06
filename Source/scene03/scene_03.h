@@ -9,8 +9,8 @@ namespace scene {
         using Scene::Scene;
 
         void Init() override;
-        void OnSceneRender() override;
-        void OnImGuiRender() override;
+        void OnSceneRender(float dt = 0) override;
+        void OnImGuiRender(float dt = 0) override;
 
         Entity camera;
         Entity skybox;

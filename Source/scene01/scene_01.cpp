@@ -204,7 +204,7 @@ namespace scene {
     }
 
     // this is called every frame, update your scene here and submit entities to the renderer
-    void Scene01::OnSceneRender() {
+    void Scene01::OnSceneRender(float dt ) {
         auto& main_camera = camera.GetComponent<Camera>();
         main_camera.Update();
 
@@ -370,7 +370,7 @@ namespace scene {
     }
 
     // this is called every frame, update your ImGui widgets here to control entities in the scene
-    void Scene01::OnImGuiRender() {
+    void Scene01::OnImGuiRender(float dt ) {
         using namespace ImGui;
         const ImVec4 text_color = ImVec4(0.4f, 0.8f, 0.4f, 1.0f);
         const ImGuiColorEditFlags color_flags = ImGuiColorEditFlags_NoSidePreview

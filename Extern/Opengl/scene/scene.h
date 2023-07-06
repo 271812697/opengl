@@ -35,10 +35,13 @@ namespace scene {
         std::string title;
         explicit Scene(const std::string& title);
         virtual ~Scene();
-
+        virtual void Resize(int w,int h);
+        virtual void Present(){}
+        int width, height;
+        virtual void UpdateScene(float dt = 0);
         virtual void Init(void);
-        virtual void OnSceneRender(void);
-        virtual void OnImGuiRender(void);
+        virtual void OnSceneRender(float dt =0);
+        virtual void OnImGuiRender(float dt=0);
 
       private:
 

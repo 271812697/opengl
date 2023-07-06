@@ -28,6 +28,8 @@ namespace UI::Panels {
 
 
 
+
+
 	protected:
 		UI::Widgets::Layout::Group* m_inspectorHeader;
 	};
