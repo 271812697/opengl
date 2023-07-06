@@ -46,37 +46,6 @@ std::unique_ptr<Windowing::Inputs::InputManager>inputManager;
 std::unique_ptr<UI::Core::UIManager>uiManager;
 UI::Settings::PanelWindowSettings settings;
 std::unique_ptr<PanelsManager>m_panelsManager;
-void Update(float secondsElapsed)
-{
-   // keyPressed = false;
-    Scene* scene = GetScene();
-    //相机视角交互逻辑
-    if (m_panelsManager->GetPanelAs<AView>("Scene View").IsFocused() && ImGui::IsAnyMouseDown() && !ImGuizmo::IsOver())
-    {
-        
-        if (ImGui::IsMouseDown(0))
-        {
-            ImVec2 mouseDelta = ImGui::GetMouseDragDelta(0, 0);
-            scene->camera->OffsetOrientation(mouseDelta.x, mouseDelta.y);
-            ImGui::ResetMouseDragDelta(0);
-        }
-        else if (ImGui::IsMouseDown(1))
-        {
-            ImVec2 mouseDelta = ImGui::GetMouseDragDelta(1, 0);
-            scene->camera->SetRadius(mouseSensitivity * mouseDelta.y);
-            ImGui::ResetMouseDragDelta(1);
-        }
-        else if (ImGui::IsMouseDown(2))
-        {
-            ImVec2 mouseDelta = ImGui::GetMouseDragDelta(2, 0);
-            scene->camera->Strafe(mouseSensitivity * mouseDelta.x, mouseSensitivity * mouseDelta.y);
-            ImGui::ResetMouseDragDelta(2);
-        }
-        scene->dirty = true;
-    }
-    GetRenderer()->Update(secondsElapsed);
-}
-
 
 
 
@@ -152,14 +121,40 @@ int main(int, char**)
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
         
-        Update(clock.GetDeltaTime());
+
+        //相机视角交互逻辑
+        if (m_panelsManager->GetPanelAs<AView>("Scene View").IsFocused() && ImGui::IsAnyMouseDown() && !ImGuizmo::IsOver())
+        {
+
+            if (ImGui::IsMouseDown(0))
+            {
+                ImVec2 mouseDelta = ImGui::GetMouseDragDelta(0, 0);
+                GetScene()->camera->OffsetOrientation(mouseDelta.x, mouseDelta.y);
+                ImGui::ResetMouseDragDelta(0);
+            }
+            else if (ImGui::IsMouseDown(1))
+            {
+                ImVec2 mouseDelta = ImGui::GetMouseDragDelta(1, 0);
+                GetScene()->camera->SetRadius(mouseSensitivity * mouseDelta.y);
+                ImGui::ResetMouseDragDelta(1);
+            }
+            else if (ImGui::IsMouseDown(2))
+            {
+                ImVec2 mouseDelta = ImGui::GetMouseDragDelta(2, 0);
+                GetScene()->camera->Strafe(mouseSensitivity * mouseDelta.x, mouseSensitivity * mouseDelta.y);
+                ImGui::ResetMouseDragDelta(2);
+            }
+            GetScene()->dirty = true;
+        }
+        GetRenderer()->Update(clock.GetDeltaTime());
+
         GetRenderer()->Render();
-        
-        uiManager->Render();
         m_panelsManager->GetPanelAs<AView>("Scene View").Update(1);
         m_panelsManager->GetPanelAs<AView>("Scene View").Bind();
         GetRenderer()->Present();
         m_panelsManager->GetPanelAs<AView>("Scene View").UnBind();
+        uiManager->Render();
+
 
         
         ImGui::Render();

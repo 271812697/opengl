@@ -22,8 +22,11 @@
 		void Render();
 
 		std::pair<uint16_t, uint16_t> GetSafeSize() const;
+
 		void Bind();
+
 		void UnBind();
+
 		Tools::Eventing::Event<uint16_t, uint16_t> ResizeEvent;
 
 	protected:

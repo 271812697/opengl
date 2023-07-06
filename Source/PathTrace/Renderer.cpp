@@ -4,7 +4,7 @@
 
 namespace PathTrace
 {
-    // Return the source code of the complete shader
+    // 加载shader的源码
     std::string loadShaderSource(std::string path)
     {
         static bool isRecursiveCall = false;
