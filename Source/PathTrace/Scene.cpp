@@ -183,7 +183,7 @@ namespace PathTrace
         createTLAS();
         bvhTranslator.UpdateTLAS(sceneBvh, meshInstances);
 
-        //Copy transforms
+
         for (int i = 0; i < meshInstances.size(); i++)
             transforms[i] = meshInstances[i].transform;
 

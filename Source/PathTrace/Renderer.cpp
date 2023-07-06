@@ -75,7 +75,6 @@ namespace PathTrace
     {
         delete quad;
 
-        // Delete textures
         glDeleteTextures(1, &BVHTex);
         glDeleteTextures(1, &vertexIndicesTex);
         glDeleteTextures(1, &verticesTex);
@@ -92,17 +91,12 @@ namespace PathTrace
         glDeleteTextures(1, &tileOutputTexture[0]);
         glDeleteTextures(1, &tileOutputTexture[1]);
         glDeleteTextures(1, &denoisedTexture);
-
-        // Delete buffers
+   
         glDeleteBuffers(1, &BVHBuffer);
         glDeleteBuffers(1, &vertexIndicesBuffer);
         glDeleteBuffers(1, &verticesBuffer);
         glDeleteBuffers(1, &normalsBuffer);
 
-        // Delete shaders
-
-
-        // Delete denoiser data
         delete[] denoiserInputFramePtr;
         delete[] frameOutputPtr;
 
@@ -165,7 +159,7 @@ namespace PathTrace
         // 光源信息
         if (!scene->lights.empty())
         {
-            //Create texture for lights
+            
             glGenTextures(1, &lightsTex);
             glBindTexture(GL_TEXTURE_2D, lightsTex);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, (sizeof(Light) / sizeof(Vec3)) * scene->lights.size(), 1, 0, GL_RGB, GL_FLOAT, &scene->lights[0]);
@@ -229,7 +223,7 @@ namespace PathTrace
 
     void Renderer::ResizeRenderer()
     {
-        // Delete textures
+        //重置贴图
         glDeleteTextures(1, &pathTraceTexture);
         glDeleteTextures(1, &pathTraceTextureLowRes);
         glDeleteTextures(1, &accumTexture);
@@ -238,7 +232,7 @@ namespace PathTrace
         glDeleteTextures(1, &denoisedTexture);
 
 
-        // Delete denoiser data
+        
         delete[] denoiserInputFramePtr;
         delete[] frameOutputPtr;
 
@@ -259,7 +253,7 @@ namespace PathTrace
 
         tileWidth = scene->renderOptions.tileWidth;
         tileHeight = scene->renderOptions.tileHeight;
-
+        //单块瓦片所占据的uv区间长度
         invNumTiles.x = (float)tileWidth / renderSize.x;
         invNumTiles.y = (float)tileHeight / renderSize.y;
 
@@ -272,16 +266,14 @@ namespace PathTrace
         pathTracefbo.reset();
         pathTracefbo = std::make_shared<asset::FBO>(tileWidth, tileHeight);
         pathTraceFBOLowRes.reset();
-        pathTraceFBOLowRes = std::make_shared<asset::FBO>(tileWidth, tileHeight);
+        pathTraceFBOLowRes = std::make_shared<asset::FBO>(windowSize.x * pixelRatio, windowSize.y * pixelRatio);
         accumFBO.reset();
         accumFBO = std::make_shared<asset::FBO>(renderSize.x, renderSize.y);
         outputFBO.reset();
         outputFBO = std::make_shared<asset::FBO>(renderSize.x, renderSize.y);
 
 
-        // Create FBOs for path trace shader 
 
-        // Create Texture for FBO
         glGenTextures(1, &pathTraceTexture);
         glBindTexture(GL_TEXTURE_2D, pathTraceTexture);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, tileWidth, tileHeight, 0, GL_RGBA, GL_FLOAT, 0);
@@ -290,10 +282,7 @@ namespace PathTrace
         glBindTexture(GL_TEXTURE_2D, 0);
 
         pathTracefbo->SetColorTexture(0, pathTraceTexture);
-        // Create FBOs for low res preview shader 
 
-
-        // Create Texture for FBO
         glGenTextures(1, &pathTraceTextureLowRes);
         glBindTexture(GL_TEXTURE_2D, pathTraceTextureLowRes);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, windowSize.x * pixelRatio, windowSize.y * pixelRatio, 0, GL_RGBA, GL_FLOAT, 0);
@@ -304,9 +293,7 @@ namespace PathTrace
         glBindTexture(GL_TEXTURE_2D, 0);
         pathTraceFBOLowRes->SetColorTexture(0, pathTraceTextureLowRes);
 
-        // Create FBOs for accum buffer
 
-        // Create Texture for FBO
         glGenTextures(1, &accumTexture);
         glBindTexture(GL_TEXTURE_2D, accumTexture);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, renderSize.x, renderSize.y, 0, GL_RGBA, GL_FLOAT, 0);
@@ -316,10 +303,6 @@ namespace PathTrace
 
         accumFBO->SetColorTexture(0, accumTexture);
 
-        // Create FBOs for tile output shader
-
-
-        // Create Texture for FBO
         glGenTextures(1, &tileOutputTexture[0]);
         glBindTexture(GL_TEXTURE_2D, tileOutputTexture[0]);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, renderSize.x, renderSize.y, 0, GL_RGBA, GL_FLOAT, 0);
@@ -335,7 +318,6 @@ namespace PathTrace
         glBindTexture(GL_TEXTURE_2D, 0);
         outputFBO->SetColorTexture(0, tileOutputTexture[currentBuffer]);
 
-        // For Denoiser
         denoiserInputFramePtr = new Vec3[renderSize.x * renderSize.y];
         frameOutputPtr = new Vec3[renderSize.x * renderSize.y];
 
@@ -346,10 +328,6 @@ namespace PathTrace
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glBindTexture(GL_TEXTURE_2D, 0);
 
-        printf("Window Resolution : %d %d\n", windowSize.x, windowSize.y);
-        printf("Render Resolution : %d %d\n", renderSize.x, renderSize.y);
-        printf("Preview Resolution : %d %d\n", (int)((float)windowSize.x * pixelRatio), (int)((float)windowSize.y * pixelRatio));
-        printf("Tile Size : %d %d\n", tileWidth, tileHeight);
     }
 
     void Renderer::ReloadShaders()
@@ -454,6 +432,8 @@ namespace PathTrace
         /*
         outputShader用于将结果绘制到默认帧缓冲
         pathTraceShader用于结果的一个瓦片
+        tonemapShader用于对光线做平均，并作色调映射
+        pathTraceShaderLowRes用来预览一个粗糙的结果
         */
         pathTraceShader.reset();
         pathTraceShaderLowRes.reset();
@@ -469,7 +449,6 @@ namespace PathTrace
         outputShader->LoadFromSource(outputShaderSrcObj);
         tonemapShader->LoadFromSource(tonemapShaderSrcObj);
 
-        // Setup shader uniforms
         GLuint shaderObject;
         pathTraceShader->Bind();
         shaderObject = pathTraceShader->ID();
@@ -526,8 +505,7 @@ namespace PathTrace
 
     void Renderer::Render()
     {
-        // If maxSpp was reached then stop rendering. 
-        // TODO: Tonemapping and denosing still need to be able to run on final image
+
         if (!scene->dirty && scene->renderOptions.maxSpp != -1 && sampleCounter >= scene->renderOptions.maxSpp)
             return;
 
@@ -535,7 +513,6 @@ namespace PathTrace
 
         if (scene->dirty)
         {
-            // Renders a low res preview if camera/instances are modified
             pathTraceFBOLowRes->Bind();
             glViewport(0, 0, windowSize.x * pixelRatio, windowSize.y * pixelRatio);
             quad->Draw(pathTraceShaderLowRes.get());
@@ -547,9 +524,7 @@ namespace PathTrace
         }
         else
         {
-            // Renders to pathTraceTexture while using previously accumulated samples from accumTexture
-            // Rendering is done a tile per frame, so if a 500x500 image is rendered with a tileWidth and tileHeight of 250 then, all tiles (for a single sample) 
-            // get rendered after 4 frames
+
 
             pathTracefbo->Bind();
             glViewport(0, 0, tileWidth, tileHeight);
@@ -557,16 +532,12 @@ namespace PathTrace
             quad->Draw(pathTraceShader.get());
             pathTracefbo->Unbind();
 
-            // pathTraceTexture is copied to accumTexture and re-used as input for the first step.
-
             glNamedFramebufferReadBuffer(pathTracefbo->ID(), GL_COLOR_ATTACHMENT0);
             glNamedFramebufferDrawBuffer(accumFBO->ID(), GL_COLOR_ATTACHMENT0);
             glBlitNamedFramebuffer(pathTracefbo->ID(), accumFBO->ID(), 0, 0, tileWidth, tileHeight, tileWidth * tile.x, tileHeight * tile.y,
                 tileWidth * tile.x + tileWidth, tileHeight * tile.y + tileHeight, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
 
-            // Here we render to tileOutputTexture[currentBuffer] but display tileOutputTexture[1-currentBuffer] until all tiles are done rendering
-            // When all tiles are rendered, we flip the bound texture and start rendering to the other one
             outputFBO->Bind();
             outputFBO->SetColorTexture(0, tileOutputTexture[currentBuffer]);
             glViewport(0, 0, renderSize.x, renderSize.y);
@@ -580,7 +551,6 @@ namespace PathTrace
     {
         glActiveTexture(GL_TEXTURE0);
 
-        // For the first sample or if the camera is moving, we do not have an image ready with all the tiles rendered, so we display a low res preview.
         if (scene->dirty || sampleCounter == 1)
         {
             glBindTexture(GL_TEXTURE_2D, pathTraceTextureLowRes);
@@ -627,23 +597,21 @@ namespace PathTrace
 
     void Renderer::Update(float secondsElapsed)
     {
-        // If maxSpp was reached then stop updates
-        // TODO: Tonemapping and denosing still need to be able to run on final image
+
         if (!scene->dirty && scene->renderOptions.maxSpp != -1 && sampleCounter >= scene->renderOptions.maxSpp)
             return;
-
-        // Update data for instances
+        //更新场景
         if (scene->instancesModified)
         {
-            // Update transforms
+            // Transform
             glBindTexture(GL_TEXTURE_2D, transformsTex);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, (sizeof(Mat4) / sizeof(Vec4)) * scene->transforms.size(), 1, 0, GL_RGBA, GL_FLOAT, &scene->transforms[0]);
 
-            // Update materials
+            // Material
             glBindTexture(GL_TEXTURE_2D, materialsTex);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, (sizeof(Material) / sizeof(Vec4)) * scene->materials.size(), 1, 0, GL_RGBA, GL_FLOAT, &scene->materials[0]);
 
-            // Update top level BVH
+            // BVH
             int index = scene->bvhTranslator.topLevelIndex;
             int offset = sizeof(RadeonRays::BvhTranslator::Node) * index;
             int size = sizeof(RadeonRays::BvhTranslator::Node) * (scene->bvhTranslator.nodes.size() - index);
@@ -651,10 +619,10 @@ namespace PathTrace
             glBufferSubData(GL_TEXTURE_BUFFER, offset, size, &scene->bvhTranslator.nodes[index]);
         }
 
-        // Recreate texture for envmaps
+        // 更新环境贴图
         if (scene->envMapModified)
         {
-            // Create texture for environment map
+           
             if (scene->envMap != nullptr)
             {
                 glBindTexture(GL_TEXTURE_2D, envMapTex);
@@ -678,35 +646,34 @@ namespace PathTrace
             }
         }
 
-        // Denoise image if requested
+        // 降噪处理
         if (scene->renderOptions.enableDenoiser && sampleCounter > 1)
         {
+            //每间隔降噪
             if (!denoised || (frameCounter % (scene->renderOptions.denoiserFrameCnt * (numTiles.x * numTiles.y)) == 0))
             {
-                // FIXME: Figure out a way to have transparency with denoiser
+             
                 glBindTexture(GL_TEXTURE_2D, tileOutputTexture[1 - currentBuffer]);
                 glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_FLOAT, denoiserInputFramePtr);
 
-                // Create an Intel Open Image Denoise device
                 oidn::DeviceRef device = oidn::newDevice();
                 device.commit();
 
-                // Create a denoising filter
+        
                 oidn::FilterRef filter = device.newFilter("RT"); // generic ray tracing filter
                 filter.setImage("color", denoiserInputFramePtr, oidn::Format::Float3, renderSize.x, renderSize.y, 0, 0, 0);
                 filter.setImage("output", frameOutputPtr, oidn::Format::Float3, renderSize.x, renderSize.y, 0, 0, 0);
                 filter.set("hdr", false);
                 filter.commit();
 
-                // Filter the image
                 filter.execute();
 
-                // Check for errors
+                
                 const char* errorMessage;
                 if (device.getError(errorMessage) != oidn::Error::None)
                     std::cout << "Error: " << errorMessage << std::endl;
 
-                // Copy the denoised data to denoisedTexture
+                
                 glBindTexture(GL_TEXTURE_2D, denoisedTexture);
                 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, renderSize.x, renderSize.y, 0, GL_RGB, GL_FLOAT, frameOutputPtr);
 
@@ -716,7 +683,7 @@ namespace PathTrace
         else
             denoised = false;
 
-        // If scene was modified then clear out image for re-rendering
+        // 重新开始计算，重置参数
         if (scene->dirty)
         {
             tile.x = -1;
@@ -724,10 +691,9 @@ namespace PathTrace
             sampleCounter = 1;
             denoised = false;
             frameCounter = 1;
-            // Clear out the accumulated texture for rendering a new image
             accumFBO->Clear(0);
         }
-        else // Update render state
+        else //走向下一个瓦片绘制
         {
             frameCounter++;
             tile.x++;
@@ -737,7 +703,7 @@ namespace PathTrace
                 tile.y--;
                 if (tile.y < 0)
                 {
-                    // If we've reached here, it means all the tiles have been rendered (for a single sample) and the image can now be displayed.
+                    // 算完一帧，切换当前绘制缓冲，样本数加一
                     tile.x = 0;
                     tile.y = numTiles.y - 1;
                     sampleCounter++;
@@ -746,7 +712,7 @@ namespace PathTrace
             }
         }
 
-        // Update uniforms
+        // 更新参数
 
         GLuint shaderObject;
         pathTraceShader->Bind();

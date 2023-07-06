@@ -81,7 +81,7 @@ namespace PathTrace
         Quad* quad;
         Scene* scene;
 
-        // Opengl buffer objects and textures for storing scene data on the GPU
+        // GPU数据
         GLuint BVHBuffer;
         GLuint BVHTex;
         GLuint vertexIndicesBuffer;
@@ -97,13 +97,17 @@ namespace PathTrace
         GLuint envMapTex;
         GLuint envMapCDFTex;
 
-        // FBOs
+        // 帧缓冲
+        /*
+        pathTracefbo        绘制一个瓦片的结果
+        pathTraceFBOLowRes  粗略预览
+        accumFBO            存放光线的累加和
+        outputFBO           将路径的累加和做平均和色调映射
+        */
         std::shared_ptr<asset::FBO> pathTracefbo;
         std::shared_ptr<asset::FBO> pathTraceFBOLowRes;
         std::shared_ptr<asset::FBO> accumFBO;
         std::shared_ptr<asset::FBO> outputFBO;
-
-
 
         // Shaders
         std::string shadersDirectory;
@@ -113,18 +117,18 @@ namespace PathTrace
         std::shared_ptr<asset::Shader> outputShader;
         std::shared_ptr<asset::Shader> tonemapShader;
 
-        // Render textures
+        // 贴图
         GLuint pathTraceTextureLowRes;
         GLuint pathTraceTexture;
         GLuint accumTexture;
         GLuint tileOutputTexture[2];
         GLuint denoisedTexture;
 
-        // Render resolution and window resolution
+
         iVec2 renderSize;
         iVec2 windowSize;
 
-        // Variables to track rendering status
+
         iVec2 tile;
         iVec2 numTiles;
         Vec2 invNumTiles;
@@ -135,7 +139,6 @@ namespace PathTrace
         int sampleCounter;
         float pixelRatio;
 
-        // Denoiser output
         Vec3* denoiserInputFramePtr;
         Vec3* frameOutputPtr;
         bool denoised;

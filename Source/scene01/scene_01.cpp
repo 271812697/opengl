@@ -51,9 +51,7 @@ namespace scene {
     constexpr GLuint n_pls = 28;  // number of point lights
     static GLuint nx = 0, ny = 0;
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
 
-    // this is called before the first frame, use this function to initialize your scene
     void Scene01::Init() {
         Renderer::SetScene(this);
         this->title = "Tiled Forward Renderer";
@@ -606,10 +604,7 @@ namespace scene {
         pl_range    = WrapAsset<SSBO>(2, n_pls * sizeof(float), CPU_access);
         pl_index    = WrapAsset<SSBO>(3, n_pls * n_tiles * sizeof(int), GPU_access);
 
-        // light culling in a tiled forward renderer can apply to both static and dynamic
-        // lights, the latter case requires users to update the SSBO buffers every frame.
-        // for simplicity, we'll only perform light culling on the 28 static point lights
-        // since that's enough for most cases, so the SSBO only needs to be set up once.
+
 
         pl_position->Acquire(CPU_access);
         pl_color->Acquire(CPU_access);

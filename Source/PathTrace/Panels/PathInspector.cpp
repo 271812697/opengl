@@ -106,7 +106,7 @@ void PathInspector::InstallUI()
 
 	auto denoiser = &CreateWidget<UI::Widgets::Layout::GroupCollapsable>("Denoiser");
 	denoiser->CreateWidget<UI::Widgets::Selection::CheckBox>(false, "Enbale").AddPlugin<UI::Plugins::DataDispatcher<bool>>().RegisterReference(GetRenderOptions().enableDenoiser);
-	denoiser->CreateWidget<UI::Widgets::Sliders::SliderInt>(5, 50, -1, UI::Widgets::Sliders::ESliderOrientation::HORIZONTAL, "Skip Frames").AddPlugin<UI::Plugins::DataDispatcher<int>>().RegisterReference(GetRenderOptions().denoiserFrameCnt);
+	denoiser->CreateWidget<UI::Widgets::Sliders::SliderInt>(5, 50, -1, UI::Widgets::Sliders::ESliderOrientation::HORIZONTAL, "Interval Frames").AddPlugin<UI::Plugins::DataDispatcher<int>>().RegisterReference(GetRenderOptions().denoiserFrameCnt);
 
 	auto camera = &CreateWidget<UI::Widgets::Layout::GroupCollapsable>("Camera settings");
 	auto& fov = camera->CreateWidget<UI::Widgets::Sliders::SliderFloat>(10, 90, 60, UI::Widgets::Sliders::ESliderOrientation::HORIZONTAL, "Fov").AddPlugin<UI::Plugins::DataDispatcher<float>>();
