@@ -14,21 +14,18 @@
 #include"UI/Core/UIManager.h"
 #include"UI/Styling/EStyle.h"
 #include"tools/Clock.h"
-#include"Panels/PanelsManager.h"
-#include"Panels/AView.h"
+#include"UI/Panels/PanelsManager.h"
+#include"UI/Panels/AView.h"
 #include "Panels/PathInspector.h"
 #include"Opengl/core/log.h"
 #include"ImGuizmo.h"
 #include<string>
-#include"Scene.h"
 #include"LoadScene.h"
 #include"Renderer.h"
 #include"PathTrace.h"
 using namespace std;
 using namespace PathTrace;
 
-double lastTime = 0.0;
-bool done = false;
 #if defined(_MSC_VER) && (_MSC_VER >= 1900) && !defined(IMGUI_DISABLE_WIN32_FUNCTIONS)
 #pragma comment(lib, "legacy_stdio_definitions")
 #endif
@@ -37,7 +34,6 @@ static void glfw_error_callback(int error, const char* description)
     fprintf(stderr, "Glfw  %d: %s\n", error, description);
 }
 
-
 Windowing::Settings::WindowSettings windowSettings;
 Windowing::Settings::DeviceSettings deviceSettings;
 std::unique_ptr<Windowing::Context::Device>	device ;
@@ -45,9 +41,7 @@ std::unique_ptr<Windowing::Window> window ;
 std::unique_ptr<Windowing::Inputs::InputManager>inputManager;
 std::unique_ptr<UI::Core::UIManager>uiManager;
 UI::Settings::PanelWindowSettings settings;
-std::unique_ptr<PanelsManager>m_panelsManager;
-
-
+std::unique_ptr<UI::Panels::PanelsManager>m_panelsManager;
 
 int main(int, char**)
 {
@@ -91,13 +85,13 @@ int main(int, char**)
     settings.collapsable = true;
     settings.dockable = true;
     UI::Modules::Canvas m_canvas;
-    m_panelsManager= std::make_unique<PanelsManager>(m_canvas);
+    m_panelsManager= std::make_unique<UI::Panels::PanelsManager>(m_canvas);
 
-    m_panelsManager->CreatePanel<MenuBar>("Menu Bar");
+    m_panelsManager->CreatePanel<UI::Panels::MenuBar>("Menu Bar");
     m_panelsManager->CreatePanel<PathInspector>("Inspector",true, settings);
     m_panelsManager->GetPanelAs<PathInspector>("Inspector").InstallUI();
-    m_panelsManager->CreatePanel<AView>("Scene View", true, settings);
-    m_panelsManager->GetPanelAs<AView>("Scene View").ResizeEvent+= [](int p_width, int p_height) {
+    m_panelsManager->CreatePanel<UI::Panels::AView>("Scene View", true, settings);
+    m_panelsManager->GetPanelAs<UI::Panels::AView>("Scene View").ResizeEvent+= [](int p_width, int p_height) {
         GetRenderOptions().windowResolution.x = p_width;
         GetRenderOptions().windowResolution.y = p_height;
         if (!GetRenderOptions().independentRenderSize)
@@ -123,7 +117,7 @@ int main(int, char**)
         
 
         //相机视角交互逻辑
-        if (m_panelsManager->GetPanelAs<AView>("Scene View").IsFocused() && ImGui::IsAnyMouseDown() && !ImGuizmo::IsOver())
+        if (m_panelsManager->GetPanelAs<UI::Panels::AView>("Scene View").IsFocused() && ImGui::IsAnyMouseDown() && !ImGuizmo::IsOver())
         {
 
             if (ImGui::IsMouseDown(0))
@@ -149,10 +143,10 @@ int main(int, char**)
         GetRenderer()->Update(clock.GetDeltaTime());
 
         GetRenderer()->Render();
-        m_panelsManager->GetPanelAs<AView>("Scene View").Update(1);
-        m_panelsManager->GetPanelAs<AView>("Scene View").Bind();
+        m_panelsManager->GetPanelAs<UI::Panels::AView>("Scene View").Update(1);
+        m_panelsManager->GetPanelAs<UI::Panels::AView>("Scene View").Bind();
         GetRenderer()->Present();
-        m_panelsManager->GetPanelAs<AView>("Scene View").UnBind();
+        m_panelsManager->GetPanelAs<UI::Panels::AView>("Scene View").UnBind();
         uiManager->Render();
 
 

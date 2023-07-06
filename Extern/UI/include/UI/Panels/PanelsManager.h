@@ -4,6 +4,7 @@
 #include "UI/Panels/APanel.h"
 #include "UI/Panels/PanelWindow.h"
 #include "UI/Modules/Canvas.h"
+namespace UI::Panels {
 	class PanelsManager
 	{
 	public:
@@ -39,3 +40,4 @@
 		UI::Modules::Canvas& m_canvas;
 	};
 
+}

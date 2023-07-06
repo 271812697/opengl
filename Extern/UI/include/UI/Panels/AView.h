@@ -1,7 +1,8 @@
 #pragma once
 #include <UI/Panels/PanelWindow.h>
 #include <UI/Widgets/Visual/Image.h>
-#include"FrameBuffer.h"
+#include <UI/Panels/FrameBuffer.h>
+namespace UI::Panels {
 	class AView : public UI::Panels::PanelWindow
 	{
 	public:
@@ -32,6 +33,7 @@
 	protected:
 
 		UI::Widgets::Visual::Image* m_image;
-        std::unique_ptr<Framebuffer> m_fbo;
-		
+		std::unique_ptr<UI::Panels::Framebuffer> m_fbo;
+
 	};
+}

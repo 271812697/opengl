@@ -22,7 +22,7 @@ namespace UI::Panels {
 		~Inspector();
 
 		virtual void InstallUI() {
-			printf("¸¸ÀàµÄÐéº¯Êý");
+		
 
 		}
 

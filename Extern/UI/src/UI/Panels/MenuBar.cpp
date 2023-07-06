@@ -4,23 +4,23 @@
 #include <UI/Widgets/Sliders/SliderFloat.h>
 #include <UI/Widgets/Drags/DragFloat.h>
 #include <UI/Widgets/Selection/ColorEdit.h>
-#include "MenuBar.h"
-using namespace UI::Panels;
+#include <UI/Panels/MenuBar.h>
+
 using namespace UI::Widgets;
 using namespace UI::Widgets::Menu;
 
 
-MenuBar::MenuBar()
+UI::Panels::MenuBar::MenuBar()
 {
-	CreateFileMenu();
+	//CreateFileMenu();
 	CreateWindowMenu();
-	CreateResourcesMenu();
+	//CreateResourcesMenu();
 
 }
 
 
 
-void MenuBar::CreateFileMenu()
+void UI::Panels::MenuBar::CreateFileMenu()
 {
 	auto& fileMenu = CreateWidget<MenuList>("File");
 	fileMenu.CreateWidget<MenuItem>("New Scene", "CTRL + N");
@@ -31,7 +31,7 @@ void MenuBar::CreateFileMenu()
 
 
 
-void MenuBar::CreateResourcesMenu()
+void UI::Panels::MenuBar::CreateResourcesMenu()
 {
 	auto& resourcesMenu = CreateWidget<MenuList>("Resources");
 	resourcesMenu.CreateWidget<MenuItem>("Compile shaders");
@@ -39,7 +39,7 @@ void MenuBar::CreateResourcesMenu()
 }
 
 
-void MenuBar::CreateWindowMenu()
+void UI::Panels::MenuBar::CreateWindowMenu()
 {
 	m_windowMenu = &CreateWidget<MenuList>("Window");
 	m_windowMenu->CreateWidget<MenuItem>("Close all").ClickedEvent += std::bind(&MenuBar::OpenEveryWindows, this, false);
@@ -50,7 +50,7 @@ void MenuBar::CreateWindowMenu()
 	m_windowMenu->ClickedEvent += std::bind(&MenuBar::UpdateToggleableItems, this);
 }
 
-void MenuBar::RegisterPanel(const std::string& p_name, UI::Panels::PanelWindow& p_panel)
+void UI::Panels::MenuBar::RegisterPanel(const std::string& p_name, UI::Panels::PanelWindow& p_panel)
 {
 	
 	auto& menuItem = m_windowMenu->CreateWidget<MenuItem>(p_name, "", true, true);
@@ -58,13 +58,13 @@ void MenuBar::RegisterPanel(const std::string& p_name, UI::Panels::PanelWindow& 
 	m_panels.emplace(p_name, std::make_pair(std::ref(p_panel), std::ref(menuItem)));
 }
 
-void MenuBar::UpdateToggleableItems()
+void UI::Panels::MenuBar::UpdateToggleableItems()
 {
 	for (auto&[name, panel] : m_panels)
 		panel.second.get().checked = panel.first.get().IsOpened();
 }
 
-void MenuBar::OpenEveryWindows(bool p_state)
+void UI::Panels::MenuBar::OpenEveryWindows(bool p_state)
 {
 	for (auto&[name, panel] : m_panels)
 		panel.first.get().SetOpened(p_state);
