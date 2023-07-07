@@ -2,12 +2,8 @@
 #include "camera.h"
 #include "transform.h"
 #include "../util/math.h"
-#include "../core/clock.h"
-#include "../core/window.h"
-#include "../core/input.h"
-using namespace core;
+#include "Window/InputManager.h"
 using namespace utils::math;
-
 namespace component {
 
     Camera::Camera(Transform* T, View view) :
@@ -36,13 +32,15 @@ namespace component {
     glm::mat4 Camera::GetProjectionMatrix() const {
         return (view == View::Orthgraphic)
             ? glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, near_clip, far_clip)
-            : glm::perspective(glm::radians(fov), Window::aspect_ratio, near_clip, far_clip);
+            : glm::perspective(glm::radians(fov),aspect, near_clip, far_clip);
     }
 
     void Camera::Update() {
-        float deltatime = Clock::delta_time;
+        auto instance= Windowing::Inputs::InputManager::GetInputManager();
+        float deltatime =instance->GetDeltaTime();
         static bool recovering = false;
 
+        
         // smoothly recover camera to its initial position and orientation
         if (recovering) {
             float t = EaseFactor(10.0f, deltatime);
@@ -53,52 +51,24 @@ namespace component {
                 recovering = false;  // keep recovering until both position and rotation are recovered
             }
 
-            return;  // all user inputs are ignored during recovery transition
+            return;  
         }
-        /*
-          // camera orbit: move cursor around while holding the left button (arcball camera)
-        if (Input::GetMouseDown(MouseButton::Left)) {
-           
-            static  glm::vec3 world_up = { 0.0,1.0,0.0 };
-
-            // for arcball mode, horizontal orbit is around the world up axis (+Y), vertical
-            // orbit is about the local right vector, both rotations are done in world space
-            // vertical orbit should be clamped to a range s.t. camera's euler angle x can
-            // never escape the (-90, 90) bound in degrees, o/w the world will be inverted
-
-            float orbit_y = -Input::GetCursorOffset(MouseAxis::Horizontal) * orbit_speed;
-            float orbit_x = -Input::GetCursorOffset(MouseAxis::Vertical) * orbit_speed;
-
-            // clamp `T->euler_x + orbit_x` to (-89, 89)
-            orbit_x = glm::clamp(orbit_x, -T->euler_x - 89.0f, -T->euler_x + 89.0f);
-
-            T->Rotate(world_up, orbit_y, Space::World);
-            T->Rotate(T->right, orbit_x, Space::World);
-            return;  // ignore other events (keys) in arcball mode
-        }
-
-        // camera zoom: slide the cursor while holding the right button
-        if (Input::GetMouseDown(MouseButton::Right)) {
-            fov -= Input::GetCursorOffset(MouseAxis::Horizontal) * zoom_speed;
-            fov = glm::clamp(fov, 30.0f, 120.0f);
-            return;  // ignore other events (keys and rotation) during smooth zooming
-        }      
-        
-        
-        */
 
 
      
 
         // key events are only processed if there's no mouse button event (which cannot be interrupted)
-        if (Input::GetKeyDown('r')) {
+        if (instance->IsKeyPressed(Windowing::Inputs::EKey::KEY_R)) {
+            
             recovering = true;
         }
-
-        if(Input::GetMouseDown(MouseButton::Middle)){
+        
+        if(instance->IsMouseButtonPressed(Windowing::Inputs::EMouseButton::MOUSE_BUTTON_MIDDLE)){
         // rotation is limited to the X and Y axis (pitch and yawn only, no roll)
-        float euler_y = T->euler_y - Input::GetCursorOffset(MouseAxis::Horizontal) * rotate_speed;
-        float euler_x = T->euler_x - Input::GetCursorOffset(MouseAxis::Vertical) * rotate_speed;
+            //instance->GetMousePosition
+        auto [x, y] = instance->GetCursoreOffset();
+        float euler_y = T->euler_y -x* rotate_speed;
+        float euler_x = T->euler_x - y * rotate_speed;
 
         euler_y = glm::radians(euler_y);
         euler_x = glm::radians(glm::clamp(euler_x, -89.0f, 89.0f));  // clamp vertical rotation
@@ -106,28 +76,29 @@ namespace component {
 
         T->SetRotation(rotation);
         }
+        
         // translation (not normalized, movement is faster along the diagonal)
-        if (Input::GetKeyDown('w')) {
+        if (instance->IsKeyPressed(Windowing::Inputs::EKey::KEY_W)) {
             T->Translate(T->forward * (move_speed * deltatime));
         }
 
-        if (Input::GetKeyDown('s')) {
+        if (instance->IsKeyPressed(Windowing::Inputs::EKey::KEY_S)) {
             T->Translate(-T->forward * (move_speed * deltatime));
         }
 
-        if (Input::GetKeyDown('a')) {
+        if (instance->IsKeyPressed(Windowing::Inputs::EKey::KEY_A)) {
             T->Translate(-T->right * (move_speed * deltatime));
         }
 
-        if (Input::GetKeyDown('d')) {
+        if (instance->IsKeyPressed(Windowing::Inputs::EKey::KEY_D)) {
             T->Translate(T->right * (move_speed * deltatime));
         }
 
-        if (Input::GetKeyDown('z')) {
+        if (instance->IsKeyPressed(Windowing::Inputs::EKey::KEY_Z)) {
             T->Translate(-T->up * (move_speed * deltatime));
         }
 
-        if (Input::GetKeyDown(0x20)) {  // VK_SPACE
+        if (instance->IsKeyPressed(Windowing::Inputs::EKey::KEY_SPACE)) {  // VK_SPACE
             T->Translate(T->up * (move_speed * deltatime));
         }
     }

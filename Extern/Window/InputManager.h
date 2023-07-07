@@ -27,6 +27,13 @@ namespace Windowing::Inputs
 		* Destroy the input manager by removing listeners on the window
 		*/
 		~InputManager();
+		
+		void SetDeltaTime(float dt) {
+			deltaTime = dt;
+		}
+		float GetDeltaTime() {
+			return deltaTime;
+		}
 
 		/**
 		* Return the current state of the given key
@@ -69,14 +76,17 @@ namespace Windowing::Inputs
 		*/
 		std::pair<double, double> GetMousePosition() const;
 
+		std::pair<int, int>GetCursoreOffset();
+
 		/**
 		* Clear any event occured
 		* @note Should be called at the end of every game tick
 		*/
 		void ClearEvents();
         float GetMouseScrollOffset()const;
-
+		static InputManager* GetInputManager();
 	private:
+		void OnCursorMove(int p_x,int p_y);
 		void OnKeyPressed(int p_key);
 		void OnKeyReleased(int p_key);
 		void OnMouseButtonPressed(int p_button);
@@ -85,13 +95,15 @@ namespace Windowing::Inputs
 
 	private:
 		Window& m_window;
-
+	    float deltaTime = 0;
 
 		Tools::Eventing::ListenerID m_keyPressedListener;
 		Tools::Eventing::ListenerID m_keyReleasedListener;
 		Tools::Eventing::ListenerID m_mouseButtonPressedListener;
 		Tools::Eventing::ListenerID m_mouseButtonReleasedListener;
         float wheel = 0.0f;
+		int horizon_X = 0;
+		int vertical_Y = 0;
 		std::unordered_map<EKey, EKeyState>					m_keyEvents;
 		std::unordered_map<EMouseButton, EMouseButtonState>	m_mouseButtonEvents;
 	};

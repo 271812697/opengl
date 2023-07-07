@@ -1,6 +1,138 @@
+#include "scene_01.h"
+//主程序的全局数据
+#include "imgui.h"
+#include "backends/imgui_impl_glfw.h"
+#include "backends/imgui_impl_opengl3.h"
+#include <stdio.h>
+#include<iostream>
+#include<glad/glad.h>
+#include <GLFW/glfw3.h>
+#include"Window/Device.h"
+#include"Window/WindowSettings.h"
+#include"Window/Window.h"
+#include"Window/InputManager.h"
+#include"UI/Core/UIManager.h"
+#include"UI/Styling/EStyle.h"
+#include"tools/Clock.h"
+#include"UI/Panels/PanelsManager.h"
+#include"UI/Panels/AView.h"
+#include"UI/Panels/Inspector.h"
+#include"UI/Widgets/CustomWidget.h"
+#include"Opengl/core/log.h"
+#include"Opengl/core/clock.h"
+#include"ImGuizmo.h"
+#include<string>
+
+Windowing::Settings::WindowSettings windowSettings;
+Windowing::Settings::DeviceSettings deviceSettings;
+std::unique_ptr<Windowing::Context::Device>	device;
+std::unique_ptr<Windowing::Window> window;
+std::unique_ptr<Windowing::Inputs::InputManager>inputManager;
+std::unique_ptr<UI::Core::UIManager>uiManager;
+UI::Settings::PanelWindowSettings settings;
+std::unique_ptr<UI::Panels::PanelsManager>m_panelsManager;
+using namespace std;
+
+#if defined(_MSC_VER) && (_MSC_VER >= 1900) && !defined(IMGUI_DISABLE_WIN32_FUNCTIONS)
+#pragma comment(lib, "legacy_stdio_definitions")
+#endif
+static void glfw_error_callback(int error, const char* description)
+{
+    fprintf(stderr, "Glfw  %d: %s\n", error, description);
+}
+int main(int, char**) {
+    {
+
+        deviceSettings.contextMajorVersion = 4;
+        deviceSettings.contextMinorVersion = 6;
+        windowSettings.title = "Tiled Forward Renderer";
+        windowSettings.width = 1600;
+        windowSettings.height = 900;
+        windowSettings.maximized = true;
+        device = std::make_unique<Windowing::Context::Device>(deviceSettings);
+        window = std::make_unique<Windowing::Window>(*device, windowSettings);
+        window->SetIcon("res/texture/awesomeface.png");
+        inputManager = std::make_unique<Windowing::Inputs::InputManager>(*window);;
+        window->MakeCurrentContext();
+
+        if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+            return -1;
+        }
+        device->SetVsync(true);
+        //初始化场景
+        ::core::Log::Init();
+        scene::Scene* S = new scene::Scene01("Tiled Forward Renderer");
+        S->Init();
+        S->Resize(1600, 900);
+        //初始化UI
+        uiManager = std::make_unique<UI::Core::UIManager>(window->GetGlfwWindow(), UI::Styling::EStyle::CUSTOM);;
+        uiManager->LoadFont("Ruda_Big", "res/font/Ruda-Bold.ttf", 18);
+        uiManager->LoadFont("Ruda_Small", "res/font/Ruda-Bold.ttf", 12);
+        uiManager->LoadFont("Ruda_Medium", "res/font/Ruda-Bold.ttf", 14);
+        uiManager->UseFont("Ruda_Big");
+        uiManager->SetEditorLayoutSaveFilename(std::string(getenv("APPDATA")) + "\\layout.ini");
+        uiManager->SetEditorLayoutAutosaveFrequency(60.0f);
+        uiManager->EnableEditorLayoutSave(true);
+        uiManager->EnableDocking(true);
+
+        settings.closable = true;
+        settings.collapsable = true;
+        settings.dockable = true;
+        UI::Modules::Canvas m_canvas;
+        m_panelsManager = std::make_unique<UI::Panels::PanelsManager>(m_canvas);
+
+
+        Tools::Time::Clock clock;
+        m_panelsManager->CreatePanel<UI::Panels::MenuBar>("Menu Bar");
+        m_panelsManager->CreatePanel<UI::Panels::Inspector>("Inspector", true, settings);
+        m_panelsManager->GetPanelAs<UI::Panels::Inspector>("Inspector").CreateWidget<UI::Widgets::CustomWidget>().DrawIn += [&S, &clock]() {
+            S->OnImGuiRender(clock.GetDeltaTime());
+        };
+        m_panelsManager->CreatePanel<UI::Panels::AView>("Scene View", true, settings);
+        m_panelsManager->GetPanelAs<UI::Panels::AView>("Scene View").ResizeEvent += [&S](int p_width, int p_height) {
+            S->Resize(p_width, p_height);
+        };
+
+        m_canvas.MakeDockspace(true);
+        uiManager->SetCanvas(m_canvas);
+        //主循环
+        while (!window->ShouldClose())
+        {
+            //glClearColor(0., 0., 0., 0.);
+            //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+           // glDisable(GL_DEPTH_TEST);
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame(); 
+            S->UpdateScene(clock.GetDeltaTime());
+            S->OnSceneRender(clock.GetDeltaTime());
+            m_panelsManager->GetPanelAs<UI::Panels::AView>("Scene View").Update(1);
+            m_panelsManager->GetPanelAs<UI::Panels::AView>("Scene View").Bind();
+            S->Present();  
+            m_panelsManager->GetPanelAs<UI::Panels::AView>("Scene View").UnBind();
+            uiManager->Render();
+            ImGui::Render();
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+            device->PollEvents();
+            window->SwapBuffers();
+            inputManager->SetDeltaTime(clock.GetDeltaTime());
+            //inputManager->ClearEvents();
+            core::Clock::Update();
+            clock.Update();
+            
+        }
+        //回收资源
+        device.reset();
+        ::core::Log::Shutdown();
+        uiManager.reset();
+        m_panelsManager.reset();
+        inputManager.reset();
+        window.reset();
+    }
+    return 0;
+}
 
 #include "Opengl/pch.h"
-
 #include "Opengl/core/base.h"
 #include "Opengl/core/clock.h"
 #include "Opengl/core/sync.h"
@@ -12,8 +144,7 @@
 
 #include "Opengl/util/math.h"
 #include "Opengl/util/path.h"
-#include "scene_01.h"
-#include "../openglApp.h"
+
 
 using namespace core;
 using namespace asset;
@@ -78,18 +209,7 @@ namespace scene {
         AddUBO(resource_manager.Get<Shader>(03)->ID());
         AddUBO(resource_manager.Get<Shader>(04)->ID());
 
-       openglApp* instance= GetOpenglApp();
-       auto  Window = instance->GetWindowSize();
-        // create intermediate framebuffer objects (FBO)
-        AddFBO(Window.first, Window.second);
-        AddFBO(Window.first, Window.second);
-        AddFBO(Window.first, Window.second);
-        AddFBO(Window.first/2, Window.second/2);
-        FBOs[0].AddDepStTexture();
-        FBOs[1].AddColorTexture(2, true);
-        FBOs[1].AddDepStRenderBuffer(true);
-        FBOs[2].AddColorTexture(2);
-        FBOs[3].AddColorTexture(2);
+
 
       
 
@@ -194,8 +314,6 @@ namespace scene {
         }
 
         SetupPLBuffers();  // setup shader storage buffers for our tiled forward renderer
-      
-
         Renderer::FaceCulling(true);
         Renderer::AlphaBlend(false);
         Renderer::SeamlessCubemap(true);
@@ -204,6 +322,7 @@ namespace scene {
     // this is called every frame, update your scene here and submit entities to the renderer
     void Scene01::OnSceneRender(float dt ) {
         auto& main_camera = camera.GetComponent<Camera>();
+        if(m_panelsManager->GetPanelAs<UI::Panels::AView>("Scene View").IsHovered())
         main_camera.Update();
 
         if (auto& ubo = UBOs[0]; true) {
@@ -343,31 +462,12 @@ namespace scene {
 
         for (int i = 0; i < 2 * n_blurs; ++i) {
             bloom_shader->SetUniform(0, i % 2 == 0);
-            bloom_shader->Dispatch(ping.width / 32, ping.width / 18);
+            bloom_shader->Dispatch(ping.width / 32, ping.height / 18);
             bloom_shader->SyncWait(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT | GL_TEXTURE_FETCH_BARRIER_BIT);
         }
 
-        // ------------------------------ postprocessing pass ------------------------------
 
-        framebuffer_2.GetColorTexture(0).Bind(0);  // color texture
-        framebuffer_3.GetColorTexture(0).Bind(1);  // bloom texture
-
-        auto bilinear_sampler = resource_manager.Get<Sampler>(99);
-        bilinear_sampler->Bind(1);  // upsample the bloom texture (bilinear filtering)
-
-        auto postprocess_shader = resource_manager.Get<Shader>(05);
-        postprocess_shader->Bind();
-        postprocess_shader->SetUniform(0, tone_mapping_mode);
-
-        Renderer::Clear();
-        Mesh::DrawQuad();
-        std::string a;
-       
-        postprocess_shader->Unbind();
-        bilinear_sampler->Unbind(1);
     }
-
-    // this is called every frame, update your ImGui widgets here to control entities in the scene
     void Scene01::OnImGuiRender(float dt ) {
         using namespace ImGui;
         const ImVec4 text_color = ImVec4(0.4f, 0.8f, 0.4f, 1.0f);
@@ -388,7 +488,7 @@ namespace scene {
         static bool edit_sphere_albedo = false;
         static bool edit_flashlight_color = false;
 
-        if (ui::NewInspector() && BeginTabBar("InspectorTab", ImGuiTabBarFlags_None)) {
+        if (  BeginTabBar("InspectorTab", ImGuiTabBarFlags_None)) {
             Indent(5.0f);
 
             if (BeginTabItem("Scene")) {
@@ -469,7 +569,7 @@ namespace scene {
 
             EndTabBar();
             Unindent(5.0f);
-            ui::EndInspector();
+           
         }
 
         if (show_sphere_gizmo) {
@@ -480,6 +580,57 @@ namespace scene {
             ui::DrawGizmo(camera, plane, ui::Gizmo::Translate);
         }
       
+    }
+
+    void Scene01::Resize(int w, int h)
+    {
+        camera.GetComponent<Camera>().aspect = 1.0f * w / h;
+        Scene::Resize(w,h);
+        FBOs.clear();
+
+        AddFBO(w, h);
+        AddFBO(w, h);
+        AddFBO(w, h);
+        AddFBO(w / 2, h / 2);
+        FBOs[0].AddDepStTexture();
+        FBOs[1].AddColorTexture(2, true);
+        FBOs[1].AddDepStRenderBuffer(true);
+        FBOs[2].AddColorTexture(2);
+        FBOs[3].AddColorTexture(2);
+        SetupPLBuffers();
+    }
+
+    void Scene01::Present()
+    {
+        FBO& framebuffer_0= FBOs[0];
+        FBO& framebuffer_2 = FBOs[2];
+        FBO& framebuffer_3 = FBOs[3];
+
+        if (draw_depth_buffer) {
+            Renderer::DepthTest(false);
+            Renderer::Clear();
+            framebuffer_0.Draw(-1);
+            return;
+
+        }
+        // ------------------------------ postprocessing pass ------------------------------
+
+        framebuffer_2.GetColorTexture(0).Bind(0);  // color texture
+        framebuffer_3.GetColorTexture(0).Bind(1);  // bloom texture
+
+        auto bilinear_sampler = resource_manager.Get<Sampler>(99);
+        bilinear_sampler->Bind(1);  // upsample the bloom texture (bilinear filtering)
+
+        auto postprocess_shader = resource_manager.Get<Shader>(05);
+        postprocess_shader->Bind();
+        postprocess_shader->SetUniform(0, tone_mapping_mode);
+
+        Renderer::Clear();
+        Mesh::DrawQuad();
+        std::string a;
+
+        postprocess_shader->Unbind();
+        bilinear_sampler->Unbind(1);
     }
 
     void Scene01::UpdatePLColors() {
@@ -588,10 +739,10 @@ namespace scene {
     }
 
     void Scene01::SetupPLBuffers() {
-        openglApp* instance = GetOpenglApp();
-        auto  Window = instance->GetWindowSize();
-        nx = (Window.first  + tile_size - 1) / tile_size;
-        ny = (Window.second + tile_size - 1) / tile_size;
+       
+       
+        nx = (this->width  + tile_size - 1) / tile_size;
+        ny = (this->height + tile_size - 1) / tile_size;
         GLuint n_tiles = nx * ny;
 
 
@@ -626,6 +777,3 @@ namespace scene {
 
 }
 
-#include"../all.h"
-
-MAINSCENE(scene::Scene01,"01")

@@ -253,9 +253,9 @@ namespace scene::ui {
 
 
 
-    void DrawGizmo(Entity& camera, Entity& target, Gizmo z) {
-        static const ImVec2 win_pos = ImVec2(0.0f, 50.0f);
-        static const ImVec2 win_size = ImVec2((float)Window::width, (float)Window::height - 82.0f);
+    void DrawGizmo(Entity& camera, Entity& target, Gizmo z,std::pair<int,int>pos,std::pair<int,int>size) {
+        //static const ImVec2 win_pos = ImVec2(0.0f, 50.0f);
+        //static const ImVec2 win_size = ImVec2((float)1600.0f, (float)900.0f);
 
         ImGuizmo::MODE mode = ImGuizmo::MODE::LOCAL;
         ImGuizmo::OPERATION operation = ImGuizmo::OPERATION::TRANSLATE;
@@ -287,13 +287,14 @@ namespace scene::ui {
         static const glm::vec3 RvL = glm::vec3(1.0f, 1.0f, -1.0f);  // scaling vec for R2L and L2R
         glm::mat4 transform = glm::scale(T.transform, RvL);
 
-        SetNextWindowPos(win_pos);    // below the menu bar
-        SetNextWindowSize(win_size);  // above the status bar
-        Begin("##Invisible Gizmo Window", 0, invisible_window_flags);
-
+        SetNextWindowPos(ImVec2(pos.first,pos.second));    // below the menu bar
+        SetNextWindowSize(ImVec2(size.first,size.second));  // above the status bar
+        //Begin("##Invisible Gizmo Window", 0, invisible_window_flags);
+     
+        ImGuizmo::SetRect(pos.first, pos.second, size.first,size.second);
         ImGuizmo::SetOrthographic(true);
         ImGuizmo::SetDrawlist();
-        ImGuizmo::SetRect(win_pos.x, win_pos.y, win_size.x, win_size.y);
+       
         ImGuizmo::Manipulate(value_ptr(V), value_ptr(P), operation, mode, value_ptr(transform));
 
         // if the gizmo is being manipulated, which means that the transform matrix may have been
@@ -309,7 +310,7 @@ namespace scene::ui {
             T.SetTransform(transform);
         }
 
-        ImGui::End();
+        //ImGui::End();
     }
 
     void PushRotation() {

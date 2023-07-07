@@ -12,6 +12,7 @@ namespace component {
 
     class Camera : public Component {
       public:
+        float aspect = 16.0f / 9.0f;
         float fov;
         float near_clip;
         float far_clip;

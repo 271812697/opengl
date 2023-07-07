@@ -314,7 +314,9 @@ void main() {
         if (id != curr_bound_framebuffer) {
             CORE_ASERT(status == GL_FRAMEBUFFER_COMPLETE, "Incomplete framebuffer status: {0}", status);
             if (depst_renderbuffer) {
+              
                 depst_renderbuffer->Bind();
+                glViewport(0,0,width,height);
             }
             glBindFramebuffer(GL_FRAMEBUFFER, id);
             curr_bound_framebuffer = id;
@@ -412,11 +414,6 @@ void main() {
         const GLfloat clear_color[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
         const GLfloat clear_depth = 1.0f;
         const GLint clear_stencil = 0;
-
-        // a framebuffer always has a depth buffer, a stencil buffer and all color buffers,
-        // an empty buffer just doesn't have any textures attached to it, but the buffer is
-        // still there. It's ok to clear a buffer even if there's no textures attached
-
 
 
         // clear one of the color attachments

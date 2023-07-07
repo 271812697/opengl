@@ -28,7 +28,7 @@ namespace scene::ui {
     // scene-level helper functions
     void DrawVerticalLine(void);
     void DrawTooltip(const char* desc, float spacing = 5.0f);
-    void DrawGizmo(scene::Entity& camera, scene::Entity& target, Gizmo z);
+    void DrawGizmo(Entity& camera, Entity& target, Gizmo z, std::pair<int, int>pos, std::pair<int, int>size);
     void PushRotation();
     void PopRotation(float radians, bool ccw = false);
 

@@ -300,6 +300,7 @@ namespace Windowing
 		void BindFocusCallback() const;
 		void BindCloseCallback() const;
 
+
 		/* Event listeners */
 		void OnResize(uint16_t p_width, uint16_t p_height);
 		void OnMove(int16_t p_x, int16_t p_y);

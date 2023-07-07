@@ -3,15 +3,23 @@
 #include <iostream>
 
 #include "InputManager.h"
+Windowing::Inputs::InputManager* instance = nullptr;
+Windowing::Inputs::InputManager* Windowing::Inputs::InputManager::GetInputManager() {
+
+	return instance;
+}
 
 Windowing::Inputs::InputManager::InputManager(Window& p_window) : m_window(p_window)
 {
+
+	instance = this;
     //挂载回调
 	m_keyPressedListener = m_window.KeyPressedEvent.AddListener(std::bind(&InputManager::OnKeyPressed, this, std::placeholders::_1));
 	m_keyReleasedListener = m_window.KeyReleasedEvent.AddListener(std::bind(&InputManager::OnKeyReleased, this, std::placeholders::_1));
 	m_mouseButtonPressedListener = m_window.MouseButtonPressedEvent.AddListener(std::bind(&InputManager::OnMouseButtonPressed, this, std::placeholders::_1));
 	m_mouseButtonReleasedListener = m_window.MouseButtonReleasedEvent.AddListener(std::bind(&InputManager::OnMouseButtonReleased, this, std::placeholders::_1));
     m_window.MouseScroolEvent.AddListener(std::bind(&InputManager::OnMouseScroll,this,std::placeholders::_1));
+	m_window.CursorMoveEvent.AddListener(std::bind(&InputManager::OnCursorMove,this,std::placeholders::_1,std::placeholders::_2));
 }
 
 Windowing::Inputs::InputManager::~InputManager()
@@ -68,7 +76,16 @@ std::pair<double, double> Windowing::Inputs::InputManager::GetMousePosition() co
 {
 	std::pair<double, double> result;
 	glfwGetCursorPos(m_window.GetGlfwWindow(), &result.first, &result.second);
+
 	return result;
+}
+
+std::pair<int, int> Windowing::Inputs::InputManager::GetCursoreOffset() 
+{
+	auto ans= std::pair<int, int>(horizon_X,vertical_Y);
+	horizon_X = 0;
+	vertical_Y = 0;
+	return ans;
 }
 
 void Windowing::Inputs::InputManager::ClearEvents()
@@ -81,6 +98,17 @@ void Windowing::Inputs::InputManager::ClearEvents()
 float Windowing::Inputs::InputManager::GetMouseScrollOffset() const
 {
     return wheel;
+}
+
+void Windowing::Inputs::InputManager::OnCursorMove(int p_x, int p_y)
+{
+	static int x = 0;
+	static int y =0;
+	horizon_X = p_x - x;
+	vertical_Y = p_y - y;
+    x = p_x;
+	y = p_y;
+
 }
 
 void Windowing::Inputs::InputManager::OnKeyPressed(int p_key)
