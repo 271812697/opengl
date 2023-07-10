@@ -5,13 +5,18 @@ namespace scene {
 
         using Scene::Scene;
 
+
+
         void Init() override;
-        void OnSceneRender(float dt=0) override;
+        void OnSceneRender(float dt = 0) override;
         void OnImGuiRender(float dt = 0) override;
+        void Resize(int w, int h)override;
+        void Present() override;
 
         asset_ref<Texture> irradiance_map;
         asset_ref<Texture> prefiltered_map;
         asset_ref<Texture> BRDF_LUT;
+
         Entity camera;
         Entity skybox;
         Entity point_light;

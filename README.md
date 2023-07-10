@@ -6,7 +6,7 @@ Watch [demo](https://www.bilibili.com/video/BV18Y4y1973W/) on bilibili
 
 ## How to build (Windows only)
 
-- Visual Studio 2019
+- Visual Studio 2019 or greater
 - Windows 10/11 with OpenGl4.6 support
 - Cmake
 
@@ -18,28 +18,38 @@ cd Build/
 cmake ..
 ```
 
-## Screenshots
+# Screenshots
+
+## **path Trace**
 
 ![image-20230703001754290](README.assets/image-20230703001754290.png)
+
+## Fluid simulation
 
 ![image-20230706192959316](README.assets/image-20230706192959316.png)![image-20230706192957271](README.assets/image-20230706192957271.png
 
 ![fluid3](D:\Others\opengl\fluid3.png
 
-![image-20230312104122727](README.assets/image-20230312104122727.png)
+## tiled forward renderer
 
-![image-20230312104507897](README.assets/image-20230312104507897.png)
+![image-20230710142321377](README.assets/image-20230710142321377.png)
 
-![image-20230312112127729](README.assets/image-20230312112127729.png)
+## environment lighting (IBL)
 
-![image-20230312111837394](README.assets/image-20230312111837394.png)
+![image-20230710142554961](README.assets/image-20230710142554961.png)
 
-![image-20230312104658699](README.assets/image-20230312104658699.png)
+## disney principled BSDF
 
-![image-20230312112317724](README.assets/image-20230312112317724.png)
+![image-20230710142735202](README.assets/image-20230710142735202.png)
 
-![image-20230312112623783](README.assets/image-20230312112623783.png)
+![image-20230710142832334](README.assets/image-20230710142832334.png)
 
-![image-20230312112700067](README.assets/image-20230312112700067.png)
+![image-20230710142947662](README.assets/image-20230710142947662.png)
 
-## 
+## Skeleton Animation
+
+![image-20230710143120456](README.assets/image-20230710143120456.png)
+
+## PCSS Shadow and Animation
+
+![image-20230710143252170](README.assets/image-20230710143252170.png)

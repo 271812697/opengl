@@ -1,3 +1,164 @@
+#include "scene_03.h"
+
+//主程序的全局数据
+#include "imgui.h"
+#include "backends/imgui_impl_glfw.h"
+#include "backends/imgui_impl_opengl3.h"
+#include <stdio.h>
+#include<iostream>
+#include<glad/glad.h>
+#include <GLFW/glfw3.h>
+#include"Window/Device.h"
+#include"Window/WindowSettings.h"
+#include"Window/Window.h"
+#include"Window/InputManager.h"
+#include"UI/Core/UIManager.h"
+#include"UI/Styling/EStyle.h"
+#include"tools/Clock.h"
+#include"UI/Panels/PanelsManager.h"
+#include"UI/Panels/AView.h"
+#include"UI/Panels/Inspector.h"
+#include"UI/Widgets/CustomWidget.h"
+#include"Opengl/core/log.h"
+#include"Opengl/core/clock.h"
+#include"ImGuizmo.h"
+#include<string>
+
+Windowing::Settings::WindowSettings windowSettings;
+Windowing::Settings::DeviceSettings deviceSettings;
+std::unique_ptr<Windowing::Context::Device>	device;
+std::unique_ptr<Windowing::Window> window;
+std::unique_ptr<Windowing::Inputs::InputManager>inputManager;
+std::unique_ptr<UI::Core::UIManager>uiManager;
+UI::Settings::PanelWindowSettings settings;
+std::unique_ptr<UI::Panels::PanelsManager>m_panelsManager;
+using namespace std;
+
+#if defined(_MSC_VER) && (_MSC_VER >= 1900) && !defined(IMGUI_DISABLE_WIN32_FUNCTIONS)
+#pragma comment(lib, "legacy_stdio_definitions")
+#endif
+static void glfw_error_callback(int error, const char* description)
+{
+    fprintf(stderr, "Glfw  %d: %s\n", error, description);
+}
+int main(int, char**) {
+    {
+
+        deviceSettings.contextMajorVersion = 4;
+        deviceSettings.contextMinorVersion = 6;
+        windowSettings.title = "Disney Principled BSDF";
+        windowSettings.width = 1600;
+        windowSettings.height = 900;
+        windowSettings.maximized = true;
+        device = std::make_unique<Windowing::Context::Device>(deviceSettings);
+        window = std::make_unique<Windowing::Window>(*device, windowSettings);
+        window->SetIcon("res/texture/awesomeface.png");
+        inputManager = std::make_unique<Windowing::Inputs::InputManager>(*window);;
+        window->MakeCurrentContext();
+
+        if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+            return -1;
+        }
+        device->SetVsync(true);
+        //初始化场景
+        ::core::Log::Init();
+        scene::Scene* S = new scene::Scene03("Disney Principled BSDF");
+        S->Init();
+        S->Resize(1600, 900);
+        //初始化UI
+        uiManager = std::make_unique<UI::Core::UIManager>(window->GetGlfwWindow(), UI::Styling::EStyle::CUSTOM);;
+        uiManager->LoadFont("Ruda_Big", "res/font/Ruda-Bold.ttf", 18);
+        uiManager->LoadFont("Ruda_Small", "res/font/Ruda-Bold.ttf", 12);
+        uiManager->LoadFont("Ruda_Medium", "res/font/Ruda-Bold.ttf", 14);
+        uiManager->UseFont("Ruda_Big");
+        uiManager->SetEditorLayoutSaveFilename(std::string(getenv("APPDATA")) + "\\layout.ini");
+        uiManager->SetEditorLayoutAutosaveFrequency(60.0f);
+        uiManager->EnableEditorLayoutSave(true);
+        uiManager->EnableDocking(true);
+
+        settings.closable = true;
+        settings.collapsable = true;
+        settings.dockable = true;
+        UI::Modules::Canvas m_canvas;
+        m_panelsManager = std::make_unique<UI::Panels::PanelsManager>(m_canvas);
+
+
+        Tools::Time::Clock clock;
+        m_panelsManager->CreatePanel<UI::Panels::MenuBar>("Menu Bar");
+        m_panelsManager->CreatePanel<UI::Panels::Inspector>("Inspector", true, settings);
+        m_panelsManager->GetPanelAs<UI::Panels::Inspector>("Inspector").CreateWidget<UI::Widgets::CustomWidget>().DrawIn += [&S, &clock]() {
+            S->OnImGuiRender(clock.GetDeltaTime());
+        };
+        m_panelsManager->CreatePanel<UI::Panels::AView>("Scene View", true, settings);
+        m_panelsManager->GetPanelAs<UI::Panels::AView>("Scene View").ResizeEvent += [&S](int p_width, int p_height) {
+            S->Resize(p_width, p_height);
+        };
+        m_panelsManager->GetPanelAs<UI::Panels::AView>("Scene View").DrawInWindow += [S]() {
+            if (S->selected_entity != -1) {
+                ImGuizmo::MODE mode = ImGuizmo::MODE::LOCAL;
+                ImGuizmo::OPERATION operation = ImGuizmo::OPERATION::TRANSLATE;
+                if (S->cur_operation == 1)operation = ImGuizmo::OPERATION::ROTATE;
+                if (S->cur_operation == 2)operation = ImGuizmo::OPERATION::SCALE;
+                auto& T = S->directory_Entity[S->selected_entity].GetComponent<Transform>();
+                auto& C = S->directory["Camera"].GetComponent<Camera>();
+                glm::mat4 V = C.GetViewMatrix();
+                glm::mat4 P = C.GetProjectionMatrix();
+                auto pos = m_panelsManager->GetPanelAs<UI::Panels::AView>("Scene View").GetPosition();
+                auto size = m_panelsManager->GetPanelAs<UI::Panels::AView>("Scene View").GetSize();
+                // convert model matrix to left-handed as ImGuizmo assumes a left-handed coordinate system
+                static const glm::vec3 RvL = glm::vec3(1.0f, 1.0f, -1.0f);  // scaling vec for R2L and L2R
+                glm::mat4 transform = glm::scale(T.transform, RvL);
+                ImGuizmo::SetRect(pos.x, pos.y, size.x, size.y);
+                ImGuizmo::SetOrthographic(true);
+                ImGuizmo::SetDrawlist();
+                ImGuizmo::Manipulate(value_ptr(V), value_ptr(P), operation, mode, value_ptr(transform));
+                if (ImGuizmo::IsUsing()) {
+                    transform = glm::scale(transform, RvL);  // convert back to right-handed
+                    T.SetTransform(transform);
+                }
+            }
+        };
+        m_canvas.MakeDockspace(true);
+        uiManager->SetCanvas(m_canvas);
+        //主循环
+        while (!window->ShouldClose())
+        {
+            //glClearColor(0., 0., 0., 0.);
+            //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+           // glDisable(GL_DEPTH_TEST);
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
+            S->UpdateScene(clock.GetDeltaTime());
+            S->OnSceneRender(clock.GetDeltaTime());
+            m_panelsManager->GetPanelAs<UI::Panels::AView>("Scene View").Update(1);
+            m_panelsManager->GetPanelAs<UI::Panels::AView>("Scene View").Bind();
+            S->Present();
+            m_panelsManager->GetPanelAs<UI::Panels::AView>("Scene View").UnBind();
+            uiManager->Render();
+            ImGui::Render();
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+            device->PollEvents();
+            window->SwapBuffers();
+            inputManager->SetDeltaTime(clock.GetDeltaTime());
+            //inputManager->ClearEvents();
+            core::Clock::Update();
+            clock.Update();
+
+        }
+        //回收资源
+        device.reset();
+        ::core::Log::Shutdown();
+        uiManager.reset();
+        m_panelsManager.reset();
+        inputManager.reset();
+        window.reset();
+    }
+    return 0;
+}
+
+
+
 #include "Opengl/pch.h"
 
 #include "Opengl/core/base.h"
@@ -13,7 +174,7 @@
 #include "Opengl/util/ext.h"
 #include "Opengl/util/math.h"
 #include "Opengl/util/path.h"
-#include "scene_03.h"
+
 
 using namespace core;
 using namespace asset;
@@ -73,12 +234,7 @@ namespace scene {
         AddUBO(resource_manager.Get<Shader>(02)->ID());
         AddUBO(resource_manager.Get<Shader>(04)->ID());
 
-        AddFBO(Window::width, Window::height);
-        AddFBO(Window::width, Window::height);
 
-        FBOs[0].AddColorTexture(1, true);
-        FBOs[0].AddDepStRenderBuffer(true);
-        FBOs[1].AddColorTexture(1);
 
         camera = CreateEntity("Camera", ETag::MainCamera);
         camera.GetComponent<Transform>().Translate(0.0f, 6.0f, 9.0f);
@@ -159,6 +315,8 @@ namespace scene {
     }
 
     Entity& Scene03::GetEntity(int entity_id) {
+
+
         switch (entity_id) {
             case 1: return pistol;
             case 2: return helmet;
@@ -168,10 +326,30 @@ namespace scene {
         }
     }
 
+    void Scene03::SetSelected_Entity()
+    {
+        auto call = [this](const Entity& val) {
+            for (int i = 0; i < directory_Entity.size(); i++) {
+                if (directory_Entity[i].id == val.id) {
+                    return i;
+                }
+            }
+            return -1;
+        };
+        switch (entity_id) {
+        case 1: selected_entity = call(pistol); break;
+        case 2: selected_entity = call(helmet); break;
+        case 3: selected_entity = call(pyramid); break;
+        case 4:selected_entity = call(capsule); break;
+        default: throw std::runtime_error("Invalid entity id!");
+        }
+    }
+
     void Scene03::OnSceneRender(float dt) {
         auto& e = GetEntity(entity_id);
         auto& main_camera = camera.GetComponent<Camera>();
-        main_camera.Update();
+        if (m_panelsManager->GetPanelAs<UI::Panels::AView>("Scene View").IsHovered())
+            main_camera.Update();
 
         if (auto& ubo = UBOs[0]; true) {
             ubo.SetUniform(0, val_ptr(main_camera.T->position));
@@ -246,8 +424,23 @@ namespace scene {
         framebuffer_1.Clear();
         FBO::CopyColor(framebuffer_0, 0, framebuffer_1, 0);
 
-        // ------------------------------ postprocessing pass ------------------------------
 
+    }
+    void Scene03::Resize(int w, int h) {
+        camera.GetComponent<Camera>().aspect = 1.0f * w / h;
+        Scene::Resize(w, h);
+        FBOs.clear();
+        AddFBO(w, h);
+        AddFBO(w, h);
+
+        FBOs[0].AddColorTexture(1, true);
+        FBOs[0].AddDepStRenderBuffer(true);
+        FBOs[1].AddColorTexture(1);
+    }
+
+    void Scene03::Present() {
+        // ------------------------------ postprocessing pass ------------------------------
+        FBO& framebuffer_1 = FBOs[1];
         framebuffer_1.GetColorTexture(0).Bind(0);
         auto postprocess_shader = resource_manager.Get<Shader>(05);
         postprocess_shader->Bind();
@@ -258,16 +451,16 @@ namespace scene {
         postprocess_shader->Unbind();
     }
 
-    void Scene03::OnImGuiRender(float dt = 0) {
+    void Scene03::OnImGuiRender(float dt ) {
         using namespace ImGui;
         const ImGuiColorEditFlags color_flags = ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoAlpha;
         const ImVec2 rainbow_offset = ImVec2(5.0f, 105.0f);
         const ImVec4 tab_color_off  = ImVec4(0.0f, 0.3f, 0.6f, 1.0f);
         const ImVec4 tab_color_on   = ImVec4(0.0f, 0.4f, 0.8f, 1.0f);
 
-        if (ui::NewInspector()) {
+        if (true) {
             Indent(5.0f);
-            Text(ICON_FK_SUN_O "  Directional Light Vector");
+            Text("  Directional Light Vector");
             DragFloat3("###", val_ptr(dl_direction), 0.01f, -1.0f, 1.0f, "%.3f");
            
             Spacing();
@@ -340,7 +533,7 @@ namespace scene {
             PushStyleColor(ImGuiCol_TabHovered, tab_color_on);
             PushStyleColor(ImGuiCol_TabActive, tab_color_on);
 
-            if (BeginTabItem(ICON_FK_TH_LARGE)) {
+            if (BeginTabItem("Grid")) {
                 PushItemWidth(130.0f);
                 Checkbox("Show Infinite Grid", &show_grid);
                 SliderFloat("Grid Cell Size", &grid_cell_size, 0.25f, 8.0f);
@@ -354,11 +547,16 @@ namespace scene {
             EndTabBar();
 
             Unindent(5.0f);
-            ui::EndInspector();
+ 
         }
 
         if (show_gizmo) {
-            ui::DrawGizmo(camera, GetEntity(entity_id), ui::Gizmo::Translate);
+           // ui::DrawGizmo(camera, GetEntity(entity_id), ui::Gizmo::Translate);
+            SetSelected_Entity();
+        }
+        else
+        {
+            selected_entity = -1;
         }
     }
 
@@ -446,6 +644,3 @@ namespace scene {
     }
 
 }
-#include"../all.h"
-
-MAINSCENE(scene::Scene03, "01")

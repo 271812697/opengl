@@ -7,10 +7,11 @@ namespace scene {
     class Scene03 : public Scene {
 
         using Scene::Scene;
-
         void Init() override;
         void OnSceneRender(float dt = 0) override;
         void OnImGuiRender(float dt = 0) override;
+        void Resize(int w, int h)override;
+        void Present() override;
 
         Entity camera;
         Entity skybox;
@@ -28,6 +29,7 @@ namespace scene {
         void PrecomputeIBL(const std::string& hdri);
         void SetupMaterial(Material& mat);
         Entity& GetEntity(int entity_id);
+        void SetSelected_Entity();
     };
 
 }

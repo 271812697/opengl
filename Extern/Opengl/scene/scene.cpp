@@ -17,10 +17,6 @@ namespace scene {
     }
 
     Scene::~Scene() {
-        registry.each([this](auto id) {
-            CORE_TRACE("Destroying entity: {0}", directory.at(id));
-        });
-
         registry.clear();
     }
 
@@ -30,7 +26,7 @@ namespace scene {
         // every entity has a transform and a tag component
         e.AddComponent<Transform>();
         e.AddComponent<Tag>(tag);
-        directory.emplace(e.id, e.name);
+        directory.emplace(e.name,e);
         directory_Entity.push_back(e);
 
         return e;
@@ -38,7 +34,7 @@ namespace scene {
 
     void Scene::DestroyEntity(Entity e) {
         CORE_TRACE("Destroying entity: {0}", e.name);
-        directory.erase(e.id);
+        directory.erase(e.name);
         registry.destroy(e.id);
     }
 

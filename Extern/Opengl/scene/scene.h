@@ -19,8 +19,7 @@ namespace scene {
         friend class Renderer;
         
       protected:
-        std::map<entt::entity, std::string> directory;
-        std::vector<Entity> directory_Entity;
+
         ResourceManager resource_manager;
         std::map<GLuint, UBO> UBOs;  // indexed by uniform buffer's binding point
         std::map<GLuint, FBO> FBOs;  // indexed by the order of creation
@@ -31,7 +30,11 @@ namespace scene {
         Entity CreateEntity(const std::string& name, ETag tag = ETag::Untagged);
         void DestroyEntity(Entity entity);
 
-      public:
+      public: 
+        std::map<std::string, Entity> directory;
+        std::vector<Entity> directory_Entity;
+        int selected_entity= -1;
+        int cur_operation = 0;
         std::string title;
         explicit Scene(const std::string& title);
         virtual ~Scene();

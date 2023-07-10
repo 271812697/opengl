@@ -51,7 +51,9 @@ namespace UI::Panels
         bool IsScrolledToTop() const;
 
 	protected:
-        void virtual _Draw_ImplInWindow(){};
+        void virtual _Draw_ImplInWindow(){
+			DrawInWindow.Invoke();
+		};
 		void _Draw_Impl() override;
 
 	public:
@@ -74,9 +76,10 @@ namespace UI::Panels
 		bool allowInputs = true;
 		bool titleBar = true;
 
+
 		Tools::Eventing::Event<> OpenEvent;
 		Tools::Eventing::Event<> CloseEvent;
-
+		Tools::Eventing::Event<> DrawInWindow;
 	protected:
 		bool m_opened;
 		bool m_hovered;

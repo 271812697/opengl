@@ -287,8 +287,8 @@ namespace scene::ui {
         static const glm::vec3 RvL = glm::vec3(1.0f, 1.0f, -1.0f);  // scaling vec for R2L and L2R
         glm::mat4 transform = glm::scale(T.transform, RvL);
 
-        SetNextWindowPos(ImVec2(pos.first,pos.second));    // below the menu bar
-        SetNextWindowSize(ImVec2(size.first,size.second));  // above the status bar
+        //SetNextWindowPos(ImVec2(pos.first,pos.second));    // below the menu bar
+        //SetNextWindowSize(ImVec2(size.first,size.second));  // above the status bar
         //Begin("##Invisible Gizmo Window", 0, invisible_window_flags);
      
         ImGuizmo::SetRect(pos.first, pos.second, size.first,size.second);
@@ -310,7 +310,7 @@ namespace scene::ui {
             T.SetTransform(transform);
         }
 
-        //ImGui::End();
+       // ImGui::End();
     }
 
     void PushRotation() {

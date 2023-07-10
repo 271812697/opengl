@@ -63,7 +63,7 @@ namespace component {
             recovering = true;
         }
         
-        if(instance->IsMouseButtonPressed(Windowing::Inputs::EMouseButton::MOUSE_BUTTON_MIDDLE)){
+        if(instance->IsMouseButtonPressed(Windowing::Inputs::EMouseButton::MOUSE_BUTTON_RIGHT)){
         // rotation is limited to the X and Y axis (pitch and yawn only, no roll)
             //instance->GetMousePosition
         auto [x, y] = instance->GetCursoreOffset();

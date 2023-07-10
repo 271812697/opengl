@@ -93,7 +93,31 @@ int main(int, char**) {
         m_panelsManager->GetPanelAs<UI::Panels::AView>("Scene View").ResizeEvent += [&S](int p_width, int p_height) {
             S->Resize(p_width, p_height);
         };
-
+        m_panelsManager->GetPanelAs<UI::Panels::AView>("Scene View").DrawInWindow += [S]() {
+            if (S->selected_entity != -1) {
+                ImGuizmo::MODE mode = ImGuizmo::MODE::LOCAL;
+                ImGuizmo::OPERATION operation = ImGuizmo::OPERATION::TRANSLATE;
+                if(S->cur_operation==1)operation = ImGuizmo::OPERATION::ROTATE;
+                if (S->cur_operation == 2)operation = ImGuizmo::OPERATION::SCALE;
+                auto& T = S->directory_Entity[S->selected_entity].GetComponent<Transform>();
+                auto& C = S->directory["Camera"].GetComponent<Camera>();
+                glm::mat4 V = C.GetViewMatrix();
+                glm::mat4 P = C.GetProjectionMatrix();
+                auto pos = m_panelsManager->GetPanelAs<UI::Panels::AView>("Scene View").GetPosition();
+                auto size = m_panelsManager->GetPanelAs<UI::Panels::AView>("Scene View").GetSize();
+                // convert model matrix to left-handed as ImGuizmo assumes a left-handed coordinate system
+                static const glm::vec3 RvL = glm::vec3(1.0f, 1.0f, -1.0f);  // scaling vec for R2L and L2R
+                glm::mat4 transform = glm::scale(T.transform, RvL);
+                ImGuizmo::SetRect(pos.x, pos.y, size.x, size.y);
+                ImGuizmo::SetOrthographic(true);
+                ImGuizmo::SetDrawlist();
+                ImGuizmo::Manipulate(value_ptr(V), value_ptr(P), operation, mode, value_ptr(transform));
+                if (ImGuizmo::IsUsing()) {
+                    transform = glm::scale(transform, RvL);  // convert back to right-handed
+                    T.SetTransform(transform);
+                }
+            }
+        };
         m_canvas.MakeDockspace(true);
         uiManager->SetCanvas(m_canvas);
         //Ö÷Ñ­»·
@@ -358,10 +382,9 @@ namespace scene {
 
         for (int i = 0; i < 6; ++i) {
             bloom_shader->SetUniform(0, i % 2 == 0);
-            bloom_shader->Dispatch(ping.width / 32, ping.height/ 18);
+            bloom_shader->Dispatch(ping.width / 32 + 1, ping.height / 18 + 1);
             bloom_shader->SyncWait(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT | GL_TEXTURE_FETCH_BARRIER_BIT);
         }
-
     }
 
     void Scene02::OnImGuiRender(float dt ) {
@@ -462,7 +485,6 @@ namespace scene {
                 RadioButton("S", &z_mode, 3); SameLine();
                 RadioButton("N/A", &z_mode, 0);
                 Separator();
-
                 BeginGroup();
                 for (int row = 0; row < 3; row++) {
                     for (int col = 0; col < 3; col++) {
@@ -493,13 +515,11 @@ namespace scene {
                                 reset_cube = true;
                             }
                         }
-
                         PopStyleVar(2);
                     }
                 }
                 EndGroup();
             }
-
             if (CollapsingHeader("Color Torus", ImGuiTreeNodeFlags_None)) {
                 PushItemWidth(130.0f);
                 SliderFloat("Metalness##3", &torus_metalness, 0.00f, 1.0f);
@@ -508,7 +528,6 @@ namespace scene {
                 PopItemWidth();
                 Checkbox("Torus Rotation", &rotate_torus);
             }
-
             if (CollapsingHeader("Motorbike", ImGuiTreeNodeFlags_None)) {
                 PushItemWidth(130.0f);
                 Checkbox("Wireframe Mode", &motor_wireframe);
@@ -519,26 +538,23 @@ namespace scene {
                 static ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Selected |
                     ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
                 static Entity e;
-                for (auto& it : directory_Entity) {
-                    ImGui::TreeNodeEx(it.name.c_str(), base_flags);
+                for (int i = 0; i < directory_Entity.size();i++) {
+                    ImGui::TreeNodeEx(directory_Entity[i].name.c_str(), base_flags);
                     if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen()) {
-                        e = it;
-                        CORE_INFO("{0} is selected", it.name);
+                        e = directory_Entity[i];
+                        CORE_INFO("{0} is selected", directory_Entity[i].name);
+                        selected_entity = i;
                     }
                 }
                 if (e.id != entt::null) {
-                    static int c = 0;
-                    ImGui::RadioButton("T", &c, 0); ImGui::SameLine();
-                    ImGui::RadioButton("R", &c, 1); ImGui::SameLine();
-                    ImGui::RadioButton("S", &c, 2);
-
-                    auto [x,y]=m_panelsManager->GetPanelAs<UI::Panels::AView>("Scene View").GetPosition();
-                    auto [sx, sy] = m_panelsManager->GetPanelAs<UI::Panels::AView>("Scene View").GetSize();
-                    ui::DrawGizmo(camera, e, c == 0 ? ui::Gizmo::Translate : c > 1 ? ui::Gizmo::Rotate : ui::Gizmo::Scale,std::make_pair(x,y),std::make_pair(sx,sy));
+                    ImGui::RadioButton("T", &cur_operation, 0); ImGui::SameLine();
+                    ImGui::RadioButton("R", &cur_operation, 1); ImGui::SameLine();
+                    ImGui::RadioButton("S", &cur_operation, 2); 
                 }
-
-
                 ImGui::TreePop();
+            }
+            else {
+                selected_entity = -1;
             }
             Unindent(5.0f);
         }
@@ -546,8 +562,6 @@ namespace scene {
 
     void Scene02::Resize(int w, int h)
     {
-
-
         camera.GetComponent<Camera>().aspect = 1.0f * w / h;
         Scene::Resize(w, h); 
         FBOs.clear();
@@ -559,9 +573,6 @@ namespace scene {
         FBOs[0].AddDepStRenderBuffer(true);  // multisampled RBO for MSAA
         FBOs[1].AddColorTexture(2);
         FBOs[2].AddColorTexture(2);
-
-       
-
     }
 
     void Scene02::Present()

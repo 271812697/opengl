@@ -462,7 +462,7 @@ namespace scene {
 
         for (int i = 0; i < 2 * n_blurs; ++i) {
             bloom_shader->SetUniform(0, i % 2 == 0);
-            bloom_shader->Dispatch(ping.width / 32, ping.height / 18);
+            bloom_shader->Dispatch(ping.width / 32+1, ping.height / 18+1);
             bloom_shader->SyncWait(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT | GL_TEXTURE_FETCH_BARRIER_BIT);
         }
 
@@ -566,20 +566,9 @@ namespace scene {
                 PopItemWidth();
                 EndTabItem();
             }
-
             EndTabBar();
-            Unindent(5.0f);
-           
-        }
-
-        if (show_sphere_gizmo) {
-            ui::DrawGizmo(camera, sphere, ui::Gizmo::Translate);
-        }
-
-        if (show_plane_gizmo && show_plane) {
-            ui::DrawGizmo(camera, plane, ui::Gizmo::Translate);
-        }
-      
+            Unindent(5.0f);  
+        }      
     }
 
     void Scene01::Resize(int w, int h)

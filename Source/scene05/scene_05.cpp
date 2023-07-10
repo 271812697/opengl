@@ -1,5 +1,163 @@
-#include "Opengl/pch.h"
+#include"scene_05.h"
 
+//主程序的全局数据
+#include "imgui.h"
+#include "backends/imgui_impl_glfw.h"
+#include "backends/imgui_impl_opengl3.h"
+#include <stdio.h>
+#include<iostream>
+#include<glad/glad.h>
+#include <GLFW/glfw3.h>
+#include"Window/Device.h"
+#include"Window/WindowSettings.h"
+#include"Window/Window.h"
+#include"Window/InputManager.h"
+#include"UI/Core/UIManager.h"
+#include"UI/Styling/EStyle.h"
+#include"tools/Clock.h"
+#include"UI/Panels/PanelsManager.h"
+#include"UI/Panels/AView.h"
+#include"UI/Panels/Inspector.h"
+#include"UI/Widgets/CustomWidget.h"
+#include"Opengl/core/log.h"
+#include"Opengl/core/clock.h"
+#include"ImGuizmo.h"
+#include<string>
+
+Windowing::Settings::WindowSettings windowSettings;
+Windowing::Settings::DeviceSettings deviceSettings;
+std::unique_ptr<Windowing::Context::Device>	device;
+std::unique_ptr<Windowing::Window> window;
+std::unique_ptr<Windowing::Inputs::InputManager>inputManager;
+std::unique_ptr<UI::Core::UIManager>uiManager;
+UI::Settings::PanelWindowSettings settings;
+std::unique_ptr<UI::Panels::PanelsManager>m_panelsManager;
+using namespace std;
+
+#if defined(_MSC_VER) && (_MSC_VER >= 1900) && !defined(IMGUI_DISABLE_WIN32_FUNCTIONS)
+#pragma comment(lib, "legacy_stdio_definitions")
+#endif
+static void glfw_error_callback(int error, const char* description)
+{
+    fprintf(stderr, "Glfw  %d: %s\n", error, description);
+}
+int main(int, char**) {
+    {
+
+        deviceSettings.contextMajorVersion = 4;
+        deviceSettings.contextMinorVersion = 6;
+        windowSettings.title = "PCSS Shadow and Animation";
+        windowSettings.width = 1600;
+        windowSettings.height = 900;
+        windowSettings.maximized = true;
+        device = std::make_unique<Windowing::Context::Device>(deviceSettings);
+        window = std::make_unique<Windowing::Window>(*device, windowSettings);
+        window->SetIcon("res/texture/awesomeface.png");
+        inputManager = std::make_unique<Windowing::Inputs::InputManager>(*window);;
+        window->MakeCurrentContext();
+
+        if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+            return -1;
+        }
+        device->SetVsync(true);
+        //初始化场景
+        ::core::Log::Init();
+        scene::Scene* S = new scene::Scene05("PCSS Shadow and Animation");
+        S->Init();
+        S->Resize(1600, 900);
+        //初始化UI
+        uiManager = std::make_unique<UI::Core::UIManager>(window->GetGlfwWindow(), UI::Styling::EStyle::CUSTOM);;
+        uiManager->LoadFont("Ruda_Big", "res/font/Ruda-Bold.ttf", 18);
+        uiManager->LoadFont("Ruda_Small", "res/font/Ruda-Bold.ttf", 12);
+        uiManager->LoadFont("Ruda_Medium", "res/font/Ruda-Bold.ttf", 14);
+        uiManager->UseFont("Ruda_Big");
+        uiManager->SetEditorLayoutSaveFilename(std::string(getenv("APPDATA")) + "\\layout.ini");
+        uiManager->SetEditorLayoutAutosaveFrequency(60.0f);
+        uiManager->EnableEditorLayoutSave(true);
+        uiManager->EnableDocking(true);
+
+        settings.closable = true;
+        settings.collapsable = true;
+        settings.dockable = true;
+        UI::Modules::Canvas m_canvas;
+        m_panelsManager = std::make_unique<UI::Panels::PanelsManager>(m_canvas);
+
+
+        Tools::Time::Clock clock;
+        m_panelsManager->CreatePanel<UI::Panels::MenuBar>("Menu Bar");
+        m_panelsManager->CreatePanel<UI::Panels::Inspector>("Inspector", true, settings);
+        m_panelsManager->GetPanelAs<UI::Panels::Inspector>("Inspector").CreateWidget<UI::Widgets::CustomWidget>().DrawIn += [&S, &clock]() {
+            S->OnImGuiRender(clock.GetDeltaTime());
+        };
+        m_panelsManager->CreatePanel<UI::Panels::AView>("Scene View", true, settings);
+        m_panelsManager->GetPanelAs<UI::Panels::AView>("Scene View").ResizeEvent += [&S](int p_width, int p_height) {
+            S->Resize(p_width, p_height);
+        };
+        m_panelsManager->GetPanelAs<UI::Panels::AView>("Scene View").DrawInWindow += [S]() {
+            if (S->selected_entity != -1) {
+                ImGuizmo::MODE mode = ImGuizmo::MODE::LOCAL;
+                ImGuizmo::OPERATION operation = ImGuizmo::OPERATION::TRANSLATE;
+                if (S->cur_operation == 1)operation = ImGuizmo::OPERATION::ROTATE;
+                if (S->cur_operation == 2)operation = ImGuizmo::OPERATION::SCALE;
+                auto& T = S->directory_Entity[S->selected_entity].GetComponent<Transform>();
+                auto& C = S->directory["Camera"].GetComponent<Camera>();
+                glm::mat4 V = C.GetViewMatrix();
+                glm::mat4 P = C.GetProjectionMatrix();
+                auto pos = m_panelsManager->GetPanelAs<UI::Panels::AView>("Scene View").GetPosition();
+                auto size = m_panelsManager->GetPanelAs<UI::Panels::AView>("Scene View").GetSize();
+                // convert model matrix to left-handed as ImGuizmo assumes a left-handed coordinate system
+                static const glm::vec3 RvL = glm::vec3(1.0f, 1.0f, -1.0f);  // scaling vec for R2L and L2R
+                glm::mat4 transform = glm::scale(T.transform, RvL);
+                ImGuizmo::SetRect(pos.x, pos.y, size.x, size.y);
+                ImGuizmo::SetOrthographic(true);
+                ImGuizmo::SetDrawlist();
+                ImGuizmo::Manipulate(value_ptr(V), value_ptr(P), operation, mode, value_ptr(transform));
+                if (ImGuizmo::IsUsing()) {
+                    transform = glm::scale(transform, RvL);  // convert back to right-handed
+                    T.SetTransform(transform);
+                }
+            }
+        };
+        m_canvas.MakeDockspace(true);
+        uiManager->SetCanvas(m_canvas);
+        //主循环
+        while (!window->ShouldClose())
+        {
+            //glClearColor(0., 0., 0., 0.);
+            //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+           // glDisable(GL_DEPTH_TEST);
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
+            S->UpdateScene(clock.GetDeltaTime());
+            S->OnSceneRender(clock.GetDeltaTime());
+            m_panelsManager->GetPanelAs<UI::Panels::AView>("Scene View").Update(1);
+            m_panelsManager->GetPanelAs<UI::Panels::AView>("Scene View").Bind();
+            S->Present();
+            m_panelsManager->GetPanelAs<UI::Panels::AView>("Scene View").UnBind();
+            uiManager->Render();
+            ImGui::Render();
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+            device->PollEvents();
+            window->SwapBuffers();
+            inputManager->SetDeltaTime(clock.GetDeltaTime());
+            //inputManager->ClearEvents();
+            core::Clock::Update();
+            clock.Update();
+
+        }
+        //回收资源
+        device.reset();
+        ::core::Log::Shutdown();
+        uiManager.reset();
+        m_panelsManager.reset();
+        inputManager.reset();
+        window.reset();
+    }
+    return 0;
+}
+
+#include "Opengl/pch.h"
 #include "Opengl/core/base.h"
 #include "Opengl/core/clock.h"
 #include "Opengl/core/input.h"
@@ -12,7 +170,6 @@
 #include "Opengl/util/ext.h"
 #include "Opengl/util/math.h"
 #include "Opengl/util/path.h"
-#include"scene_05.h"
 using namespace core;
 using namespace asset;
 using namespace component;
@@ -41,7 +198,7 @@ namespace scene {
     void Scene05::Init() {
         Renderer::SetScene(this);
         PrecomputeIBL("res\\texture\\HDRI\\Field-Path-Fence-Steinbacher-Street-4K.hdr");
-        this->title = "Animation";
+        this->title = "PCSS Shadow and Animation";
 
         resource_manager.Add(00, MakeAsset<CShader>("res\\shaders\\bloom.glsl"));
         resource_manager.Add(01, MakeAsset<Shader>("res\\shaders\\infinite_grid.glsl"));
@@ -60,18 +217,7 @@ namespace scene {
         AddUBO(resource_manager.Get<Shader>(03)->ID());
         AddUBO(resource_manager.Get<Shader>(04)->ID());
 
-        AddFBO(shadow_width, shadow_height);
-        AddFBO(shadow_width, shadow_height);
-        AddFBO(Window::width, Window::height);
-        AddFBO(Window::width, Window::height);
-        AddFBO(Window::width / 2, Window::height / 2);
 
-        FBOs[0].AddDepthCubemap();
-        FBOs[1].AddDepthCubemap();
-        FBOs[2].AddColorTexture(2, true);    // multisampled textures for MSAA
-        FBOs[2].AddDepStRenderBuffer(true);  // multisampled RBO for MSAA
-        FBOs[3].AddColorTexture(2);
-        FBOs[4].AddColorTexture(2);
 
 
         camera = CreateEntity("Camera", ETag::MainCamera);
@@ -200,9 +346,52 @@ namespace scene {
         Renderer::FaceCulling(true);
 
     }
+    void Scene05::Resize(int w, int h) {
+        camera.GetComponent<Camera>().aspect = 1.0f * w / h;
+        Scene::Resize(w, h);
+        FBOs.clear();
+
+        AddFBO(shadow_width, shadow_height);
+        AddFBO(shadow_width, shadow_height);
+        AddFBO(w, h);
+        AddFBO(w, h);
+        AddFBO(w / 2, h / 2);
+
+        FBOs[0].AddDepthCubemap();
+        FBOs[1].AddDepthCubemap();
+        FBOs[2].AddColorTexture(2, true);    // multisampled textures for MSAA
+        FBOs[2].AddDepStRenderBuffer(true);  // multisampled RBO for MSAA
+        FBOs[3].AddColorTexture(2);
+        FBOs[4].AddColorTexture(2);
+
+
+
+    }
+    void Scene05::Present() {
+        FBO& framebuffer_3 = FBOs[3];
+        FBO& framebuffer_4 = FBOs[4];
+        // ------------------------------ postprocessing pass ------------------------------
+
+        framebuffer_3.GetColorTexture(0).Bind(0);  // color texture
+        framebuffer_4.GetColorTexture(0).Bind(1);  // bloom texture
+
+        auto bilinear_sampler = resource_manager.Get<Sampler>(99);
+        bilinear_sampler->Bind(1);  // upsample the bloom texture (bilinear filtering)
+
+        auto postprocess_shader = resource_manager.Get<Shader>(05);
+        postprocess_shader->Bind();
+        postprocess_shader->SetUniform(0, 3);  // select tone-mapping operator
+
+        Renderer::Clear();
+        Mesh::DrawQuad();
+
+        postprocess_shader->Unbind();
+        bilinear_sampler->Unbind(1);
+    }
     void Scene05::OnSceneRender(float dt) {
         auto& main_camera = camera.GetComponent<Camera>();
-        main_camera.Update();
+        if (m_panelsManager->GetPanelAs<UI::Panels::AView>("Scene View").IsHovered())
+            main_camera.Update();
 
         if (auto& ubo = UBOs[0]; true) {
             ubo.SetUniform(0, val_ptr(main_camera.T->position));
@@ -371,29 +560,9 @@ namespace scene {
 
         for (int i = 0; i < 6; ++i) {
             bloom_shader->SetUniform(0, i % 2 == 0);
-            bloom_shader->Dispatch(ping.width / 32, ping.width / 18);
+            bloom_shader->Dispatch(ping.width / 32+1, ping.width / 18+1);
             bloom_shader->SyncWait(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT | GL_TEXTURE_FETCH_BARRIER_BIT);
         }
-
-        // ------------------------------ postprocessing pass ------------------------------
-
-        framebuffer_3.GetColorTexture(0).Bind(0);  // color texture
-        framebuffer_4.GetColorTexture(0).Bind(1);  // bloom texture
-
-        auto bilinear_sampler = resource_manager.Get<Sampler>(99);
-        bilinear_sampler->Bind(1);  // upsample the bloom texture (bilinear filtering)
-
-        auto postprocess_shader = resource_manager.Get<Shader>(05);
-        postprocess_shader->Bind();
-        postprocess_shader->SetUniform(0, 3);  // select tone-mapping operator
-
-        Renderer::Clear();
-        Mesh::DrawQuad();
-
-        postprocess_shader->Unbind();
-        bilinear_sampler->Unbind(1);
-        
-
     }
     void Scene05::OnImGuiRender(float dt) {
         using namespace ImGui;
@@ -406,7 +575,7 @@ namespace scene {
         static vec3 lantern_color = color::white;
         static float v = 1.0;
 
-        if (ui::NewInspector()) {
+        if (true) {
             Indent(5.0f);
             PushItemWidth(130.0f);
             SliderFloat("Skybox Exposure", &skybox_exposure, 0.5f, 4.0f);
@@ -440,51 +609,41 @@ namespace scene {
                 Checkbox("Show Gizmo SL", &show_gizmo_sl);
                 if (show_gizmo_pl && show_gizmo_sl) { show_gizmo_pl = false; }
                 Checkbox("Play Animation", &animate_suzune);
-   
                 SliderFloat("Animation Speed", &animate_speed, 0.1f, 3.0f);
                 if (Button("Go next")) {
                     auto& animator = mingyue.GetComponent<Animator>();
                     animator.Gonext();
-
                 }
                 SliderFloat("Light Radius", &light_radius, 0.001f, 0.1f);
                 PopItemWidth();
                 EndTabItem();
             }
-
-
-           
-            
-          
-            
-            if (ImGui::TreeNode("Entity")) { 
-                static ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth |ImGuiTreeNodeFlags_Selected|
-                ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+            if (ImGui::TreeNode("Entity")) {
+                static ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Selected |
+                    ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
                 static Entity e;
-                for (auto& it : directory_Entity) {
-                    ImGui::TreeNodeEx(it.name.c_str(), base_flags);
+                for (int i = 0; i < directory_Entity.size(); i++) {
+                    ImGui::TreeNodeEx(directory_Entity[i].name.c_str(), base_flags);
                     if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen()) {
-                        e = it;
-                        CORE_INFO("{0} is selected",it.name);
-                    }  
+                        e = directory_Entity[i];
+                        CORE_INFO("{0} is selected", directory_Entity[i].name);
+                        selected_entity = i;
+                    }
                 }
                 if (e.id != entt::null) {
-                    static int c = 0;
-                    ImGui::RadioButton("T", &c, 0); ImGui::SameLine();
-                    ImGui::RadioButton("R", &c, 1); ImGui::SameLine();
-                    ImGui::RadioButton("S", &c, 2);
-                   
-                    ui::DrawGizmo(camera,e,c==0? ui::Gizmo::Translate:c>1?ui::Gizmo::Rotate:ui::Gizmo::Scale);
+                    ImGui::RadioButton("T", &cur_operation, 0); ImGui::SameLine();
+                    ImGui::RadioButton("R", &cur_operation, 1); ImGui::SameLine();
+                    ImGui::RadioButton("S", &cur_operation, 2);
                 }
-
-            
                 ImGui::TreePop();
+            }
+            else {
+                selected_entity = -1;
             }
             PushStyleColor(ImGuiCol_Tab, tab_color_off);
             PushStyleColor(ImGuiCol_TabHovered, tab_color_on);
             PushStyleColor(ImGuiCol_TabActive, tab_color_on);
-
-            if (BeginTabItem(ICON_FK_TH_LARGE)) {
+            if (BeginTabItem("Grid")) {
                 PushItemWidth(130.0f);
                 Checkbox("Show Infinite Grid", &show_grid);
                 SliderFloat("Grid Cell Size", &grid_cell_size, 0.25f, 8.0f);
@@ -493,12 +652,9 @@ namespace scene {
                 ColorEdit4("Line Color Main", val_ptr(wide_line_color), color_flags);
                 EndTabItem();
             }
-
             PopStyleColor(3);
             EndTabBar();
-
             Unindent(5.0f);
-            ui::EndInspector();
         }
     }
     void Scene05::PrecomputeIBL(const std::string& hdri)
@@ -640,6 +796,3 @@ namespace scene {
 
     }
 }
-#include"../all.h"
-
-MAINSCENE(scene::Scene05, "01")
