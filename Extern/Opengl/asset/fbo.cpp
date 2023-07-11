@@ -316,9 +316,10 @@ void main() {
             if (depst_renderbuffer) {
               
                 depst_renderbuffer->Bind();
-                glViewport(0,0,width,height);
+               
             }
             glBindFramebuffer(GL_FRAMEBUFFER, id);
+            glViewport(0,0,width,height);
             curr_bound_framebuffer = id;
         }
     }

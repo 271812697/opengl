@@ -501,7 +501,6 @@ namespace scene {
         shadow_shader->SetUniform(1008, false);
         Renderer::Submit(ball[0].id, ball[1].id, ball[2].id);
         Renderer::Submit(wall.id,floor.id);
-        Renderer::Submit(ball[0].id, ball[1].id, ball[2].id);
         Renderer::Submit(floor.id);
         Renderer::Submit(korean_fire.id);
 
@@ -520,15 +519,11 @@ namespace scene {
         Renderer::Submit(point_light.id);
         Renderer::Submit(skybox.id);
         Renderer::Submit(ball[0].id, ball[1].id, ball[2].id);
-    
-        Renderer::Submit(floor.id);
+
         Renderer::Submit(wall.id);
-        Renderer::Submit(point_light.id);
+  
         Renderer::Submit(spotlight.id);
-        Renderer::Submit(skybox.id);
-        Renderer::Submit(point_light.id);
-        Renderer::Submit(floor.id);
-        Renderer::Submit(skybox.id);
+
         Renderer::Render();
         if (show_grid) {
             auto grid_shader = resource_manager.Get<Shader>(01);

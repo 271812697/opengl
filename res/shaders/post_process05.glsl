@@ -248,6 +248,7 @@ void main() {
     ldr_color+=texture(bloom_map, _uv).rgb;
 
     color = vec4(Linear2Gamma(ldr_color), 1.0);
+    //color = vec4(radiance, 1.0);
 }
 
 #endif
