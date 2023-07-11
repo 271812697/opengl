@@ -44,9 +44,8 @@ layout(location = 7) in vec4 bone_wt;
 layout(location = 250) uniform mat4 light_transform;
 
 
-layout(location = 0) out vec4 world_position;
 void main() {
-    world_position=self.transform *vec4(position, 1.0);
+    
     
     gl_Position = light_transform*self.transform *vec4(position, 1.0);  // keep in world space
 }
@@ -55,10 +54,31 @@ void main() {
 
 
 #ifdef fragment_shader
-layout(location = 0) in vec4 world_position;
+layout(location = 0) out vec4 color;
+#define NEAR_PLANE 0.1
+#define FAR_PLANE 100.0
+// 输入为 [0, 1] 的投影深度
+// 输出为 [0, 1] 的线性深度
+float getLinearizeDepth(float depth) {
+    float z = depth * 2.0 - 1.0; // Back to NDC
+    // 简单通过代入 [-1, 1] 验证结果为 [NEAR_PLANE, FAR_PLANE]
+    z =(2.0 * NEAR_PLANE * FAR_PLANE) / (FAR_PLANE + NEAR_PLANE - z * (FAR_PLANE - NEAR_PLANE));
+    return (z - NEAR_PLANE)/(FAR_PLANE - NEAR_PLANE);
+}
+
+layout(location = 5) uniform bool vsm;
+
 void main() {
-    //gl_FragDepth =length(world_position.xyz)/10.f;
-    return;
+     //if(!vsm)
+     //return;
+
+    float depth = getLinearizeDepth(gl_FragCoord.z);
+    color.r = depth;
+    color.g = depth * depth;
+    //color.b=1.0;
+    color.a=1.0;
+
+    
 }
 
 #endif

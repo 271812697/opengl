@@ -184,7 +184,8 @@ namespace scene {
     static float PCF_SampleRadius = 1.0f;
     static float lightWidth=1.0f;  // 光源的宽度
     static float SMDiffuse=1.0f;   // 阴影的弥散程度
-
+    static float  BIAS = 0.0005f;//偏移
+    static int shadow_type = 0;
     void Scene07::PrecomputeIBL(const std::string&hdri) {
         Renderer::SeamlessCubemap(true);
         Renderer::DepthTest(false);
@@ -284,6 +285,7 @@ namespace scene {
         resource_manager.Add(04, MakeAsset<Shader>("res\\shaders\\pbr07.glsl"));
         resource_manager.Add(05, MakeAsset<Shader>("res\\shaders\\post_process05.glsl"));
         resource_manager.Add(06, MakeAsset<Shader>("res\\shaders\\shadow07.glsl"));
+        resource_manager.Add(07, MakeAsset<Shader>("res\\shaders\\shadow07vsm.glsl"));
         resource_manager.Add(12, MakeAsset<Material>(resource_manager.Get<Shader>(02)));
         resource_manager.Add(13, MakeAsset<Material>(resource_manager.Get<Shader>(03)));
         resource_manager.Add(14, MakeAsset<Material>(resource_manager.Get<Shader>(04)));
@@ -400,8 +402,10 @@ namespace scene {
             ubo.SetUniform(5, range);
             ubo.SetUniform(6, light_transform);
             ubo.SetUniform(7,&lightWidth);
-            ubo.SetUniform(8,&SMDiffuse);
+            ubo.SetUniform(8, &SMDiffuse);
             ubo.SetUniform(9, &PCF_SampleRadius);
+            ubo.SetUniform(10, &BIAS);
+            ubo.SetUniform(11,&shadow_type);
         }
 
         if (auto& ubo = UBOs[2]; true) {
@@ -436,31 +440,45 @@ namespace scene {
         FBO& framebuffer_2 = FBOs[2];
         FBO& framebuffer_3 = FBOs[3];
         FBO& framebuffer_4 = FBOs[4];
+        FBO& framebuffer_5 = FBOs[5];
         // ------------------------------ shadow pass 1 ------------------------------
 
 
         framebuffer_0.Clear(-1);
         framebuffer_0.Bind();
         auto shadow_shader = resource_manager.Get<Shader>(06);
-
-
-
-
         shadow_shader->SetUniform(250, pl_transform);
-
-
-
-
+        shadow_shader->SetUniform(5, false);
         Renderer::Submit(ball[0].id, ball[1].id, ball[2].id);
         Renderer::Submit(wall.id, floor.id);
-
-
-
         Renderer::Render(shadow_shader);
+        framebuffer_0.Unbind();
+
+        framebuffer_1.Clear();
+        framebuffer_1.Bind();
+       
+        shadow_shader->SetUniform(250, pl_transform);
+        shadow_shader->SetUniform(5, true);
+        Renderer::Submit(ball[0].id, ball[1].id, ball[2].id);
+        Renderer::Submit(wall.id, floor.id);
+        Renderer::Render(shadow_shader);
+        framebuffer_1.Unbind();
+
+        framebuffer_1.GetColorTexture(0).Bind(14);
+        framebuffer_5.Bind();
+        auto shadowvsm_shader = resource_manager.Get<Shader>(07);
+        shadowvsm_shader->Bind();shadowvsm_shader->SetUniform(5,true);
+        Mesh::DrawQuad();
+        shadowvsm_shader->Bind();shadowvsm_shader->SetUniform(5,false);
+        Mesh::DrawQuad();
+        framebuffer_5.Unbind();
+
+
 
 
         // ------------------------------ MRT render pass ------------------------------
         framebuffer_0.GetDepthTexture().Bind(15);
+        framebuffer_5.GetColorTexture(0).Bind(13);
         framebuffer_2.Clear();
         framebuffer_2.Bind();
 
@@ -476,6 +494,8 @@ namespace scene {
 
 
         framebuffer_2.Unbind();
+
+
 
         // ------------------------------ MSAA resolve pass ------------------------------
 
@@ -503,12 +523,21 @@ namespace scene {
     }
 
     void Scene07::OnImGuiRender(float dt) {   
-        
+        static float bias = 0.05;
         ImGui::Checkbox("Ball Bounce", &bounce_ball);
         ImGui::SliderFloat("PCF_SampleRadius",&PCF_SampleRadius,0,5);
         ImGui::SliderFloat("LightWidth", &lightWidth, 0, 5);
         ImGui::SliderFloat("SMDiffuse", &SMDiffuse, 0, 5);
+        ImGui::SliderFloat("BIAS",&bias,0.05,0.5);
+        BIAS = bias / 100.0;
+        ImGui::RadioButton("shadow map",&shadow_type,0);
+        ImGui::RadioButton("PCF", &shadow_type, 1);
+        ImGui::RadioButton("PCSS", &shadow_type, 2);
+        ImGui::RadioButton("VSM", &shadow_type, 3);
+       
         ImGui::Text("this is a test");
+        ImGui::Image((void*)FBOs[0].GetDepthTexture().ID(), ImVec2(500, 500), ImVec2(0.f, 1.f), ImVec2(1.f, 0.f));
+        ImGui::Image((void*)FBOs[5].GetColorTexture(0).ID(), ImVec2(500, 500), ImVec2(0.f, 1.f), ImVec2(1.f, 0.f));
         if (ImGui::TreeNode("Entity")) {
             static ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Selected |
                 ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
@@ -543,9 +572,12 @@ namespace scene {
         AddFBO(w, h);
         AddFBO(w, h);
         AddFBO(w / 2, h / 2);
+        AddFBO(shadow_with, shadow_with);
 
         FBOs[0].AddDepStTexture();
-        FBOs[1].AddDepStTexture();;
+        FBOs[5].AddColorTexture(1);
+        FBOs[1].AddDepStTexture();
+        FBOs[1].AddColorTexture(1);
         FBOs[2].AddColorTexture(2, true);    // multisampled textures for MSAA
         FBOs[2].AddDepStRenderBuffer(true);  // multisampled RBO for MSAA
         FBOs[3].AddColorTexture(2);

@@ -28,6 +28,8 @@ layout(std140, binding = 1) uniform PL {
     float lightWidth;  // 光源的宽度
     float SMDiffuse;   // 阴影的弥散程度
     float PCF_SampleRadius;       // PCF 采样半径
+    float BIAS ; 
+    int shadow_type;
 } pl;
 
 layout(std140, binding = 2) uniform SL {
@@ -87,7 +89,7 @@ void main() {
     mat4 MVP = camera.projection * camera.view * self.transform;
 
     gl_Position = MVP * vec4(position, 1.0);
-    FragPosLightSpace=pl.light_transform*self.transform *  vec4(position, 1.0);
+    FragPosLightSpace=pl.light_transform*self.transform *vec4(position, 1.0);  // keep in world space
     _position = vec3(self.transform *  vec4(position, 1.0));
     _normal   = normalize(vec3(self.transform * vec4(normal, 0.0)));
     _tangent  = normalize(vec3(self.transform * vec4(tangent, 0.0)));
@@ -1274,9 +1276,9 @@ layout(location = 4) uniform bool enable_shadow;
 
 // shadow map is directly controlled by scene code as it comes from the framebuffer so this
 // texture unit must be unique, otherwise it could be replaced by textures in other shaders
+layout(binding = 13) uniform sampler2D d_d2_filter;
 layout(binding = 15) uniform sampler2D  depthMap;
 
-#define BIAS 0.005
 #define NEAR_PLANE 0.1
 #define FAR_PLANE 100.0
 
@@ -1309,7 +1311,7 @@ float ShadowCalculation(vec4 fragPosLightSpace) {
     // 当前片元的深度
     float currentDepth = projCoords.z;
     // 判断是否处于阴影当中
-    float shadow = currentDepth-BIAS > closestDepth  ? 1.0 : 0.0;
+    float shadow = currentDepth-pl.BIAS > closestDepth  ? 1.0 : 0.0;
     return 1.0 - shadow;
 }
 
@@ -1328,7 +1330,7 @@ float PCF(vec4 fragPosLightSpace, float radius) {
     for(int x = -PCF_RADIUS; x <= PCF_RADIUS; ++x) {
         for(int y = -PCF_RADIUS; y <= PCF_RADIUS; ++y) {
             float shadowMapDepth = texture(depthMap, projCoords.xy + radius*vec2(x, y) * texelSize).r; 
-            shadow += currentDepth-BIAS > shadowMapDepth  ? 1.0 : 0.0;
+            shadow += currentDepth-pl.BIAS > shadowMapDepth  ? 1.0 : 0.0;
         }
     }
     float total = (2*PCF_RADIUS+1);
@@ -1357,7 +1359,7 @@ float findBlocker(vec2 uv, float zReceiver) {
             float shadowMapDepth = texture(depthMap, uv + r*vec2(x, y) * texelSize).r;
             // [0, 1] => [-1, 1]
             shadowMapDepth = getLinearizeDepth(shadowMapDepth * 2.0 - 1.0);
-            if(zReceiver - BIAS > shadowMapDepth) {
+            if(zReceiver - pl.BIAS > shadowMapDepth) {
                 ret += shadowMapDepth;
                 ++blockers;
             }
@@ -1393,6 +1395,29 @@ float PCSS(vec4 fragPosLightSpace){
     // STEP 3: filtering
     return PCF(fragPosLightSpace, filterRadius);
 }
+
+
+
+// VSM 算法
+float VSM(vec4 fragPosLightSpace) {
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    // 转换为线性深度
+    float depth = getLinearizeDepth(projCoords.z);
+    // [-1, 1] => [0, 1]
+    projCoords = projCoords * 0.5 + 0.5;
+    if(projCoords.x<0||projCoords.x>1||projCoords.y<0||projCoords.y>1)return 0.0;
+    vec2 d_d2 = texture(d_d2_filter, projCoords.xy).rg;
+    float var = d_d2.y - d_d2.x * d_d2.x; // E(X-EX)^2 = EX^2-E^2X
+
+    // 不满足不等式, 直接可见
+    if(depth - pl.BIAS < d_d2.x){
+        return 1.0;
+    }
+    else{
+        float t_minus_mu = depth - d_d2.x;
+        return var/(var + t_minus_mu*t_minus_mu);
+    }
+}
 void main() {
     Pixel px;
     px._position = _position;
@@ -1410,9 +1435,17 @@ void main() {
 
 
     if (true) {  // the point light is always enabled
-        float visibility = ShadowCalculation(FragPosLightSpace);
+        float visibility=1.0f;
+        switch(pl.shadow_type){
+            case 0:visibility=ShadowCalculation(FragPosLightSpace);break;
+            case 1:visibility=PCF(FragPosLightSpace,1.0);break;
+            case 2:visibility=PCSS(FragPosLightSpace);break;
+            case 3:visibility=VSM(FragPosLightSpace);break;
+
+        }
+        //float visibility = ShadowCalculation(FragPosLightSpace);
         //float visibility = PCF(FragPosLightSpace,1.0);
-        //float visibility = PCSS(FragPosLightSpace);
+       
         vec3 pc = EvaluateAPL(px, pl.position.xyz, pl.range, pl.linear, pl.quadratic, visibility);
         Lo += pc * pl.color.rgb * pl.intensity;
     }
