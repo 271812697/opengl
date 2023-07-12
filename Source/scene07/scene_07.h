@@ -21,7 +21,8 @@ namespace scene {
         Entity camera;
         Entity skybox;
         Entity point_light;
-        Entity spotlight;
+        Entity dir_light;
+       
         Entity floor;
         Entity wall;
         Entity ball[3];

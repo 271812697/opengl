@@ -46,7 +46,7 @@ int main(int, char**) {
 
         deviceSettings.contextMajorVersion = 4;
         deviceSettings.contextMinorVersion = 6;
-        windowSettings.title = "PCSS Shadow and Animation";
+        windowSettings.title = "PCSS PCF VSM CSM Shadow";
         windowSettings.width = 1600;
         windowSettings.height = 900;
         windowSettings.maximized = true;
@@ -186,6 +186,115 @@ namespace scene {
     static float SMDiffuse=1.0f;   // 阴影的弥散程度
     static float  BIAS = 0.0005f;//偏移
     static int shadow_type = 0;
+
+    //csm相关的
+    unsigned int lightFBO;
+    unsigned int lightDepthMaps;
+    constexpr unsigned int depthMapResolution = 4096;
+    float cameraNearPlane = 0.1f;
+    float cameraFarPlane = 100.0f;
+    std::vector<glm::vec4> shadowCascadeLevels{ {cameraFarPlane / 50.0f,0,0,0}, {cameraFarPlane / 25.0f,0,0,0}, {cameraFarPlane / 10.0f,0,0,0}, {cameraFarPlane / 2.0f,0,0,0} };
+    std::vector<glm::vec4> getFrustumCornersWorldSpace(const glm::mat4& projview)
+    {
+        const auto inv = glm::inverse(projview);
+
+        std::vector<glm::vec4> frustumCorners;
+        for (unsigned int x = 0; x < 2; ++x)
+        {
+            for (unsigned int y = 0; y < 2; ++y)
+            {
+                for (unsigned int z = 0; z < 2; ++z)
+                {
+                    const glm::vec4 pt = inv * glm::vec4(2.0f * x - 1.0f, 2.0f * y - 1.0f, 2.0f * z - 1.0f, 1.0f);
+                    frustumCorners.push_back(pt / pt.w);
+                }
+            }
+        }
+
+        return frustumCorners;
+    }
+
+
+    std::vector<glm::vec4> getFrustumCornersWorldSpace(const glm::mat4& proj, const glm::mat4& view)
+    {
+        return getFrustumCornersWorldSpace(proj * view);
+    }
+    glm::mat4 getLightSpaceMatrix(const float nearPlane, const float farPlane, const glm::mat4& view, const glm::vec3& lightdir)
+    {
+        const auto proj = glm::perspective(
+            glm::radians(60.0f), 1.0f, nearPlane,
+            farPlane);
+        const auto corners = getFrustumCornersWorldSpace(proj, view);
+
+        glm::vec3 center = glm::vec3(0, 0, 0);
+        for (const auto& v : corners)
+        {
+            center += glm::vec3(v);
+        }
+        center /= corners.size();
+
+        const auto lightView = glm::lookAt(center + lightdir, center, glm::vec3(0.0f, 1.0f, 0.0f));
+
+        float minX = std::numeric_limits<float>::max();
+        float maxX = std::numeric_limits<float>::lowest();
+        float minY = std::numeric_limits<float>::max();
+        float maxY = std::numeric_limits<float>::lowest();
+        float minZ = std::numeric_limits<float>::max();
+        float maxZ = std::numeric_limits<float>::lowest();
+        for (const auto& v : corners)
+        {
+            const auto trf = lightView * v;
+            minX = std::min(minX, trf.x);
+            maxX = std::max(maxX, trf.x);
+            minY = std::min(minY, trf.y);
+            maxY = std::max(maxY, trf.y);
+            minZ = std::min(minZ, trf.z);
+            maxZ = std::max(maxZ, trf.z);
+        }
+
+        // Tune this parameter according to the scene
+        constexpr float zMult = 10.0f;
+        if (minZ < 0)
+        {
+            minZ *= zMult;
+        }
+        else
+        {
+            minZ /= zMult;
+        }
+        if (maxZ < 0)
+        {
+            maxZ /= zMult;
+        }
+        else
+        {
+            maxZ *= zMult;
+        }
+
+        const glm::mat4 lightProjection = glm::ortho(minX, maxX, minY, maxY, minZ, maxZ);
+        return lightProjection * lightView;
+    }
+    std::vector<glm::mat4> getLightSpaceMatrices(const glm::mat4& view,const glm::vec3& dir)
+    {
+        std::vector<glm::mat4> ret;
+        for (size_t i = 0; i < shadowCascadeLevels.size() + 1; ++i)
+        {
+            if (i == 0)
+            {
+                ret.push_back(getLightSpaceMatrix(cameraNearPlane, shadowCascadeLevels[i].x,view,dir));
+            }
+            else if (i < shadowCascadeLevels.size())
+            {
+                ret.push_back(getLightSpaceMatrix(shadowCascadeLevels[i - 1].x, shadowCascadeLevels[i].x,view,dir));
+            }
+            else
+            {
+                ret.push_back(getLightSpaceMatrix(shadowCascadeLevels[i - 1].x, cameraFarPlane,view,dir));
+            }
+        }
+        return ret;
+    }
+
     void Scene07::PrecomputeIBL(const std::string&hdri) {
         Renderer::SeamlessCubemap(true);
         Renderer::DepthTest(false);
@@ -286,6 +395,7 @@ namespace scene {
         resource_manager.Add(05, MakeAsset<Shader>("res\\shaders\\post_process05.glsl"));
         resource_manager.Add(06, MakeAsset<Shader>("res\\shaders\\shadow07.glsl"));
         resource_manager.Add(07, MakeAsset<Shader>("res\\shaders\\shadow07vsm.glsl"));
+        resource_manager.Add(8, MakeAsset<Shader>("res\\shaders\\shadow07csm.glsl"));
         resource_manager.Add(12, MakeAsset<Material>(resource_manager.Get<Shader>(02)));
         resource_manager.Add(13, MakeAsset<Material>(resource_manager.Get<Shader>(03)));
         resource_manager.Add(14, MakeAsset<Material>(resource_manager.Get<Shader>(04)));
@@ -323,15 +433,15 @@ namespace scene {
             mat.SetUniform(5, 2.0f);
         }
 
-        spotlight = CreateEntity("Spotlight");
-        spotlight.AddComponent<Mesh>(Primitive::Sphere);
-        spotlight.GetComponent<Transform>().Translate(vec3(0.0f, 10.0f, -7.0f));
-        spotlight.GetComponent<Transform>().Scale(0.1f);
-        spotlight.AddComponent<Spotlight>(color::white, 13.8f);
-        spotlight.GetComponent<Spotlight>().SetCutoff(20.0f, 10.0f, 45.0f);
+        dir_light = CreateEntity("Directionlight");
+        dir_light.AddComponent<Mesh>(Primitive::Sphere);
+        dir_light.GetComponent<Transform>().Translate(vec3(0.0f, 10.0f, -7.0f));
+        dir_light.GetComponent<Transform>().Scale(0.1f);
+        dir_light.AddComponent<DirectionLight>(color::white, 13.8f);
+     
 
-        if (auto& mat = spotlight.AddComponent<Material>(resource_manager.Get<Material>(13)); true) {
-            auto& sl = spotlight.GetComponent<Spotlight>();
+        if (auto& mat = dir_light.AddComponent<Material>(resource_manager.Get<Material>(13)); true) {
+            auto& sl = dir_light.GetComponent<DirectionLight>();
             mat.SetUniform(3, sl.color);
             mat.SetUniform(4, sl.intensity);
             mat.SetUniform(5, 2.0f);
@@ -353,6 +463,42 @@ namespace scene {
             SetupMaterial(ball[i].AddComponent<Material>(resource_manager.Get<Material>(14)), i + 2);
         }
         
+
+
+        //配置CSM的阴影贴图
+        // configure light FBO
+        // -----------------------
+        glGenFramebuffers(1, &lightFBO);
+
+        glGenTextures(1, &lightDepthMaps);
+        glBindTexture(GL_TEXTURE_2D_ARRAY, lightDepthMaps);
+        glTexImage3D(
+            GL_TEXTURE_2D_ARRAY, 0, GL_DEPTH_COMPONENT32F, depthMapResolution, depthMapResolution, int(shadowCascadeLevels.size()) + 1,
+            0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+
+        constexpr float bordercolor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+        glTexParameterfv(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BORDER_COLOR, bordercolor);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, lightFBO);
+        glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, lightDepthMaps, 0);
+        glDrawBuffer(GL_NONE);
+        glReadBuffer(GL_NONE);
+
+        int status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+        if (status != GL_FRAMEBUFFER_COMPLETE)
+        {
+            std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!";
+            throw 0;
+        }
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
         Renderer::MSAA(true);
         Renderer::DepthTest(true);
         Renderer::AlphaBlend(true);
@@ -408,18 +554,18 @@ namespace scene {
             ubo.SetUniform(11,&shadow_type);
         }
 
-        if (auto& ubo = UBOs[2]; true) {
-            auto& sl = spotlight.GetComponent<Spotlight>();
-            auto& st = spotlight.GetComponent<Transform>();
-            float inner_cos = sl.GetInnerCosine();
-            float outer_cos = sl.GetOuterCosine();
-            ubo.SetUniform(0, val_ptr(sl.color));
-            ubo.SetUniform(1, val_ptr(st.position));
-            ubo.SetUniform(2, val_ptr(st.up));
-            ubo.SetUniform(3, val_ptr(sl.intensity));
-            ubo.SetUniform(4, val_ptr(inner_cos));
-            ubo.SetUniform(5, val_ptr(outer_cos));
-            ubo.SetUniform(6, val_ptr(sl.range));
+        if (auto& ubo = UBOs[3]; true) {
+            auto& sl = dir_light.GetComponent<DirectionLight>();
+            auto& st = dir_light.GetComponent<Transform>();
+            const auto lightMatrices=getLightSpaceMatrices(main_camera.GetViewMatrix(),-st.forward);
+            vec3 light_dir[] = { -st.forward };
+            int cascadeCount = shadowCascadeLevels.size();
+            ubo.SetUniform(0, lightMatrices.data());
+            ubo.SetUniform(1, shadowCascadeLevels.data());
+            ubo.SetUniform(2,&cascadeCount);
+            ubo.SetUniform(3,light_dir);
+
+
         }
         // update entities
          // simulate balls gravity using a cheap quadratic easing factor
@@ -454,6 +600,7 @@ namespace scene {
         Renderer::Render(shadow_shader);
         framebuffer_0.Unbind();
 
+        //vsm 得到x、x2
         framebuffer_1.Clear();
         framebuffer_1.Bind();
        
@@ -463,7 +610,7 @@ namespace scene {
         Renderer::Submit(wall.id, floor.id);
         Renderer::Render(shadow_shader);
         framebuffer_1.Unbind();
-
+        //vsm 做平均得到Ex、Ex2
         framebuffer_1.GetColorTexture(0).Bind(14);
         framebuffer_5.Bind();
         auto shadowvsm_shader = resource_manager.Get<Shader>(07);
@@ -473,12 +620,29 @@ namespace scene {
         Mesh::DrawQuad();
         framebuffer_5.Unbind();
 
+        //csm 
+        auto shadowcsm_shader = resource_manager.Get<Shader>(8);
+        glBindFramebuffer(GL_FRAMEBUFFER, lightFBO);
+        glViewport(0, 0, depthMapResolution, depthMapResolution);
+        glClear(GL_DEPTH_BUFFER_BIT);
+        glCullFace(GL_FRONT);  // peter panning
+        Renderer::Submit(ball[0].id, ball[1].id, ball[2].id);
+        Renderer::Submit(wall.id, floor.id);
+        Renderer::Render(shadowcsm_shader);
+        glCullFace(GL_BACK);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+       
+
 
 
 
         // ------------------------------ MRT render pass ------------------------------
         framebuffer_0.GetDepthTexture().Bind(15);
         framebuffer_5.GetColorTexture(0).Bind(13);
+
+
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D_ARRAY, lightDepthMaps);
         framebuffer_2.Clear();
         framebuffer_2.Bind();
 
@@ -489,7 +653,7 @@ namespace scene {
 
         Renderer::Submit(wall.id);
 
-        Renderer::Submit(spotlight.id);
+        Renderer::Submit(dir_light.id);
         Renderer::Render();
 
 
@@ -534,10 +698,16 @@ namespace scene {
         ImGui::RadioButton("PCF", &shadow_type, 1);
         ImGui::RadioButton("PCSS", &shadow_type, 2);
         ImGui::RadioButton("VSM", &shadow_type, 3);
+        ImGui::RadioButton("CSM", &shadow_type, 4);
        
         ImGui::Text("this is a test");
+        ImGui::TextColored(ImVec4(1,1,0,1),"ShadowMap");
         ImGui::Image((void*)FBOs[0].GetDepthTexture().ID(), ImVec2(500, 500), ImVec2(0.f, 1.f), ImVec2(1.f, 0.f));
+        ImGui::TextColored(ImVec4(1, 1, 0, 1), "VSM ShadowMap");
         ImGui::Image((void*)FBOs[5].GetColorTexture(0).ID(), ImVec2(500, 500), ImVec2(0.f, 1.f), ImVec2(1.f, 0.f));
+        ImGui::TextColored(ImVec4(1, 1, 0, 1), "CSM ShadowMap");
+        ImGui::Image((void*)lightDepthMaps, ImVec2(500, 500), ImVec2(0.f, 1.f), ImVec2(1.f, 0.f));
+       
         if (ImGui::TreeNode("Entity")) {
             static ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_Selected |
                 ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;

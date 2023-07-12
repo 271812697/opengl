@@ -180,10 +180,10 @@ namespace asset {
             CORE_ASERT(std_140_430.find(u_type) != std_140_430.end(), "Unsupported uniform type \"{0}\"", unif_name);
 
             // GLuint base_align = u_arr_size <= 1 ? std_140_430.at(u_type).x : 16U;
-            GLuint byte_size = u_arr_size <= 1 ? std_140_430.at(u_type).y : 16U * u_arr_size;
+            GLuint byte_size = u_arr_size <= 1 ? std_140_430.at(u_type).y : std_140_430.at(u_type).y * u_arr_size;
 
             if (u_arr_size > 1) {
-                CORE_ASERT(u_arr_stride == 16U, "Array element is not padded to the size of a vec4!");
+                CORE_ASERT(u_arr_stride == 16U|| u_arr_stride == 64U, "Array element is not padded to the size of a vec4!");
             }
 
             this->offset_vec.push_back(u_offset);

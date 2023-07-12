@@ -43,9 +43,10 @@ layout(std140, binding = 2) uniform SL {
 } sl;
 
 layout(std140, binding = 3) uniform DL {
-    vec4  color;
-    vec4  direction[5];
-    float intensity;
+    mat4 lightSpaceMatrices[16];//csm各级阴影贴图对应的光空间矩阵
+    float cascadePlaneDistances[16];
+    int cascadeCount;   // number of frusta - 1
+    vec4 lightDir;
 } dl;
 
 // default-block (loose) uniform locations >= 1000 are reserved for internal use only
@@ -1278,7 +1279,7 @@ layout(location = 4) uniform bool enable_shadow;
 // texture unit must be unique, otherwise it could be replaced by textures in other shaders
 layout(binding = 13) uniform sampler2D d_d2_filter;
 layout(binding = 15) uniform sampler2D  depthMap;
-
+layout(binding = 1) uniform sampler2DArray shadowMap;
 #define NEAR_PLANE 0.1
 #define FAR_PLANE 100.0
 
@@ -1418,6 +1419,72 @@ float VSM(vec4 fragPosLightSpace) {
         return var/(var + t_minus_mu*t_minus_mu);
     }
 }
+
+
+//CSM 算法
+float CSMShadowCalculation(vec3 fragPosWorldSpace)
+{
+    // select cascade layer
+    vec4 fragPosViewSpace = camera.view * vec4(fragPosWorldSpace, 1.0);
+    float depthValue = abs(fragPosViewSpace.z);
+
+    int layer = -1;
+    for (int i = 0; i < dl.cascadeCount; ++i)
+    {
+        if (depthValue < dl.cascadePlaneDistances[i])
+        {
+            layer = i;
+            break;
+        }
+    }
+    if (layer == -1)
+    {
+        layer = dl.cascadeCount;
+    }
+
+    vec4 fragPosLightSpace = dl.lightSpaceMatrices[layer] * vec4(fragPosWorldSpace, 1.0);
+    // perform perspective divide
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    // transform to [0,1] range
+    projCoords = projCoords * 0.5 + 0.5;
+
+    // get depth of current fragment from light's perspective
+    float currentDepth = projCoords.z;
+
+    // keep the shadow at 1.0 when outside the far_plane region of the light's frustum.
+    if (currentDepth > 1.0)
+    {
+        return 1.0;
+    }
+    // calculate bias (based on depth map resolution and slope)
+    vec3 normal = normalize(_normal);
+    float bias = max(0.05 * (1.0 - dot(normal, dl.lightDir.xyz)), 0.005);
+    const float biasModifier = 0.5f;
+    if (layer == dl.cascadeCount)
+    {
+        bias *= 1 / (FAR_PLANE * biasModifier);
+    }
+    else
+    {
+        bias *= 1 / (dl.cascadePlaneDistances[layer] * biasModifier);
+    }
+
+    // PCF
+    float shadow = 0.0;
+    vec2 texelSize = 1.0 / vec2(textureSize(shadowMap, 0));
+    for(int x = -1; x <= 1; ++x)
+    {
+        for(int y = -1; y <= 1; ++y)
+        {
+            float pcfDepth = texture(shadowMap, vec3(projCoords.xy + vec2(x, y) * texelSize, layer)).r;
+            shadow += (currentDepth - bias) > pcfDepth ? 1.0 : 0.0;        
+        }    
+    }
+    shadow /= 9.0;
+        
+    return 1.0-shadow;
+}
+
 void main() {
     Pixel px;
     px._position = _position;
@@ -1441,11 +1508,12 @@ void main() {
             case 1:visibility=PCF(FragPosLightSpace,1.0);break;
             case 2:visibility=PCSS(FragPosLightSpace);break;
             case 3:visibility=VSM(FragPosLightSpace);break;
+            case 4:visibility= CSMShadowCalculation(_position);break;
 
         }
         //float visibility = ShadowCalculation(FragPosLightSpace);
         //float visibility = PCF(FragPosLightSpace,1.0);
-       
+      
         vec3 pc = EvaluateAPL(px, pl.position.xyz, pl.range, pl.linear, pl.quadratic, visibility);
         Lo += pc * pl.color.rgb * pl.intensity;
     }
