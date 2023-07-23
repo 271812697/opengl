@@ -51,6 +51,7 @@ namespace asset {
       public:  // rule of zero
         CShader(const std::string& source_path);
         CShader(const std::string& binary_path, GLenum format);
+        CShader(const std::string& source_code,const std::string& source_path);
 
       public:
         void Dispatch(GLuint nx, GLuint ny, GLuint nz = 1) const;

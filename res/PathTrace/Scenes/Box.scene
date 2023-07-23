@@ -35,9 +35,12 @@ material small_box_white
 	color 0.725 0.71 0.68
 }
 
-material large_box_white
+material alien
 {
 	color 0.725 0.71 0.68
+	metallic 0.122
+	roughness 0.150
+	albedotexture  Texture/MyColorBar.png
 }
 
 material red
@@ -50,67 +53,112 @@ material green
 	color 0.14 0.45 0.091
 }
 
-mesh
+material checker
 {
-	file Box/cbox_ceiling.obj
-	material ceiling_white
-	position .278 .5488 .27955
-	scale 0.01 0.01 0.01
+	albedotexture Texture/checker.png
+	roughness 0.5
+}
+
+material white
+{
+	color 0 0.29 0.88
+	roughness 0.0
 }
 
 mesh
 {
-	file Box/cbox_floor.obj
-	material floor_white
-	position .2756 0 .2796
-	scale 0.01 0.01 0.01
+	file Scene/Mesh000.obj
+	material white
 }
 
 mesh
 {
-	file Box/cbox_back.obj
-	material back_wall_white
-	position .2764 .2744 .5592
-	scale 0.01 0.01 0.01
+	file Scene/Mesh001.obj
+	material white
 }
 
 mesh
 {
-	file Box/cbox_smallbox.obj
-	material small_box_white
-	position .1855 .0835 .169
-	scale 0.01 0.01 0.01
+	file Scene/Mesh050.obj
+	material checker
 }
 
 mesh
 {
-	file Box/cbox_largebox.obj
-	material large_box_white
+	file Scene/alien-20.obj
+	material alien
 	position .3685 .166 .35125
-	scale 0.01 0.01 0.01
+	scale 1 1 1
 }
-
 mesh
 {
-	file Box/cbox_greenwall.obj
+	file Scene/alien-21.obj
 	material green
-	position 0 .2744 .2796
-	scale 0.01 0.01 0.01
-}
-
-mesh
-{
-	file Box/cbox_redwall.obj
-	material red
-	position .5536 .2744 .2796
-	scale 0.01 0.01 0.01
+	position .3685 2.166 .35125
+	scale 1 1 1
 }
 
 light
 {
-	type quad
-	position  .34299999 .54779997 .22700010
-	v1 .34299999 .54779997 .33200008
-	v2 .21300001 .54779997 .22700010
-	emission 17 12 4
+	position 1.0 0.0 0.0
+	emission 1.0 1.0 1.0
+	radius 1.0
+	v1 0.0 0.0 0.0
+	v2 0.0 0.0 0.0
+	type distant
 }
+
+light
+{
+	position -1.0 0.0 0.0
+	emission 1.0 1.0 1.0
+	radius 1.0
+	v1 0.0 0.0 0.0
+	v2 0.0 0.0 0.0
+	type distant
+}
+
+light
+{
+	position 0.0 0.0 1.0
+	emission 1.0 1.0 1.0
+	radius 1.0
+	v1 0.0 0.0 0.0
+	v2 0.0 0.0 0.0
+	type distant
+}
+
+light
+{
+	position 0.0 0.0 -1.0
+	emission 1.0 1.0 1.0
+	radius 1.0
+	v1 0.0 0.0 0.0
+	v2 0.0 0.0 0.0
+	type distant
+}
+
+light
+{
+	position 0.0 -1.0 0.0
+	emission 1.0 1.0 1.0
+	radius 1.0
+	v1 0.0 0.0 0.0
+	v2 0.0 0.0 0.0
+	type distant
+}
+
+light
+{
+	position 0.0 1.0 0.0
+	emission 1.0 1.0 1.0
+	radius 1.0
+	v1 0.0 0.0 0.0
+	v2 0.0 0.0 0.0
+	type distant
+}
+
+
+
+
+

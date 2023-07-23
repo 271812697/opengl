@@ -20,9 +20,17 @@ cmake ..
 
 # Screenshots
 
-## **path Trace**
+## Render by two ways
 
-![image-20230703001754290](README.assets/image-20230703001754290.png)
+1. acquired by path Trace
+
+![image-20230723223149759](README.assets/image-20230723223149759.png)
+
+ 2.acquired by by Raster
+
+![image-20230723223315971](README.assets/image-20230723223315971.png)
+
+
 
 ## Fluid simulation
 

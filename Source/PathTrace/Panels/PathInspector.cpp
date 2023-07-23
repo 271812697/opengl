@@ -6,6 +6,7 @@
 #include"UI/Widgets/CustomWidget.h"
 #include"UI/Widgets/Buttons/Button.h"
 #include"../PathTrace.h"
+#include"ImGuizmo.h"
 using namespace UI::Widgets;
 using namespace PathTrace;
 
@@ -36,6 +37,7 @@ void PathInspector::InstallUI()
 		GetRenderer()->ReloadShaders();
 
 	};
+	CreateWidget<UI::Widgets::Selection::CheckBox>(false, "Raster").AddPlugin<UI::Plugins::DataDispatcher<bool>>().RegisterReference(GetRenderer()->raster);
 	auto& Sample = (CreateWidget<UI::Widgets::Texts::TextColored>("Samples", UI::Types::Color(1.0f, 1.0f, 0.0f, 1.0f))).AddPlugin<UI::Plugins::DataDispatcher<std::string>>();
 	Sample.RegisterGatherer([]() {
 		std::string a = "Samples: ";
@@ -66,7 +68,7 @@ void PathInspector::InstallUI()
 		GetScene()->AddEnvMap(envMaps[cur]);
 	};
 
-	auto& mouseDelta = CreateWidget<UI::Widgets::Sliders::SliderFloat>(0.001f, 1.0f, 0.5f, UI::Widgets::Sliders::ESliderOrientation::HORIZONTAL, "Mouse sensitivity").AddPlugin<UI::Plugins::DataDispatcher<float>>();
+	auto& mouseDelta = CreateWidget<UI::Widgets::Sliders::SliderFloat>(0.001f, 0.01f, 0.01f, UI::Widgets::Sliders::ESliderOrientation::HORIZONTAL, "Mouse sensitivity").AddPlugin<UI::Plugins::DataDispatcher<float>>();
 	mouseDelta.RegisterReference(mouseSensitivity);
 
 	bool optionsChanged = false;
@@ -132,16 +134,29 @@ void PathInspector::InstallUI()
 		return temp;
 		});
 	auto object = &CreateWidget<UI::Widgets::Layout::GroupCollapsable>("Mesh Instance");
+	//object->closable = true;
+	object->CloseEvent += []() {
+		selectedInstance = -1;
+	};
 	auto& MeshInstance = object->CreateWidget<UI::Widgets::Selection::ComboBox>(0);
+	MeshInstance.ValueChangedEvent += [](int v) {
+		selectedInstance = v;
+	};
 	for (int i = 0; i < GetScene()->meshInstances.size(); i++) {
 		MeshInstance.choices.emplace(i, GetScene()->meshInstances[i].name);
 	}
 
+	
+	object->OpenEvent += [&MeshInstance]() {
+		selectedInstance = MeshInstance.currentChoice;
+	};
+
+
 	object->CreateWidget<UI::Widgets::CustomWidget>().DrawIn += [&MeshInstance]() {
 
-		bool objectPropChanged = false;
+		objectPropChanged = false;
 		ImGui::Text("Material Properties");
-		Material* mat = &GetScene()->materials[GetScene()->meshInstances[MeshInstance.currentChoice].materialID];
+		Material* mat = &GetScene()->materials[GetScene()->meshInstances[selectedInstance].materialID];
 		// Gamma correction for color picker. Internally, the renderer uses linear RGB values for colors
 		Vec3 albedo = Vec3::Pow(mat->baseColor, 1.0 / 2.2);
 		objectPropChanged |= ImGui::ColorEdit3("Albedo (Gamma Corrected)", (float*)(&albedo), 0);
@@ -186,8 +201,24 @@ void PathInspector::InstallUI()
 
 		if (alphaMode != AlphaMode::Opaque)
 			objectPropChanged |= ImGui::SliderFloat("Opacity", &mat->opacity, 0.0f, 1.0f);
-		if (objectPropChanged)
-			GetScene()->RebuildInstances();
+
+		ImGui::Checkbox("Show Transform", &showTransform);
+		if (showTransform) {
+		float matrixTranslation[3], matrixRotation[3], matrixScale[3];
+		Mat4 xform = GetScene()->meshInstances[selectedInstance].transform;
+		ImGuizmo::DecomposeMatrixToComponents((float*)&xform, matrixTranslation, matrixRotation, matrixScale);
+		ImGui::DragScalarN("T", ImGuiDataType_Float, matrixTranslation, 3, 0.025f);
+		ImGui::DragScalarN("R", ImGuiDataType_Float, matrixRotation, 3, 0.025f);
+		ImGui::DragScalarN("S", ImGuiDataType_Float, matrixScale, 3, 0.025f);
+		ImGuizmo::RecomposeMatrixFromComponents(matrixTranslation, matrixRotation, matrixScale, (float*)&xform);
+		if (memcmp(&xform, &GetScene()->meshInstances[selectedInstance].transform, sizeof(float) * 16))
+		{
+			GetScene()->meshInstances[selectedInstance].transform = xform;
+			objectPropChanged = true;
+		}
+	    }
+
+
 	};
 
 }

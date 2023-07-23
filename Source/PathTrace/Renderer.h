@@ -3,6 +3,7 @@
 #include "Quad.h"
 #include"Opengl/asset/fbo.h"
 #include"Opengl/asset/shader.h"
+#include"Opengl/asset/buffer.h"
 #include "MathUtil.h"
 namespace PathTrace
 {
@@ -37,6 +38,7 @@ namespace PathTrace
             independentRenderSize = false;
             enableRoughnessMollification = false;
             enableVolumeMIS = false;
+          
             envMapIntensity = 1.0f;
             envMapRot = 0.0f;
             roughnessMollificationAmt = 0.0f;
@@ -108,6 +110,8 @@ namespace PathTrace
         std::shared_ptr<asset::FBO> pathTraceFBOLowRes;
         std::shared_ptr<asset::FBO> accumFBO;
         std::shared_ptr<asset::FBO> outputFBO;
+        std::shared_ptr<asset::FBO> rasterMsaaFBO;
+        std::shared_ptr<asset::FBO> rasterFBO;
 
         // Shaders
         std::string shadersDirectory;
@@ -116,6 +120,13 @@ namespace PathTrace
         std::shared_ptr<asset::Shader> pathTraceShaderLowRes;
         std::shared_ptr<asset::Shader> outputShader;
         std::shared_ptr<asset::Shader> tonemapShader;
+        std::shared_ptr<asset::Shader> pbrShader;
+        std::map<GLuint, asset::UBO> UBOs;  // indexed by uniform buffer's binding point
+        //‘§º∆À„IBL
+        std::shared_ptr<asset::Texture> irradiance_map;
+        std::shared_ptr<asset::Texture> prefiltered_map;
+        std::shared_ptr<asset::Texture> BRDF_LUT;
+
 
         // Ã˘Õº
         GLuint pathTraceTextureLowRes;
@@ -144,6 +155,7 @@ namespace PathTrace
         bool denoised;
 
         bool initialized;
+      
 
     public:
         Renderer(Scene* scene, const std::string& shadersDirectory);
@@ -151,16 +163,20 @@ namespace PathTrace
 
         void ResizeRenderer();
         void ReloadShaders();
+        void RenderPBR();
         void Render();
         void Present();
+        void PresentPBR();
         void Update(float secondsElapsed);
         float GetProgress();
         int GetSampleCount();
         void GetOutputBuffer(unsigned char**, int& w, int& h);
+        bool raster=false;
 
     private:
         void InitGPUDataBuffers();
         void InitFBOs();
         void InitShaders();
+        void PreRaster();
     };
 }

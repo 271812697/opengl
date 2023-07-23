@@ -353,7 +353,49 @@ namespace asset {
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
+    CShader::CShader(const std::string& source_code, const std::string& source_path) {
+        std::string macro[2] = { "compute_shader" ,"#ifdef compute_shader"};
+        GLenum type[1] = { GL_COMPUTE_SHADER };
+        if (source_code.find(macro[1]) == std::string::npos) {
+            CORE_ERROR("can't find the compute_shader define");
+            return;
+        }
 
+            size_t id = source_code.find("\n", source_code.find("#version", 0));
+
+            std::string output = source_code.substr(id);
+            std::string version = source_code.substr(0, id) + "\n";
+            std::string define = "";
+
+            define += ("#ifndef " + macro[0] + '\n');
+            define += ("#define " + macro[0] + '\n');
+            define += ("#endif\n\n");
+            output = version + define + output;
+            const char* c_source_code = output.c_str();
+            GLuint shader_id = glCreateShader(type[0]);
+            glShaderSource(shader_id, 1, &c_source_code, nullptr);
+            glCompileShader(shader_id);
+
+            GLint status;
+            glGetShaderiv(shader_id, GL_COMPILE_STATUS, &status);
+            if (status == GL_FALSE) {
+                GLint info_log_length;
+                glGetShaderiv(shader_id, GL_INFO_LOG_LENGTH, &info_log_length);
+
+                GLchar* info_log = new GLchar[info_log_length + 1];
+                glGetShaderInfoLog(shader_id, info_log_length, NULL, info_log);
+
+                CORE_ERROR("Failed to compile shader: {0}", info_log);
+                delete[] info_log;
+                glDeleteShader(shader_id);  // prevent shader leak
+
+                std::cin.get();  // pause the console before exiting so that we can read error messages
+                exit(EXIT_FAILURE);
+            }
+            shaders.push_back(shader_id);
+        
+        LinkShaders();
+    }
     CShader::CShader(const std::string& source_path) : Shader() {
         this->source_path = source_path;
         this->source_code = "";

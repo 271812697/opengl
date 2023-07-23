@@ -55,6 +55,7 @@ std::pair<uint16_t, uint16_t> UI::Panels::AView::GetSafeSize() const
 
 void UI::Panels::AView::Bind()
 {
+	
 	m_fbo->Bind();
 	glViewport(0, 0, m_fbo->width, m_fbo->height);
 }

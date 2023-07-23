@@ -8,9 +8,11 @@ namespace PathTrace {
     std::vector<string> sceneFiles;
     std::vector<string> envMaps;
     int sampleSceneIdx = 0;
-    int selectedInstance = 0;
+    int selectedInstance = -1;
     int envMapIdx = 0;
     float mouseSensitivity = 0.01f;
+    bool objectPropChanged=false;
+    bool showTransform=false;
 
     std::string shadersDir = "../../../res/PathTrace/shaders/";
     std::string assetsDir = "../../../res/PathTrace/Scenes/";
@@ -75,7 +77,7 @@ namespace PathTrace {
         if (!scene->envMap && !envMaps.empty())
         {
             scene->AddEnvMap(envMaps[envMapIdx]);
-            renderOptions.enableEnvMap = scene->lights.empty() ? true : false;
+            renderOptions.enableEnvMap =  true ;
             renderOptions.envMapIntensity = 1.5f;
         }
 

@@ -43,6 +43,53 @@ std::unique_ptr<UI::Core::UIManager>uiManager;
 UI::Settings::PanelWindowSettings settings;
 std::unique_ptr<UI::Panels::PanelsManager>m_panelsManager;
 
+void EditTransform(const float* view, const float* projection, float* matrix)
+{
+    static ImGuizmo::OPERATION mCurrentGizmoOperation(ImGuizmo::TRANSLATE);
+    static ImGuizmo::MODE mCurrentGizmoMode(ImGuizmo::WORLD);
+
+    if (ImGui::RadioButton("Translate", mCurrentGizmoOperation == ImGuizmo::TRANSLATE))
+    {
+        mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
+    }
+
+    ImGui::SameLine();
+    if (ImGui::RadioButton("Rotate", mCurrentGizmoOperation == ImGuizmo::ROTATE))
+    {
+        mCurrentGizmoOperation = ImGuizmo::ROTATE;
+    }
+
+    ImGui::SameLine();
+    if (ImGui::RadioButton("Scale", mCurrentGizmoOperation == ImGuizmo::SCALE))
+    {
+        mCurrentGizmoOperation = ImGuizmo::SCALE;
+    }
+
+    float matrixTranslation[3], matrixRotation[3], matrixScale[3];
+    ImGuizmo::DecomposeMatrixToComponents(matrix, matrixTranslation, matrixRotation, matrixScale);
+    ImGui::InputFloat3("Tr", matrixTranslation);
+    ImGui::InputFloat3("Rt", matrixRotation);
+    ImGui::InputFloat3("Sc", matrixScale);
+    ImGuizmo::RecomposeMatrixFromComponents(matrixTranslation, matrixRotation, matrixScale, matrix);
+
+    if (mCurrentGizmoOperation != ImGuizmo::SCALE)
+    {
+        if (ImGui::RadioButton("Local", mCurrentGizmoMode == ImGuizmo::LOCAL))
+        {
+            mCurrentGizmoMode = ImGuizmo::LOCAL;
+        }
+
+        ImGui::SameLine();
+        if (ImGui::RadioButton("World", mCurrentGizmoMode == ImGuizmo::WORLD))
+        {
+            mCurrentGizmoMode = ImGuizmo::WORLD;
+        }
+    }
+
+    ImGuiIO& io = ImGui::GetIO();
+    ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
+    ImGuizmo::Manipulate(view, projection, mCurrentGizmoOperation, mCurrentGizmoMode, matrix, NULL, NULL);
+}
 int main(int, char**)
 {
     {
@@ -76,9 +123,7 @@ int main(int, char**)
     uiManager->LoadFont("Ruda_Small", "../../../res/font/Ruda-Bold.ttf", 12);
     uiManager->LoadFont("Ruda_Medium",  "../../../res/font/Ruda-Bold.ttf", 14);
     uiManager->UseFont("Ruda_Big");
-    //uiManager->SetEditorLayoutSaveFilename(std::string(getenv("APPDATA")) + "\\PathTrace\\layout.ini");
-    //uiManager->SetEditorLayoutAutosaveFrequency(60.0f);
-    //uiManager->EnableEditorLayoutSave(true);
+
     uiManager->EnableDocking(true);
 
     settings.closable = true;
@@ -99,23 +144,48 @@ int main(int, char**)
         GetScene()->renderOptions = GetRenderOptions();
         GetRenderer()->ResizeRenderer();
     };
+    m_panelsManager->GetPanelAs<UI::Panels::AView>("Scene View").DrawInWindow += []() {
+ 
+        if (showTransform) {
+        auto pos = m_panelsManager->GetPanelAs<UI::Panels::AView>("Scene View").GetPosition();
+        auto size = m_panelsManager->GetPanelAs<UI::Panels::AView>("Scene View").GetSize();
+
+        {
+            float viewMatrix[16];
+            float projMatrix[16];
+           
+            GetScene()->camera->ComputeViewProjectionMatrix(viewMatrix, projMatrix, size.x / size.y);
+            Mat4 xform = GetScene()->meshInstances[selectedInstance].transform;
+           
+            ImGuizmo::SetRect(pos.x, pos.y, size.x, size.y);
+            ImGuizmo::SetOrthographic(false);
+            ImGuizmo::SetDrawlist();
+            ImGuizmo::Manipulate(viewMatrix, projMatrix, ImGuizmo::UNIVERSAL, ImGuizmo::LOCAL, (float*)&xform, NULL, NULL);
+      
+            if (ImGuizmo::IsUsing())
+            {
+                GetScene()->meshInstances[selectedInstance].transform = xform;
+                objectPropChanged = true;
+            }
+        }
+        }
+    };
 
     m_canvas.MakeDockspace(true);
     uiManager->SetCanvas(m_canvas);
-
-
     //主循环
     Tools::Time::Clock clock;
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
     while (!window->ShouldClose())
     {
-        glClearColor(0., 0., 0., 0.);
+        glClearColor(0., 0., 0., 1.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glDisable(GL_DEPTH_TEST);
+        //glDisable(GL_DEPTH_TEST);
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
-        
-
+       
         //相机视角交互逻辑
         if (m_panelsManager->GetPanelAs<UI::Panels::AView>("Scene View").IsFocused() && ImGui::IsAnyMouseDown() && !ImGuizmo::IsOver())
         {
@@ -138,25 +208,27 @@ int main(int, char**)
                 GetScene()->camera->Strafe(mouseSensitivity * mouseDelta.x, mouseSensitivity * mouseDelta.y);
                 ImGui::ResetMouseDragDelta(2);
             }
+
             GetScene()->dirty = true;
         }
         GetRenderer()->Update(clock.GetDeltaTime());
 
         GetRenderer()->Render();
+        //GetRenderer()->RenderPBR();
         m_panelsManager->GetPanelAs<UI::Panels::AView>("Scene View").Update(1);
         m_panelsManager->GetPanelAs<UI::Panels::AView>("Scene View").Bind();
         GetRenderer()->Present();
+        //GetRenderer()->PresentPBR();
         m_panelsManager->GetPanelAs<UI::Panels::AView>("Scene View").UnBind();
         uiManager->Render();
-
-
-        
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         device->PollEvents();
         window->SwapBuffers();
         inputManager->ClearEvents();
         clock.Update();
+        if (objectPropChanged)
+            GetScene()->RebuildInstances();
     }
     //回收资源
     Ret();

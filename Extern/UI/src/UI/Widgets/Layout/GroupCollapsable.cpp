@@ -13,7 +13,7 @@ void UI::Widgets::Layout::GroupCollapsable::_Draw_Impl()
 
 	if (ImGui::CollapsingHeader(name.c_str(), closable ? &opened : nullptr))
 		Group::_Draw_Impl();
-
+	
 	if (opened != previouslyOpened)
 	{
 		if (opened)

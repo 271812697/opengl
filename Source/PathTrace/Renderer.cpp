@@ -1,5 +1,6 @@
 #include "Renderer.h"
 #include "Scene.h"
+#include "Opengl/core/sync.h"
 #include "oidn/include/OpenImageDenoise/oidn.hpp"
 
 namespace PathTrace
@@ -69,6 +70,7 @@ namespace PathTrace
 
         InitFBOs();
         InitShaders();
+        PreRaster();
     }
 
     Renderer::~Renderer()
@@ -271,6 +273,16 @@ namespace PathTrace
         accumFBO = std::make_shared<asset::FBO>(renderSize.x, renderSize.y);
         outputFBO.reset();
         outputFBO = std::make_shared<asset::FBO>(renderSize.x, renderSize.y);
+        
+        rasterFBO.reset();
+        rasterFBO = std::make_shared<asset::FBO>(renderSize.x, renderSize.y);
+        rasterFBO->AddColorTexture(1);
+        rasterFBO->AddDepStTexture();
+        rasterMsaaFBO.reset();
+        rasterMsaaFBO = std::make_shared<asset::FBO>(renderSize.x,renderSize.y);
+        rasterMsaaFBO->AddColorTexture(1,true);
+        rasterMsaaFBO->AddDepStRenderBuffer(true);
+
 
 
 
@@ -334,7 +346,136 @@ namespace PathTrace
     {
         InitShaders();
     }
+    void Renderer::PreRaster() {
+        auto irradiance_shader = asset::CShader("..\\..\\..\\res\\shaders\\irradiance_map.glsl");
+        auto prefilter_shader = asset::CShader("..\\..\\..\\res\\shaders\\prefilter_envmap.glsl");
+        auto envBRDF_shader = asset::CShader("..\\..\\..\\res\\shaders\\environment_BRDF.glsl");
 
+        auto env_map = std::make_shared<asset::Texture>("..\\..\\..\\res\\texture\\HDRI\\sky.hdr", 2048, 0);
+        env_map->Bind(0);
+
+        irradiance_map = std::make_shared<asset::Texture>(GL_TEXTURE_CUBE_MAP, 128, 128, 6, GL_RGBA16F, 1);
+        prefiltered_map = std::make_shared<asset::Texture>(GL_TEXTURE_CUBE_MAP, 2048, 2048, 6, GL_RGBA16F, 8);
+        BRDF_LUT = std::make_shared<asset::Texture>(GL_TEXTURE_2D, 1024, 1024, 1, GL_RGBA16F, 1);
+
+
+        irradiance_map->BindILS(0, 0, GL_WRITE_ONLY);
+
+        if (irradiance_shader.Bind(); true) {
+            irradiance_shader.Dispatch(128 / 32, 128 / 32, 6);
+            irradiance_shader.SyncWait(GL_TEXTURE_FETCH_BARRIER_BIT | GL_ATOMIC_COUNTER_BARRIER_BIT);
+
+            auto irradiance_fence = core::Sync(0);
+            irradiance_fence.ClientWaitSync();
+            irradiance_map->UnbindILS(0);
+        }
+
+        
+        asset::Texture::Copy(*env_map, 0, *prefiltered_map, 0);  // copy the base level
+
+        const GLuint max_level = prefiltered_map->n_levels - 1;
+        GLuint resolution = prefiltered_map->width / 2;
+        prefilter_shader.Bind();
+
+        for (unsigned int level = 1; level <= max_level; level++, resolution /= 2) {
+            float roughness = level / static_cast<float>(max_level);
+            GLuint n_groups = glm::max<GLuint>(resolution / 32, 1);
+
+            prefiltered_map->BindILS(level, 1, GL_WRITE_ONLY);
+            prefilter_shader.SetUniform(0, roughness);
+            prefilter_shader.Dispatch(n_groups, n_groups, 6);
+            prefilter_shader.SyncWait(GL_TEXTURE_FETCH_BARRIER_BIT | GL_ATOMIC_COUNTER_BARRIER_BIT);
+
+            auto prefilter_fence = core::Sync(level);
+            prefilter_fence.ClientWaitSync();
+            prefiltered_map->UnbindILS(1);
+        }
+
+       
+        BRDF_LUT->BindILS(0, 2, GL_WRITE_ONLY);
+
+        if (envBRDF_shader.Bind(); true) {
+            envBRDF_shader.Dispatch(1024 / 32, 1024 / 32, 1);
+            envBRDF_shader.SyncWait(GL_ALL_BARRIER_BITS);
+            core::Sync::WaitFinish();
+            BRDF_LUT->UnbindILS(2);
+        }
+/*
+
+layout(std140, binding = 1) uniform PL {
+    vec4  color;
+    vec4  position;
+    float intensity;
+    float linear;
+    float quadratic;
+    float range;
+} pl;
+
+layout(std140, binding = 2) uniform SL {
+    vec4  color;
+    vec4  position;
+    vec4  direction;
+    float intensity;
+    float inner_cos;
+    float outer_cos;
+    float range;
+} sl;
+
+layout(std140, binding = 3) uniform DL {
+    vec4  color;
+    vec4  direction[5];
+    float intensity;
+} dl;
+*/
+
+        const GLenum props[] = { GL_BUFFER_BINDING };
+        GLint n_blocks = 0;
+        glGetProgramInterfaceiv(pbrShader->ID(), GL_UNIFORM_BLOCK, GL_ACTIVE_RESOURCES, &n_blocks);
+
+        for (int idx = 0; idx < n_blocks; ++idx) {
+            GLint binding_index = 0;
+            glGetProgramResourceiv(pbrShader->ID(), GL_UNIFORM_BLOCK, idx, 1, props, 1, NULL, &binding_index);
+            GLuint binding_point = static_cast<GLuint>(binding_index);
+            UBOs.try_emplace(binding_point, pbrShader->ID(), idx);  // construct UBO in-place
+          
+        }
+        int lightnum = 0;
+        float dir[24];
+        for (auto& li:scene->lights) {
+            if (li.type == LightType::SphereLight) {
+         
+                auto& ubo = UBOs[1];
+                
+                float linear[4] = { 0.03f };
+                float quadratic[4] = { 0.015f };
+                float range[4] = { 30.0f };
+                float instensity[4] = {1.0f};
+                ubo.SetUniform(0, &li.emission.x);
+                ubo.SetUniform(1, &li.position.x);
+                ubo.SetUniform(2, instensity);
+                ubo.SetUniform(3, linear);
+                ubo.SetUniform(4, quadratic);
+                ubo.SetUniform(5, range);
+
+            }
+            else if(li.type == LightType::DistantLight&&lightnum<6) {
+                
+                auto& ubo = UBOs[3];
+                float instensity[4] = {1.0f};
+                ubo.SetUniform(0, &li.emission.x);
+               // ubo.SetUniform(1, &li.position.x);
+                dir[4 * lightnum] = li.position.x;
+                dir[4 * lightnum+1] = li.position.y;
+                dir[4 * lightnum+2] = li.position.z;
+                //memcpy(dir+16*lightnum, &li.position.x,12);
+                 
+                ubo.SetUniform(2, instensity);
+                lightnum++;
+            }
+        }
+        UBOs[3].SetUniform(1,dir);
+        UBOs[3].SetUniform(3, &lightnum);
+    }
     void Renderer::InitShaders()
     {
         //初始化shader
@@ -342,6 +483,7 @@ namespace PathTrace
         std::string pathTraceShaderLowResSrcObj = loadShaderSource(shadersDirectory + "PathTraceLowRes.glsl");
         std::string outputShaderSrcObj = loadShaderSource(shadersDirectory + "OutputShader.glsl");
         std::string tonemapShaderSrcObj = loadShaderSource(shadersDirectory + "ToneMapShader.glsl");
+        std::string pbrShaderSrcObj = loadShaderSource(shadersDirectory+"pbr.glsl");
         //分析renderOptions添加向源码中预定义宏
         std::string pathtraceDefines = "";
         std::string tonemapDefines = "";
@@ -439,15 +581,18 @@ namespace PathTrace
         pathTraceShaderLowRes.reset();
         outputShader.reset();
         tonemapShader.reset();
+        pbrShader.reset();
         pathTraceShader = std::make_shared<asset::Shader>();
         pathTraceShaderLowRes = std::make_shared<asset::Shader>();
         outputShader = std::make_shared<asset::Shader>();
         tonemapShader = std::make_shared<asset::Shader>();
+        pbrShader = std::make_shared<asset::Shader>();
 
         pathTraceShader->LoadFromSource(pathTraceShaderSrcObj);
         pathTraceShaderLowRes->LoadFromSource(pathTraceShaderLowResSrcObj);
         outputShader->LoadFromSource(outputShaderSrcObj);
         tonemapShader->LoadFromSource(tonemapShaderSrcObj);
+        pbrShader->LoadFromSource(pbrShaderSrcObj);
 
         GLuint shaderObject;
         pathTraceShader->Bind();
@@ -502,10 +647,99 @@ namespace PathTrace
         glUniform1i(glGetUniformLocation(shaderObject, "envMapCDFTex"), 10);
         pathTraceShaderLowRes->Unbind();
     }
+    void Renderer::RenderPBR() {
+       
+        rasterMsaaFBO->Clear();
+        rasterMsaaFBO->Bind();
+        pbrShader->Bind();
+        irradiance_map->Bind(17);
+        prefiltered_map->Bind(18);
+        BRDF_LUT->Bind(19);
+        float viewMatrix[16];
+        float projMatrix[16];
+        scene->camera->ComputeViewProjectionMatrix(viewMatrix, projMatrix,1.0f*renderSize.x/renderSize.y);
+        glProgramUniformMatrix4fv(pbrShader->ID(), 1001, 1, GL_FALSE, viewMatrix);
+        glProgramUniformMatrix4fv(pbrShader->ID(), 1002, 1, GL_FALSE, projMatrix);
+        glProgramUniform3fv(pbrShader->ID(), 1003, 1, &scene->camera->position.x);
+        unsigned int model[2] = { 1,0 };
+        glProgramUniform2uiv(pbrShader->ID(), 999, 1, model);
+        for (auto& meshinstace : scene->meshInstances) {
+            Mesh* mesh = scene->meshes[meshinstace.meshID];
+            auto&mat=scene->materials[meshinstace.materialID];           
+            float scale[2] = { 1.0,1.0 };
+            float anisotropy[3] = {1.0,0.0,0.0};
+            // shared properties
+            glProgramUniform3fv(pbrShader->ID(), 912, 1,&mat.baseColor.x);
+            glProgramUniform1f(pbrShader->ID(), 913,  mat.roughness); 
+            glProgramUniform1f(pbrShader->ID(), 914, 1.0f);
+            glProgramUniform3fv(pbrShader->ID(), 915, 1,&mat.emission.x);
+            glProgramUniform2fv(pbrShader->ID(), 916, 1, scale);
+            glProgramUniform1f(pbrShader->ID(), 928, mat.alphaCutoff);
+
+            // standard model
+            glProgramUniform1f(pbrShader->ID(), 917, mat.metallic);
+            glProgramUniform1f(pbrShader->ID(), 918, mat.specTrans);
+            glProgramUniform1f(pbrShader->ID(), 919, mat.anisotropic);
+            glProgramUniform3fv(pbrShader->ID(), 920, 1, anisotropy);
+
+            // refraction model
+            glProgramUniform1f(pbrShader->ID(), 921, mat.specTrans);
+            glProgramUniform1f(pbrShader->ID(), 922, mat.ior);
+            glProgramUniform1f(pbrShader->ID(), 923, mat.mediumDensity);
+            glProgramUniform3fv(pbrShader->ID(), 924,1, &mat.mediumColor.x);
+
+            // additive clear coat layer
+            glProgramUniform1f(pbrShader->ID(), 929, mat.clearcoat);
+            glProgramUniform1f(pbrShader->ID(), 930, mat.clearcoatGloss);
+
+            if (mat.baseColorTexId != -1) {
+                glBindTextureUnit(20, scene->textures[mat.baseColorTexId]->id);
+                pbrShader->SetUniform(900U, true);
+            }
+            else {
+                pbrShader->SetUniform(900U, false);
+            }
+
+            if (mat.normalmapTexID != -1) {
+                glBindTextureUnit(21, scene->textures[mat.normalmapTexID]->id);
+                pbrShader->SetUniform(901U, true);
+            }
+            else {
+                pbrShader->SetUniform(901U, false);
+            }
+
+            if (mat.metallicRoughnessTexID != -1) {
+                glBindTextureUnit(23, scene->textures[mat.metallicRoughnessTexID]->id);
+                pbrShader->SetUniform(903U, true);
+            }
+            else {
+                pbrShader->SetUniform(903U, false);
+            }
+            if (mat.emissionmapTexID != -1) {
+                glBindTextureUnit(25, scene->textures[mat.emissionmapTexID]->id);
+                pbrShader->SetUniform(905U, true);
+            }
+            else {
+                pbrShader->SetUniform(905U, false);
+            }
+            glProgramUniformMatrix4fv(pbrShader->ID(), 1000, 1, GL_FALSE,  &meshinstace.transform.data[0][0]);
+            mesh->Draw();
+        }
+        pbrShader->Unbind();
+        rasterMsaaFBO->Unbind();   
+
+        rasterFBO->Clear();
+        asset::FBO::CopyColor(*rasterMsaaFBO, 0, *rasterFBO, 0);
+       
+    }
 
     void Renderer::Render()
     {
-
+        if (raster) {
+            RenderPBR();
+            return;
+        }
+        
         if (!scene->dirty && scene->renderOptions.maxSpp != -1 && sampleCounter >= scene->renderOptions.maxSpp)
             return;
 
@@ -546,9 +780,26 @@ namespace PathTrace
             outputFBO->Unbind();
         }
     }
+    void Renderer::PresentPBR() {
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, rasterFBO->GetColorTexture(0).ID());
+        quad->Draw(outputShader.get());
+    }
 
     void Renderer::Present()
     {
+        if (raster) {
+            PresentPBR();
+            return;
+
+        }
+
+
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
         glActiveTexture(GL_TEXTURE0);
 
         if (scene->dirty || sampleCounter == 1)

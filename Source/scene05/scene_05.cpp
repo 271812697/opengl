@@ -109,7 +109,7 @@ int main(int, char**) {
                 static const glm::vec3 RvL = glm::vec3(1.0f, 1.0f, -1.0f);  // scaling vec for R2L and L2R
                 glm::mat4 transform = glm::scale(T.transform, RvL);
                 ImGuizmo::SetRect(pos.x, pos.y, size.x, size.y);
-                ImGuizmo::SetOrthographic(true);
+                ImGuizmo::SetOrthographic(false);
                 ImGuizmo::SetDrawlist();
                 ImGuizmo::Manipulate(value_ptr(V), value_ptr(P), operation, mode, value_ptr(transform));
                 if (ImGuizmo::IsUsing()) {
@@ -294,6 +294,11 @@ namespace scene {
         for (int i = 0; i < 3; i++) {
             ball[i] = CreateEntity("Sphere " + std::to_string(i));
             ball[i].GetComponent<Transform>().Translate(vec3(-i * 4, (i + 1) * 2, pow(-1, i) - 4));
+            if (i == 0) {
+                auto& model=ball[i].AddComponent<Model>("res\\PathTrace\\Scenes\\Box\\alien-20.obj", Quality::Auto, true);
+                SetupMaterial(model.SetMaterial("DefaultMaterial", resource_manager.Get<Material>(14)), i + 2);
+            }
+            else
             ball[i].AddComponent<Mesh>(Primitive::Sphere);
             SetupMaterial(ball[i].AddComponent<Material>(resource_manager.Get<Material>(14)), i + 2);
         }
@@ -437,6 +442,7 @@ namespace scene {
         // update entities
                  // simulate balls gravity using a cheap quadratic easing factor
         bounce_time += Clock::delta_time;
+        if(bounce_ball)
         for (int i = 0; i < 3; ++i) {
             float h = (i + 1) * 2.0f;                       // initial height of the ball
             float s = 2.0f - i * 0.4f;                      // falling and bouncing speed
@@ -738,8 +744,8 @@ namespace scene {
             pbr_mat.SetUniform(pbr_u::roughness, 0.37f);
         }
         else if (mat_id == 2) {  // ball 0
-            pbr_mat.SetUniform(pbr_u::albedo, vec4(0.0f, 0.63f, 0.0f, 1.0f));
-            pbr_mat.SetUniform(pbr_u::roughness, 0.25f);
+            pbr_mat.SetUniform(pbr_u::albedo, vec4(1.0f, 0.0f, 0.0f, 1.0f));
+            pbr_mat.SetUniform(pbr_u::roughness, 0.45f);
         }
         else if (mat_id == 3) {  // ball 1
             pbr_mat.SetUniform(pbr_u::albedo, vec4(0.83f, 0.83f, 0.32f, 1.0f));

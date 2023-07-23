@@ -80,7 +80,30 @@ namespace PathTrace
         }
 
 
+        glGenVertexArrays(1, &vao);
+        glGenBuffers(1, &vbop);
+        glGenBuffers(1, &vbon);
+        glBindVertexArray(vao);
+        glBindBuffer(GL_ARRAY_BUFFER, vbop);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(Vec4)*verticesUVX.size(), verticesUVX.data(), GL_STATIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)0);
+
+        glBindBuffer(GL_ARRAY_BUFFER, vbon);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(Vec4) * normalsUVY.size(), normalsUVY.data(), GL_STATIC_DRAW);
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (GLvoid*)0);
+        glBindVertexArray(0);
+
+
+
+       
         return true;
+    }
+    void Mesh::Draw() {
+        glBindVertexArray(vao);
+        glDrawArrays(GL_TRIANGLES, 0, verticesUVX.size());
+        glBindVertexArray(0);
     }
 
     void Mesh::BuildBVH()

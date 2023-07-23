@@ -12,6 +12,8 @@ namespace PathTrace{
     extern std::vector<string> envMaps;
     extern int selectedInstance;
     extern float mouseSensitivity ;
+    extern bool objectPropChanged;
+    extern bool showTransform;
     
     Scene* GetScene();
     Renderer* GetRenderer();

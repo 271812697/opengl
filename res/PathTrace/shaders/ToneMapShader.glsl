@@ -270,7 +270,7 @@ void main()
 #if defined(OPT_BACKGROUND) || defined(OPT_TRANSPARENT_BACKGROUND)
     outCol = vec4(mix(bgCol, color, alpha), outAlpha);
 #else
-    outCol = vec4(color, 1.0);
+    outCol = vec4(color, 0.0);
 #endif
 }
 #endif
