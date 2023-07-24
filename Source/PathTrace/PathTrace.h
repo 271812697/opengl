@@ -11,10 +11,13 @@ namespace PathTrace{
     extern int envMapIdx;
     extern std::vector<string> envMaps;
     extern int selectedInstance;
-    extern float mouseSensitivity ;
+    extern float CameraMoveSpeed;
     extern bool objectPropChanged;
     extern bool showTransform;
-    
+    extern bool space_down;
+    extern float screenX[2];
+    extern float screenY[2] ;
+
     Scene* GetScene();
     Renderer* GetRenderer();
     void GetSceneFiles();

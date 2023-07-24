@@ -465,8 +465,9 @@ using namespace utils;
             auto[xx,yy]= view.GetPosition();
             auto [sizew, sizeh] = view.GetSize();
             float x =( mousePos.x-xx) / sizew;
-            float y = (mousePos.y -yy)/ sizeh;
+            float y = (mousePos.y -yy-25)/ sizeh;
             y = 1 - y;
+            
             if (!pointer.down && ImGui::IsMouseDown(0)) {
                 pointer.down = true;
                 pointer.move = false;

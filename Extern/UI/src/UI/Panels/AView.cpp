@@ -49,7 +49,8 @@ void UI::Panels::AView::Render()
 
 std::pair<uint16_t, uint16_t> UI::Panels::AView::GetSafeSize() const
 {
-	auto result = GetSize();// -OvMaths::FVector2{ 0.f, 25.f }; // 25 == title bar height
+	auto result = GetSize();
+	result.y -= 25.0f;
 	return { static_cast<uint16_t>(result.x), static_cast<uint16_t>(result.y) };
 }
 

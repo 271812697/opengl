@@ -219,7 +219,7 @@ float SphereIntersect(float rad, vec3 pos, Ray r)
 
     return INF;
 }
-//pos ±íÊ¾¾ØÐÎµÄÆðµã plane ±íÊ¾¾ØÐÎËùÔÚµÄÆ½Ãæ,u¡¢v±íÊ¾¾ØÐÎÁ½ÌõÖáµÄ·½Ïò¡¢³¤¶ÈÎªÆäµ¹ÊýµÄÁ½ÌõÖá
+//pos ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½Îµï¿½ï¿½ï¿½ï¿½ plane ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Úµï¿½Æ½ï¿½ï¿½,uï¿½ï¿½vï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä·ï¿½ï¿½ò¡¢³ï¿½ï¿½ï¿½Îªï¿½äµ¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 float RectIntersect(in vec3 pos, in vec3 u, in vec3 v, in vec4 plane, in Ray r)
 {
     vec3 n = vec3(plane);
@@ -378,7 +378,7 @@ float DielectricFresnel(float cosThetaI, float eta)
 
     return 0.5f * (rs * rs + rp * rp);
 }
-//z³¯Ïò°ëÇò,²ÉÑùµãÔÚ°ëÇò±íÃæ
+//zï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 vec3 CosineSampleHemisphere(float r1, float r2)
 {
     vec3 dir;
@@ -389,14 +389,14 @@ vec3 CosineSampleHemisphere(float r1, float r2)
     dir.z = sqrt(max(0.0, 1.0 - dir.x * dir.x - dir.y * dir.y));
     return dir;
 }
-//z³¯Ïò°ëÇò,²ÉÑùµãÔÚ°ëÇò±íÃæ
+//zï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 vec3 UniformSampleHemisphere(float r1, float r2)
 {
     float r = sqrt(max(0.0, 1.0 - r1 * r1));
     float phi = TWO_PI * r2;
     return vec3(r * cos(phi), r * sin(phi), r1);
 }
-//²ÉÑùµãÔÚÇò±íÃæ
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 vec3 UniformSampleSphere(float r1, float r2)
 {
     float z = 1.0 - 2.0 * r1;
@@ -410,7 +410,7 @@ float PowerHeuristic(float a, float b)
     float t = a * a;
     return t / (b * b + t);
 }
-//ÓÉN µÃµ½Ò»¸öTBN
+//ï¿½ï¿½N ï¿½Ãµï¿½Ò»ï¿½ï¿½TBN
 void Onb(in vec3 N, inout vec3 T, inout vec3 B)
 {
     vec3 up = abs(N.z) < 0.9999999 ? vec3(0, 0, 1) : vec3(1, 0, 0);
@@ -513,7 +513,7 @@ float PhaseHG(float cosTheta, float g)
 
 #ifdef OPT_ENVMAP
 #ifndef OPT_UNIFORM_LIGHT
-//ÓÉ¶þ·Ö²éÕÒµÃµ½value£¬×ª³Éuv
+//ï¿½É¶ï¿½ï¿½Ö²ï¿½ï¿½ÒµÃµï¿½valueï¿½ï¿½×ªï¿½ï¿½uv
 vec2 BinarySearch(float value)
 {
     ivec2 envMapResInt = ivec2(envMapRes);
@@ -553,7 +553,7 @@ vec4 EvalEnvMap(Ray r)
                 
     return vec4(color, (pdf * envMapRes.x * envMapRes.y) / (TWO_PI * PI * sin(theta)));
 }
-//Ëæ»ú²ÉÑù»·¾³ÌùÍ¼·µ»Ø²ÉÑù·½ÏòºÍÑÕÉ«
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¼ï¿½ï¿½ï¿½Ø²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É«
 vec4 SampleEnvMap(inout vec3 color)
 {
     vec2 uv = BinarySearch(rand() * envMapTotalSum);
@@ -851,7 +851,7 @@ if(state.depth > 0)
     Ray rTrans;
     rTrans.origin = r.origin;
     rTrans.direction = r.direction;
-    //ÓÃÕ»Ä£ÄâµÝ¹é
+    //ï¿½ï¿½Õ»Ä£ï¿½ï¿½Ý¹ï¿½
     while (index != -1)
     {
         ivec3 LRLeaf = ivec3(texelFetch(BVH, index * 3 + 2).xyz);
@@ -863,7 +863,7 @@ if(state.depth > 0)
         if (leaf > 0) // Leaf node of BLAS
         {
         
-        //ÓëÈý½ÇÐÎÇó½»
+        //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             for (int i = 0; i < rightIndex; i++) // Loop through tris
             {
                 ivec3 vertIndices = ivec3(texelFetch(vertexIndicesTex, leftIndex + i).xyz);
@@ -1647,7 +1647,7 @@ vec4 PathTrace(Ray r)
     for (state.depth = 0;; state.depth++)
     {
         bool hit = ClosestHit(r, state, lightSample);
-        //Èç¹ûÓë³¡¾°²»Ïà½»£¬Ôò¼ÆËã»·¾³¹â
+        //ï¿½ï¿½ï¿½ï¿½ë³¡ï¿½ï¿½ï¿½ï¿½ï¿½à½»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ã»·ï¿½ï¿½ï¿½ï¿½
         if (!hit)
         {
 #if defined(OPT_BACKGROUND) || defined(OPT_TRANSPARENT_BACKGROUND)

@@ -1,7 +1,15 @@
 #include "Renderer.h"
 #include "Scene.h"
+#include "stb_image/stb_image.h"
+#include "stb_image/stb_image_write.h"
 #include "Opengl/core/sync.h"
 #include "oidn/include/OpenImageDenoise/oidn.hpp"
+namespace PathTrace {
+
+extern bool space_down;
+extern float screenX[2] ;
+extern float screenY[2] ;
+}
 
 namespace PathTrace
 {
@@ -400,33 +408,7 @@ namespace PathTrace
             core::Sync::WaitFinish();
             BRDF_LUT->UnbindILS(2);
         }
-/*
 
-layout(std140, binding = 1) uniform PL {
-    vec4  color;
-    vec4  position;
-    float intensity;
-    float linear;
-    float quadratic;
-    float range;
-} pl;
-
-layout(std140, binding = 2) uniform SL {
-    vec4  color;
-    vec4  position;
-    vec4  direction;
-    float intensity;
-    float inner_cos;
-    float outer_cos;
-    float range;
-} sl;
-
-layout(std140, binding = 3) uniform DL {
-    vec4  color;
-    vec4  direction[5];
-    float intensity;
-} dl;
-*/
 
         const GLenum props[] = { GL_BUFFER_BINDING };
         GLint n_blocks = 0;
@@ -484,6 +466,7 @@ layout(std140, binding = 3) uniform DL {
         std::string outputShaderSrcObj = loadShaderSource(shadersDirectory + "OutputShader.glsl");
         std::string tonemapShaderSrcObj = loadShaderSource(shadersDirectory + "ToneMapShader.glsl");
         std::string pbrShaderSrcObj = loadShaderSource(shadersDirectory+"pbr.glsl");
+        std::string lineShaderSrcObj = loadShaderSource(shadersDirectory+"line.glsl");
         //分析renderOptions添加向源码中预定义宏
         std::string pathtraceDefines = "";
         std::string tonemapDefines = "";
@@ -582,17 +565,20 @@ layout(std140, binding = 3) uniform DL {
         outputShader.reset();
         tonemapShader.reset();
         pbrShader.reset();
+        lineShader.reset();
         pathTraceShader = std::make_shared<asset::Shader>();
         pathTraceShaderLowRes = std::make_shared<asset::Shader>();
         outputShader = std::make_shared<asset::Shader>();
         tonemapShader = std::make_shared<asset::Shader>();
         pbrShader = std::make_shared<asset::Shader>();
+        lineShader = std::make_shared<asset::Shader>();
 
         pathTraceShader->LoadFromSource(pathTraceShaderSrcObj);
         pathTraceShaderLowRes->LoadFromSource(pathTraceShaderLowResSrcObj);
         outputShader->LoadFromSource(outputShaderSrcObj);
         tonemapShader->LoadFromSource(tonemapShaderSrcObj);
         pbrShader->LoadFromSource(pbrShaderSrcObj);
+        lineShader->LoadFromSource(lineShaderSrcObj);
 
         GLuint shaderObject;
         pathTraceShader->Bind();
@@ -781,11 +767,25 @@ layout(std140, binding = 3) uniform DL {
         }
     }
     void Renderer::PresentPBR() {
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, rasterFBO->GetColorTexture(0).ID());
         quad->Draw(outputShader.get());
+
+    }
+
+    void Renderer::SaveFrame()
+    {
+        
+        unsigned char* data = nullptr;
+        //getoup
+        int w, h;
+        GetOutputBuffer(&data, w, h);
+        std::string filename = "./img_" + std::to_string(GetSampleCount()) + ".png";
+        stbi_flip_vertically_on_write(true);
+        stbi_write_png(filename.c_str(), w, h, 4, data, w * 4);
+        printf("saved Frame: %s\n", filename.c_str());
     }
 
     void Renderer::Present()
@@ -795,9 +795,10 @@ layout(std140, binding = 3) uniform DL {
             return;
 
         }
+        
 
-
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+        glClearDepth(1.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glActiveTexture(GL_TEXTURE0);
@@ -816,6 +817,18 @@ layout(std140, binding = 3) uniform DL {
 
             quad->Draw(outputShader.get());
         }
+
+        if (space_down) {
+            float x[2] = {std::min(screenX[0],screenX[1]),std::max(screenX[0],screenX[1]) };
+            float y[2] = { std::min(screenY[0],screenY[1]),std::max(screenY[0],screenY[1]) };
+            lineShader->Bind();
+            glProgramUniform2fv(lineShader->ID(), 0, 1, x);
+            glProgramUniform2fv(lineShader->ID(), 1, 1, y);
+            lineShader->Unbind();
+            
+            quad->Draw(lineShader.get());
+        }
+       
     }
 
     float Renderer::GetProgress()

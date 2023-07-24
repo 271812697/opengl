@@ -315,7 +315,7 @@ void Windowing::Window::CreateGlfwWindow(const Settings::WindowSettings& p_windo
 	glfwWindowHint(GLFW_SAMPLES,		p_windowSettings.samples);
 
 	m_glfwWindow = glfwCreateWindow(static_cast<int>(m_size.first), static_cast<int>(m_size.second), m_title.c_str(), selectedMonitor, nullptr);
-
+	
 
 	if (!m_glfwWindow)
 	{

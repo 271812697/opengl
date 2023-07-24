@@ -121,6 +121,7 @@ namespace PathTrace
         std::shared_ptr<asset::Shader> outputShader;
         std::shared_ptr<asset::Shader> tonemapShader;
         std::shared_ptr<asset::Shader> pbrShader;
+        std::shared_ptr<asset::Shader> lineShader;
         std::map<GLuint, asset::UBO> UBOs;  // indexed by uniform buffer's binding point
         //‘§º∆À„IBL
         std::shared_ptr<asset::Texture> irradiance_map;
@@ -167,6 +168,7 @@ namespace PathTrace
         void Render();
         void Present();
         void PresentPBR();
+        void SaveFrame();
         void Update(float secondsElapsed);
         float GetProgress();
         int GetSampleCount();

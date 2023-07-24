@@ -17,6 +17,7 @@
 #include"UI/Panels/PanelsManager.h"
 #include"UI/Panels/AView.h"
 #include "Panels/PathInspector.h"
+#include "Panels/TransformInspector.h"
 #include"Opengl/core/log.h"
 #include"ImGuizmo.h"
 #include<string>
@@ -135,6 +136,11 @@ int main(int, char**)
     m_panelsManager->CreatePanel<UI::Panels::MenuBar>("Menu Bar");
     m_panelsManager->CreatePanel<PathInspector>("Inspector",true, settings);
     m_panelsManager->GetPanelAs<PathInspector>("Inspector").InstallUI();
+    m_panelsManager->CreatePanel<TransformInspector>("Mesh Property",true,settings);
+    m_panelsManager->GetPanelAs<TransformInspector>("Mesh Property").InstallUI();
+
+
+
     m_panelsManager->CreatePanel<UI::Panels::AView>("Scene View", true, settings);
     m_panelsManager->GetPanelAs<UI::Panels::AView>("Scene View").ResizeEvent+= [](int p_width, int p_height) {
         GetRenderOptions().windowResolution.x = p_width;
@@ -147,6 +153,7 @@ int main(int, char**)
     m_panelsManager->GetPanelAs<UI::Panels::AView>("Scene View").DrawInWindow += []() {
  
         if (showTransform) {
+            
         auto pos = m_panelsManager->GetPanelAs<UI::Panels::AView>("Scene View").GetPosition();
         auto size = m_panelsManager->GetPanelAs<UI::Panels::AView>("Scene View").GetSize();
 
@@ -177,40 +184,87 @@ int main(int, char**)
     Tools::Time::Clock clock;
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+    glEnable(GL_BLEND);
+    glfwSwapInterval(0);
     while (!window->ShouldClose())
     {
-        glClearColor(0., 0., 0., 1.0);
+        glClearColor(0., 0., 0., 0.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        //glDisable(GL_DEPTH_TEST);
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
        
         //相机视角交互逻辑
-        if (m_panelsManager->GetPanelAs<UI::Panels::AView>("Scene View").IsFocused() && ImGui::IsAnyMouseDown() && !ImGuizmo::IsOver())
+        if (m_panelsManager->GetPanelAs<UI::Panels::AView>("Scene View").IsHovered() && !ImGuizmo::IsOver())
         {
-
+            bool flag = false;
+            if (ImGui::IsKeyDown(ImGuiKey_::ImGuiKey_W)) {
+                GetScene()->camera->SetRadius(-clock.GetDeltaTime()* CameraMoveSpeed);
+                flag = true;
+            }
+            if (ImGui::IsKeyDown(ImGuiKey_::ImGuiKey_S)) {
+                GetScene()->camera->SetRadius(clock.GetDeltaTime() * CameraMoveSpeed);
+                flag = true;
+            }
+            if (ImGui::IsKeyDown(ImGuiKey_::ImGuiKey_A)) {
+                GetScene()->camera->Strafe(clock.GetDeltaTime() * CameraMoveSpeed,0);
+                flag = true;
+            }
+            if (ImGui::IsKeyDown(ImGuiKey_::ImGuiKey_D)) {
+                GetScene()->camera->Strafe(clock.GetDeltaTime() * -CameraMoveSpeed, 0);
+                flag = true;
+            }
+            if (ImGui::IsKeyDown(ImGuiKey_::ImGuiKey_Q)) {
+                GetScene()->camera->Strafe(0,clock.GetDeltaTime() * CameraMoveSpeed);
+                flag = true;
+            }
+            if (ImGui::IsKeyDown(ImGuiKey_::ImGuiKey_E)) {
+                GetScene()->camera->Strafe(0,clock.GetDeltaTime() * -CameraMoveSpeed);
+                flag = true;
+            }
             if (ImGui::IsMouseDown(0))
             {
                 ImVec2 mouseDelta = ImGui::GetMouseDragDelta(0, 0);
                 GetScene()->camera->OffsetOrientation(mouseDelta.x, mouseDelta.y);
                 ImGui::ResetMouseDragDelta(0);
+                flag = true;
             }
-            else if (ImGui::IsMouseDown(1))
-            {
-                ImVec2 mouseDelta = ImGui::GetMouseDragDelta(1, 0);
-                GetScene()->camera->SetRadius(mouseSensitivity * mouseDelta.y);
-                ImGui::ResetMouseDragDelta(1);
-            }
-            else if (ImGui::IsMouseDown(2))
-            {
-                ImVec2 mouseDelta = ImGui::GetMouseDragDelta(2, 0);
-                GetScene()->camera->Strafe(mouseSensitivity * mouseDelta.x, mouseSensitivity * mouseDelta.y);
-                ImGui::ResetMouseDragDelta(2);
-            }
+            GetScene()->dirty = flag;
 
-            GetScene()->dirty = true;
+            
         }
+        if (ImGui::IsKeyPressed(ImGuiKey_::ImGuiKey_Space,false)) {
+            ImVec2 mousePos = ImGui::GetMousePos();
+            auto [xx, yy] = m_panelsManager->GetPanelAs<UI::Panels::AView>("Scene View").GetPosition();
+            auto [sizew, sizeh] = m_panelsManager->GetPanelAs<UI::Panels::AView>("Scene View").GetSafeSize()   ;
+            float x = (mousePos.x - xx) / sizew;
+            float y = (mousePos.y - yy-25) / sizeh;
+            y = 1 - y;
+            space_down = true;
+            screenX[0] = x;
+            screenY[0] = y;
+
+        }
+        if (ImGui::IsKeyDown(ImGuiKey_::ImGuiKey_Space)) {
+            ImVec2 mousePos = ImGui::GetMousePos();
+            auto [xx, yy] = m_panelsManager->GetPanelAs<UI::Panels::AView>("Scene View").GetPosition();
+            auto [sizew, sizeh] = m_panelsManager->GetPanelAs<UI::Panels::AView>("Scene View").GetSafeSize();
+            float x = (mousePos.x - xx) / sizew;
+            float y = (mousePos.y - yy-25) / sizeh;
+            y = 1 - y;
+            
+            screenX[1] = x;
+            screenY[1] = y;
+
+        }
+        else {
+            space_down = false;
+        }
+       
+
+
+       
+
         GetRenderer()->Update(clock.GetDeltaTime());
 
         GetRenderer()->Render();
@@ -225,7 +279,7 @@ int main(int, char**)
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         device->PollEvents();
         window->SwapBuffers();
-        inputManager->ClearEvents();
+        //inputManager->ClearEvents();
         clock.Update();
         if (objectPropChanged)
             GetScene()->RebuildInstances();

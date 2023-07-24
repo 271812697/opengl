@@ -10,9 +10,12 @@ namespace PathTrace {
     int sampleSceneIdx = 0;
     int selectedInstance = -1;
     int envMapIdx = 0;
-    float mouseSensitivity = 0.01f;
+    float CameraMoveSpeed = 3.0f;
     bool objectPropChanged=false;
     bool showTransform=false;
+    bool space_down = false;
+    float screenX[2] = {0,0};
+    float screenY[2] = { 0,0 };
 
     std::string shadersDir = "../../../res/PathTrace/shaders/";
     std::string assetsDir = "../../../res/PathTrace/Scenes/";
