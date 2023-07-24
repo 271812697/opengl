@@ -65,23 +65,6 @@ material white
 	roughness 0.0
 }
 
-mesh
-{
-	file Scene/Mesh000.obj
-	material white
-}
-
-mesh
-{
-	file Scene/Mesh001.obj
-	material white
-}
-
-mesh
-{
-	file Scene/Mesh050.obj
-	material checker
-}
 
 mesh
 {
@@ -89,10 +72,17 @@ mesh
 	material alien
 	position .3685 .166 .35125
 	scale 1 1 1
-}
+}z
 mesh
 {
 	file Scene/alien-21.obj
+	material green
+	position .3685 2.166 .35125
+	scale 1 1 1
+}
+mesh
+{
+	file Scene/cat-5.obj
 	material green
 	position .3685 2.166 .35125
 	scale 1 1 1

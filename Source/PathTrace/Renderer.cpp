@@ -786,6 +786,22 @@ namespace PathTrace
         stbi_flip_vertically_on_write(true);
         stbi_write_png(filename.c_str(), w, h, 4, data, w * 4);
         printf("saved Frame: %s\n", filename.c_str());
+
+        float x[2] = { std::min(screenX[0],screenX[1]),std::max(screenX[0],screenX[1]) };
+        float y[2] = { std::min(screenY[0],screenY[1]),std::max(screenY[0],screenY[1]) };
+        int sx = std::min(w * x[0], w * 1.0f);
+        int sy = std::min(h * y[0], h * 1.0f);
+        int ex = std::min(w * x[1],w*1.0f);
+        int ey = std::min(h * y[1],h*1.0f);
+        unsigned char* img = new unsigned char[(ex-sx+1) * (ey-sy+1) * 4];
+        int j = 0;
+        for (int i = sy; i <= ey; i++) {
+            memcpy(img+(j)* (ex - sx + 1)*4,data+(i)*w*4+sx*4, (ex - sx + 1) * 4);
+            j++;
+        }
+        filename = "./screen_" + std::to_string(GetSampleCount()) + ".png";
+        stbi_write_png(filename.c_str(), (ex - sx + 1), (ey - sy + 1), 4, img, (ex - sx + 1) * 4);
+
     }
 
     void Renderer::Present()
