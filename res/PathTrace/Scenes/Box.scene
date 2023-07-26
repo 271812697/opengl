@@ -72,7 +72,7 @@ mesh
 	material alien
 	position .3685 .166 .35125
 	scale 1 1 1
-}z
+}
 mesh
 {
 	file Scene/alien-21.obj
@@ -88,66 +88,16 @@ mesh
 	scale 1 1 1
 }
 
-light
-{
-	position 1.0 0.0 0.0
-	emission 1.0 1.0 1.0
-	radius 1.0
-	v1 0.0 0.0 0.0
-	v2 0.0 0.0 0.0
-	type distant
-}
-
-light
-{
-	position -1.0 0.0 0.0
-	emission 1.0 1.0 1.0
-	radius 1.0
-	v1 0.0 0.0 0.0
-	v2 0.0 0.0 0.0
-	type distant
-}
-
-light
-{
-	position 0.0 0.0 1.0
-	emission 1.0 1.0 1.0
-	radius 1.0
-	v1 0.0 0.0 0.0
-	v2 0.0 0.0 0.0
-	type distant
-}
-
-light
-{
-	position 0.0 0.0 -1.0
-	emission 1.0 1.0 1.0
-	radius 1.0
-	v1 0.0 0.0 0.0
-	v2 0.0 0.0 0.0
-	type distant
-}
-
-light
-{
-	position 0.0 -1.0 0.0
-	emission 1.0 1.0 1.0
-	radius 1.0
-	v1 0.0 0.0 0.0
-	v2 0.0 0.0 0.0
-	type distant
-}
 
 light
 {
 	position 0.0 1.0 0.0
 	emission 1.0 1.0 1.0
-	radius 1.0
+	radius 0.01
 	v1 0.0 0.0 0.0
 	v2 0.0 0.0 0.0
-	type distant
+	type sphere
 }
-
 
 
 
