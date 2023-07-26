@@ -295,7 +295,7 @@ namespace scene {
             ball[i] = CreateEntity("Sphere " + std::to_string(i));
             ball[i].GetComponent<Transform>().Translate(vec3(-i * 4, (i + 1) * 2, pow(-1, i) - 4));
             if (i == 0) {
-                auto& model=ball[i].AddComponent<Model>("res\\PathTrace\\Scenes\\Box\\alien-20.obj", Quality::Auto, true);
+                auto& model=ball[i].AddComponent<Model>("res\\PathTrace\\Scenes\\Scene\\alien-20.obj", Quality::Auto, true);
                 SetupMaterial(model.SetMaterial("DefaultMaterial", resource_manager.Get<Material>(14)), i + 2);
             }
             else

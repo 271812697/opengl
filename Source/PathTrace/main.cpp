@@ -119,7 +119,7 @@ int main(int, char**)
     if (!InitRenderer())
         return 1;
     //初始化UI
-    uiManager=std::make_unique<UI::Core::UIManager>(window->GetGlfwWindow(), UI::Styling::EStyle::CUSTOM);;
+    uiManager=std::make_unique<UI::Core::UIManager>(window->GetGlfwWindow(), UI::Styling::EStyle::ALTERNATIVE_DARK);;
     uiManager->LoadFont("Ruda_Big",  "../../../res/font/Ruda-Bold.ttf", 18);
     uiManager->LoadFont("Ruda_Small", "../../../res/font/Ruda-Bold.ttf", 12);
     uiManager->LoadFont("Ruda_Medium",  "../../../res/font/Ruda-Bold.ttf", 14);
@@ -260,13 +260,7 @@ int main(int, char**)
         else {
             space_down = false;
         }
-       
-
-
-       
-
         GetRenderer()->Update(clock.GetDeltaTime());
-
         GetRenderer()->Render();
         //GetRenderer()->RenderPBR();
         m_panelsManager->GetPanelAs<UI::Panels::AView>("Scene View").Update(1);
