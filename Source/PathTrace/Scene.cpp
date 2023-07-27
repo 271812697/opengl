@@ -126,6 +126,16 @@ namespace PathTrace
     void Scene::createTLAS()
     {
         
+        for (int i = 0; i < meshInstances.size();i++) {
+            Mat4 T=meshInstances[i].localform;
+            int id = meshInstances[i].parentID;
+            while (id!=-1)
+            {
+                T = T * meshInstances[id].localform;
+                id = meshInstances[id].parentID;
+            }
+            meshInstances[i].transform = T;
+        }
         std::vector<RadeonRays::bbox> bounds;
         bounds.resize(meshInstances.size());
         //遍历所有的MeshInstance,将mesh做变换后的包围盒构建顶层BVH
@@ -193,14 +203,16 @@ namespace PathTrace
 
     void Scene::ProcessScene()
     {
-        printf("Processing scene data\n");
-        createBLAS();
 
-        printf("Building scene BVH\n");
+        createBLAS();
+        meshInstancesTree.resize(meshInstances.size());
+        for (int i = 0; i < meshInstances.size(); i++) {
+            if (meshInstances[i].parentID != -1) {
+                meshInstancesTree[meshInstances[i].parentID].push_back(i);
+            }
+        }
         createTLAS();
 
-        // Flatten BVH
-        printf("Flattening BVH\n");
         bvhTranslator.Process(sceneBvh, meshes, meshInstances);
 
         // Copy mesh data

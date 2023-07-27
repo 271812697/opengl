@@ -86,15 +86,15 @@ void TransformInspector::InstallUI()
 		ImGui::Checkbox("Show Transform", &showTransform);
 		if (showTransform) {
 		float matrixTranslation[3], matrixRotation[3], matrixScale[3];
-		Mat4 xform = GetScene()->meshInstances[selectedInstance].transform;
+		Mat4 xform = GetScene()->meshInstances[selectedInstance].localform;
 		ImGuizmo::DecomposeMatrixToComponents((float*)&xform, matrixTranslation, matrixRotation, matrixScale);
 		ImGui::DragScalarN("T", ImGuiDataType_Float, matrixTranslation, 3, 0.025f);
 		ImGui::DragScalarN("R", ImGuiDataType_Float, matrixRotation, 3, 0.025f);
 		ImGui::DragScalarN("S", ImGuiDataType_Float, matrixScale, 3, 0.025f);
 		ImGuizmo::RecomposeMatrixFromComponents(matrixTranslation, matrixRotation, matrixScale, (float*)&xform);
-		if (memcmp(&xform, &GetScene()->meshInstances[selectedInstance].transform, sizeof(float) * 16))
+		if (memcmp(&xform, &GetScene()->meshInstances[selectedInstance].localform, sizeof(float) * 16))
 		{
-			GetScene()->meshInstances[selectedInstance].transform = xform;
+			GetScene()->meshInstances[selectedInstance].localform = xform;
 			objectPropChanged = true;
 		}
 	    }

@@ -75,6 +75,7 @@ namespace PathTrace
         std::vector<Material> materials;
         // Instances
         std::vector<MeshInstance> meshInstances;
+        std::vector<std::vector<int>>meshInstancesTree;
         // Lights
         std::vector<Light> lights;
         // Environment Map

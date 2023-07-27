@@ -27,6 +27,7 @@ namespace PathTrace
         };
 
         std::map<std::string, MaterialData> materialMap;
+        std::map<std::string, int>InstanceMap;
         std::vector<std::string> albedoTex;
         std::vector<std::string> metallicRoughnessTex;
         std::vector<std::string> normalTex;
@@ -353,8 +354,11 @@ namespace PathTrace
                 std::string filename;
                 Vec4 rotQuat;
                 Mat4 xform, translate, rot, scale;
+         
                 int material_id = 0; // Default Material ID
+                int parentid = -1;
                 char meshName[200] = "none";
+                char parentName[200] = "none";
                 bool matrixProvided = false;
 
                 while (fgets(line, kMaxLineLength, file))
@@ -367,7 +371,12 @@ namespace PathTrace
                     char matName[100];
 
                     sscanf(line, " name %[^\t\n]s", meshName);
+                    if (sscanf(line, " parent %s", parentName) == 1) 
+                    {
+                        //in this case parent must prior to this meshinstance
+                        parentid = InstanceMap[parentName];
 
+                    }
                     if (sscanf(line, " file %s", file) == 1)
                         filename = path + file;
 
@@ -417,7 +426,9 @@ namespace PathTrace
                             transformMat = scale * rot * translate;
 
                         MeshInstance instance(instanceName, mesh_id, transformMat, material_id);
-                        scene->AddMeshInstance(instance);
+                        instance.localform = transformMat;
+                        instance.parentID = parentid;
+                        InstanceMap[instanceName]= scene->AddMeshInstance(instance);
                     }
                 }
             }

@@ -162,16 +162,16 @@ int main(int, char**)
             float projMatrix[16];
            
             GetScene()->camera->ComputeViewProjectionMatrix(viewMatrix, projMatrix, size.x / size.y);
-            Mat4 xform = GetScene()->meshInstances[selectedInstance].transform;
+            Mat4 xform = GetScene()->meshInstances[selectedInstance].localform;
            
             ImGuizmo::SetRect(pos.x, pos.y, size.x, size.y);
             ImGuizmo::SetOrthographic(false);
             ImGuizmo::SetDrawlist();
             ImGuizmo::Manipulate(viewMatrix, projMatrix, ImGuizmo::UNIVERSAL, ImGuizmo::LOCAL, (float*)&xform, NULL, NULL);
-      
-            if (ImGuizmo::IsUsing())
+
+            if (memcmp(&xform, &GetScene()->meshInstances[selectedInstance].localform, sizeof(float) * 16))
             {
-                GetScene()->meshInstances[selectedInstance].transform = xform;
+                GetScene()->meshInstances[selectedInstance].localform = xform;
                 objectPropChanged = true;
             }
         }

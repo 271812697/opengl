@@ -43,14 +43,17 @@ namespace PathTrace
             , transform(xform)
             , materialID(matId)
         {
+            parentID = -1;
         }
         ~MeshInstance() {}
 
         Mat4 transform;
+        Mat4 localform;
         std::string name;
 
         int materialID;
         int meshID;
+        int parentID;
     };
 }
 
