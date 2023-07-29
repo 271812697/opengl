@@ -1,0 +1,115 @@
+
+renderer
+{
+  resolution 800 800
+  maxdepth 2
+  tilewidth 200
+  tileheight 200
+  envmapintensity 2.0
+}
+camera
+{
+  position .276 .275 -.75
+  lookat .276 .275 .10
+  fov 40
+}
+material pa
+{
+  color 0.725 0.71 0.68
+  roughness 0.150
+  albedotexture  Texture/MyColorBar.png
+}
+material red
+{
+  color 1.00 0.065 0.05
+  metallic 0.122
+  roughness 0.150
+}
+mesh
+{
+  file dino_skel-3.obj
+  name dino_skel-3
+  material pa
+  position .3685 .166 .35125
+  scale 1 1 1
+}
+mesh
+{
+  file glass_sphere.obj
+  parent dino_skel-3
+  material red
+  position 0.836152 0.193151 -0.099739
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent dino_skel-3
+  material red
+  position 0.333482 0.182478 0.262871
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent dino_skel-3
+  material red
+  position 0.336389 -0.097220 -0.187792
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent dino_skel-3
+  material red
+  position -0.156613 0.507141 0.189244
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent dino_skel-3
+  material red
+  position -0.418586 0.174152 -0.342139
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent dino_skel-3
+  material red
+  position -0.856949 0.085445 -0.126419
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent dino_skel-3
+  material red
+  position -0.353130 0.282624 -0.175539
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent dino_skel-3
+  material red
+  position -0.248874 0.497503 0.085068
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent dino_skel-3
+  material red
+  position -0.329034 0.245091 -0.329263
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent dino_skel-3
+  material red
+  position 0.778470 0.265851 -0.149682
+  scale 0.025 0.025 0.025
+}

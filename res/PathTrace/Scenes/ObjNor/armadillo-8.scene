@@ -1,0 +1,179 @@
+
+renderer
+{
+  resolution 800 800
+  maxdepth 2
+  tilewidth 200
+  tileheight 200
+  envmapintensity 2.0
+}
+camera
+{
+  position .276 .275 -.75
+  lookat .276 .275 .10
+  fov 40
+}
+material pa
+{
+  color 0.725 0.71 0.68
+  roughness 0.150
+  albedotexture  Texture/MyColorBar.png
+}
+material red
+{
+  color 1.00 0.065 0.05
+  metallic 0.122
+  roughness 0.150
+}
+mesh
+{
+  file armadillo-8.obj
+  name armadillo-8
+  material pa
+  position .3685 .166 .35125
+  scale 1 1 1
+}
+mesh
+{
+  file glass_sphere.obj
+  parent armadillo-8
+  material red
+  position 0.605470 -0.528719 -0.231004
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent armadillo-8
+  material red
+  position 0.695465 -0.213063 -0.335888
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent armadillo-8
+  material red
+  position -0.506838 -0.173844 -0.276903
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent armadillo-8
+  material red
+  position 0.667454 -0.147717 -0.387425
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent armadillo-8
+  material red
+  position 0.198348 -0.028216 0.586755
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent armadillo-8
+  material red
+  position -0.182969 0.007515 -0.431664
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent armadillo-8
+  material red
+  position 0.676105 0.202209 -0.362612
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent armadillo-8
+  material red
+  position -0.531514 0.158227 -0.308953
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent armadillo-8
+  material red
+  position -0.589725 0.439890 -0.203369
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent armadillo-8
+  material red
+  position -0.543000 0.639103 -0.249880
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent armadillo-8
+  material red
+  position 0.688168 0.063897 -0.332919
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent armadillo-8
+  material red
+  position -0.594082 0.580014 -0.262862
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent armadillo-8
+  material red
+  position 0.690248 -0.078788 -0.341135
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent armadillo-8
+  material red
+  position 0.666724 0.128050 -0.363520
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent armadillo-8
+  material red
+  position -0.603724 0.513518 -0.239908
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent armadillo-8
+  material red
+  position -0.568014 -0.594467 -0.244580
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent armadillo-8
+  material red
+  position -0.520270 -0.631823 -0.245385
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent armadillo-8
+  material red
+  position -0.603488 -0.486574 -0.196095
+  scale 0.025 0.025 0.025
+}

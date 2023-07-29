@@ -1,0 +1,123 @@
+
+renderer
+{
+  resolution 800 800
+  maxdepth 2
+  tilewidth 200
+  tileheight 200
+  envmapintensity 2.0
+}
+camera
+{
+  position .276 .275 -.75
+  lookat .276 .275 .10
+  fov 40
+}
+material pa
+{
+  color 0.725 0.71 0.68
+  roughness 0.150
+  albedotexture  Texture/MyColorBar.png
+}
+material red
+{
+  color 1.00 0.065 0.05
+  metallic 0.122
+  roughness 0.150
+}
+mesh
+{
+  file dinosaur-20.obj
+  name dinosaur-20
+  material pa
+  position .3685 .166 .35125
+  scale 1 1 1
+}
+mesh
+{
+  file glass_sphere.obj
+  parent dinosaur-20
+  material red
+  position 0.709674 -0.095008 -0.220429
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent dinosaur-20
+  material red
+  position 0.355489 -0.079647 0.471206
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent dinosaur-20
+  material red
+  position -0.547699 -0.648630 0.048888
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent dinosaur-20
+  material red
+  position 0.155804 0.295459 0.159397
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent dinosaur-20
+  material red
+  position 0.236434 0.354223 0.170313
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent dinosaur-20
+  material red
+  position -0.237782 0.639303 -0.120890
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent dinosaur-20
+  material red
+  position -0.333461 0.619931 -0.206470
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent dinosaur-20
+  material red
+  position -0.462478 0.204293 0.369536
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent dinosaur-20
+  material red
+  position -0.459640 0.272517 0.325402
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent dinosaur-20
+  material red
+  position -0.441143 0.236555 0.206831
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent dinosaur-20
+  material red
+  position -0.126936 -0.243132 -0.187179
+  scale 0.025 0.025 0.025
+}

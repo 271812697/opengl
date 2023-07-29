@@ -338,8 +338,8 @@ namespace PathTrace
         glBindTexture(GL_TEXTURE_2D, 0);
         outputFBO->SetColorTexture(0, tileOutputTexture[currentBuffer]);
 
-        denoiserInputFramePtr = new Vec3[renderSize.x * renderSize.y];
-        frameOutputPtr = new Vec3[renderSize.x * renderSize.y];
+        denoiserInputFramePtr = new float[renderSize.x * renderSize.y*16];
+        frameOutputPtr = new float[renderSize.x * renderSize.y*16];
 
         glGenTextures(1, &denoisedTexture);
         glBindTexture(GL_TEXTURE_2D, denoisedTexture);
@@ -934,15 +934,15 @@ namespace PathTrace
             {
              
                 glBindTexture(GL_TEXTURE_2D, tileOutputTexture[1 - currentBuffer]);
-                glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_FLOAT, denoiserInputFramePtr);
-
+                glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, denoiserInputFramePtr);
+                memcpy(frameOutputPtr, denoiserInputFramePtr, renderSize.x*renderSize.y*16);
                 oidn::DeviceRef device = oidn::newDevice();
                 device.commit();
 
         
                 oidn::FilterRef filter = device.newFilter("RT"); // generic ray tracing filter
-                filter.setImage("color", denoiserInputFramePtr, oidn::Format::Float3, renderSize.x, renderSize.y, 0, 0, 0);
-                filter.setImage("output", frameOutputPtr, oidn::Format::Float3, renderSize.x, renderSize.y, 0, 0, 0);
+                filter.setImage("color", denoiserInputFramePtr, oidn::Format::Float3, renderSize.x, renderSize.y, 0, 16, 0);
+                filter.setImage("output", frameOutputPtr, oidn::Format::Float3, renderSize.x, renderSize.y, 0, 16, 0);
                 filter.set("hdr", false);
                 filter.commit();
 
@@ -955,7 +955,7 @@ namespace PathTrace
 
                 
                 glBindTexture(GL_TEXTURE_2D, denoisedTexture);
-                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, renderSize.x, renderSize.y, 0, GL_RGB, GL_FLOAT, frameOutputPtr);
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, renderSize.x, renderSize.y, 0, GL_RGBA, GL_FLOAT, frameOutputPtr);
 
                 denoised = true;
             }

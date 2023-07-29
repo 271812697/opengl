@@ -1,0 +1,99 @@
+
+renderer
+{
+  resolution 800 800
+  maxdepth 2
+  tilewidth 200
+  tileheight 200
+  envmapintensity 2.0
+}
+camera
+{
+  position .276 .275 -.75
+  lookat .276 .275 .10
+  fov 40
+}
+material pa
+{
+  color 0.725 0.71 0.68
+  roughness 0.150
+  albedotexture  Texture/MyColorBar.png
+}
+material red
+{
+  color 1.00 0.065 0.05
+  metallic 0.122
+  roughness 0.150
+}
+mesh
+{
+  file dog2-4.obj
+  name dog2-4
+  material pa
+  position .3685 .166 .35125
+  scale 1 1 1
+}
+mesh
+{
+  file glass_sphere.obj
+  parent dog2-4
+  material red
+  position 0.765783 -0.098495 0.365439
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent dog2-4
+  material red
+  position 0.517311 0.602468 -0.114385
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent dog2-4
+  material red
+  position -0.005618 0.368804 0.139385
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent dog2-4
+  material red
+  position -0.764880 -0.209822 0.210327
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent dog2-4
+  material red
+  position -0.832648 -0.173988 0.040475
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent dog2-4
+  material red
+  position -0.588066 0.188685 0.096578
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent dog2-4
+  material red
+  position -0.090112 0.679153 0.011546
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent dog2-4
+  material red
+  position -0.557596 0.248896 0.058821
+  scale 0.025 0.025 0.025
+}

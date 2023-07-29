@@ -1,0 +1,91 @@
+
+renderer
+{
+  resolution 800 800
+  maxdepth 2
+  tilewidth 200
+  tileheight 200
+  envmapintensity 2.0
+}
+camera
+{
+  position .276 .275 -.75
+  lookat .276 .275 .10
+  fov 40
+}
+material pa
+{
+  color 0.725 0.71 0.68
+  roughness 0.150
+  albedotexture  Texture/MyColorBar.png
+}
+material red
+{
+  color 1.00 0.065 0.05
+  metallic 0.122
+  roughness 0.150
+}
+mesh
+{
+  file paper-5.obj
+  name paper-5
+  material pa
+  position .3685 .166 .35125
+  scale 1 1 1
+}
+mesh
+{
+  file glass_sphere.obj
+  parent paper-5
+  material red
+  position 0.077150 -0.507607 -0.368951
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent paper-5
+  material red
+  position -0.655873 0.494953 0.344504
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent paper-5
+  material red
+  position -0.637685 -0.532211 0.328188
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent paper-5
+  material red
+  position 0.564052 -0.527727 0.388831
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent paper-5
+  material red
+  position 0.557563 0.498554 0.432730
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent paper-5
+  material red
+  position 0.029399 -0.510246 -0.415527
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent paper-5
+  material red
+  position 0.019466 0.537595 -0.388919
+  scale 0.025 0.025 0.025
+}

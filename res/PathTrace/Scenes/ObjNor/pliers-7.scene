@@ -1,0 +1,83 @@
+
+renderer
+{
+  resolution 800 800
+  maxdepth 2
+  tilewidth 200
+  tileheight 200
+  envmapintensity 2.0
+}
+camera
+{
+  position .276 .275 -.75
+  lookat .276 .275 .10
+  fov 40
+}
+material pa
+{
+  color 0.725 0.71 0.68
+  roughness 0.150
+  albedotexture  Texture/MyColorBar.png
+}
+material red
+{
+  color 1.00 0.065 0.05
+  metallic 0.122
+  roughness 0.150
+}
+mesh
+{
+  file pliers-7.obj
+  name pliers-7
+  material pa
+  position .3685 .166 .35125
+  scale 1 1 1
+}
+mesh
+{
+  file glass_sphere.obj
+  parent pliers-7
+  material red
+  position 0.602686 0.409946 -0.003922
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent pliers-7
+  material red
+  position 0.288775 0.066592 -0.019796
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent pliers-7
+  material red
+  position -0.610335 0.400234 0.002716
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent pliers-7
+  material red
+  position 0.826774 -0.348172 -0.005207
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent pliers-7
+  material red
+  position -0.292370 0.067022 -0.003929
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent pliers-7
+  material red
+  position -0.837914 -0.330683 0.000924
+  scale 0.025 0.025 0.025
+}

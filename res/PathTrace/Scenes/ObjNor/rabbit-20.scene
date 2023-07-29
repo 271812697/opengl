@@ -1,0 +1,99 @@
+
+renderer
+{
+  resolution 800 800
+  maxdepth 2
+  tilewidth 200
+  tileheight 200
+  envmapintensity 2.0
+}
+camera
+{
+  position .276 .275 -.75
+  lookat .276 .275 .10
+  fov 40
+}
+material pa
+{
+  color 0.725 0.71 0.68
+  roughness 0.150
+  albedotexture  Texture/MyColorBar.png
+}
+material red
+{
+  color 1.00 0.065 0.05
+  metallic 0.122
+  roughness 0.150
+}
+mesh
+{
+  file rabbit-20.obj
+  name rabbit-20
+  material pa
+  position .3685 .166 .35125
+  scale 1 1 1
+}
+mesh
+{
+  file glass_sphere.obj
+  parent rabbit-20
+  material red
+  position 0.788966 -0.150467 0.325052
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent rabbit-20
+  material red
+  position 0.699881 0.240338 -0.036236
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent rabbit-20
+  material red
+  position 0.811102 -0.305898 -0.145126
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent rabbit-20
+  material red
+  position 0.255497 0.411630 0.248886
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent rabbit-20
+  material red
+  position 0.251978 0.277243 -0.397647
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent rabbit-20
+  material red
+  position -0.480246 0.392499 -0.265402
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent rabbit-20
+  material red
+  position -0.549311 0.436908 0.333269
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent rabbit-20
+  material red
+  position -0.635907 -0.058161 -0.010734
+  scale 0.025 0.025 0.025
+}

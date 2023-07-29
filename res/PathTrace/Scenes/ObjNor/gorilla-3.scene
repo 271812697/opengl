@@ -1,0 +1,187 @@
+
+renderer
+{
+  resolution 800 800
+  maxdepth 2
+  tilewidth 200
+  tileheight 200
+  envmapintensity 2.0
+}
+camera
+{
+  position .276 .275 -.75
+  lookat .276 .275 .10
+  fov 40
+}
+material pa
+{
+  color 0.725 0.71 0.68
+  roughness 0.150
+  albedotexture  Texture/MyColorBar.png
+}
+material red
+{
+  color 1.00 0.065 0.05
+  metallic 0.122
+  roughness 0.150
+}
+mesh
+{
+  file gorilla-3.obj
+  name gorilla-3
+  material pa
+  position .3685 .166 .35125
+  scale 1 1 1
+}
+mesh
+{
+  file glass_sphere.obj
+  parent gorilla-3
+  material red
+  position 0.430776 -0.702789 0.321320
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent gorilla-3
+  material red
+  position -0.449714 0.142985 0.326022
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent gorilla-3
+  material red
+  position -0.807250 -0.291662 -0.136382
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent gorilla-3
+  material red
+  position -0.850755 0.042524 0.148196
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent gorilla-3
+  material red
+  position 0.709857 0.295797 -0.200536
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent gorilla-3
+  material red
+  position 0.666735 0.032233 0.049836
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent gorilla-3
+  material red
+  position -0.401992 0.001214 0.283965
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent gorilla-3
+  material red
+  position -0.479934 0.077870 0.294404
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent gorilla-3
+  material red
+  position -0.469219 0.041761 0.280307
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent gorilla-3
+  material red
+  position -0.807029 -0.220347 -0.110883
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent gorilla-3
+  material red
+  position -0.821912 0.021313 0.067879
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent gorilla-3
+  material red
+  position -0.841772 0.094081 0.146796
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent gorilla-3
+  material red
+  position -0.798171 -0.283429 -0.193197
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent gorilla-3
+  material red
+  position -0.470440 0.112041 0.319818
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent gorilla-3
+  material red
+  position 0.387270 -0.727932 0.262284
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent gorilla-3
+  material red
+  position 0.416198 -0.716548 0.289182
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent gorilla-3
+  material red
+  position 0.439338 -0.656767 0.333198
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent gorilla-3
+  material red
+  position 0.415723 -0.595808 0.307409
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent gorilla-3
+  material red
+  position 0.735659 0.125343 -0.041841
+  scale 0.025 0.025 0.025
+}

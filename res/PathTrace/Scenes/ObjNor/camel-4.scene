@@ -1,0 +1,107 @@
+
+renderer
+{
+  resolution 800 800
+  maxdepth 2
+  tilewidth 200
+  tileheight 200
+  envmapintensity 2.0
+}
+camera
+{
+  position .276 .275 -.75
+  lookat .276 .275 .10
+  fov 40
+}
+material pa
+{
+  color 0.725 0.71 0.68
+  roughness 0.150
+  albedotexture  Texture/MyColorBar.png
+}
+material red
+{
+  color 1.00 0.065 0.05
+  metallic 0.122
+  roughness 0.150
+}
+mesh
+{
+  file camel-4.obj
+  name camel-4
+  material pa
+  position .3685 .166 .35125
+  scale 1 1 1
+}
+mesh
+{
+  file glass_sphere.obj
+  parent camel-4
+  material red
+  position 0.179769 0.670218 0.405224
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent camel-4
+  material red
+  position -0.703389 0.381027 0.188777
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent camel-4
+  material red
+  position 0.666915 -0.189396 0.059760
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent camel-4
+  material red
+  position 0.086090 -0.470023 -0.011302
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent camel-4
+  material red
+  position 0.901676 -0.002085 -0.026931
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent camel-4
+  material red
+  position -0.461582 -0.260519 0.001713
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent camel-4
+  material red
+  position -0.716071 0.383337 -0.208610
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent camel-4
+  material red
+  position 0.080543 0.645987 -0.423447
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent camel-4
+  material red
+  position 0.677798 -0.178074 -0.070208
+  scale 0.025 0.025 0.025
+}

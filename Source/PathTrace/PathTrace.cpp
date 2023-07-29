@@ -1,4 +1,5 @@
 #include"PathTrace.h"
+
 namespace PathTrace {
     
     
@@ -18,7 +19,7 @@ namespace PathTrace {
     float screenY[2] = { 0,0 };
 
     std::string shadersDir = "../../../res/PathTrace/shaders/";
-    std::string assetsDir = "../../../res/PathTrace/Scenes/";
+    std::string assetsDir = "../../../res/PathTrace/Scenes/ObjNor";
     std::string envMapDir = "../../../res/PathTrace/Scenes/HDR/";
 
     RenderOptions renderOptions;

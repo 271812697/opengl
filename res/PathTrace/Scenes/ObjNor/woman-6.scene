@@ -1,0 +1,115 @@
+
+renderer
+{
+  resolution 800 800
+  maxdepth 2
+  tilewidth 200
+  tileheight 200
+  envmapintensity 2.0
+}
+camera
+{
+  position .276 .275 -.75
+  lookat .276 .275 .10
+  fov 40
+}
+material pa
+{
+  color 0.725 0.71 0.68
+  roughness 0.150
+  albedotexture  Texture/MyColorBar.png
+}
+material red
+{
+  color 1.00 0.065 0.05
+  metallic 0.122
+  roughness 0.150
+}
+mesh
+{
+  file woman-6.obj
+  name woman-6
+  material pa
+  position .3685 .166 .35125
+  scale 1 1 1
+}
+mesh
+{
+  file glass_sphere.obj
+  parent woman-6
+  material red
+  position 0.760296 -0.208859 -0.206422
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent woman-6
+  material red
+  position 0.636616 -0.181225 0.499927
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent woman-6
+  material red
+  position 0.346418 0.002664 0.183686
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent woman-6
+  material red
+  position 0.138230 -0.013010 -0.257717
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent woman-6
+  material red
+  position 0.077334 -0.123026 -0.055198
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent woman-6
+  material red
+  position 0.038618 -0.362505 -0.055322
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent woman-6
+  material red
+  position 0.015019 -0.529187 0.050931
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent woman-6
+  material red
+  position -0.183393 -0.080425 -0.087147
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent woman-6
+  material red
+  position -0.430006 0.002938 0.093339
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent woman-6
+  material red
+  position -0.819065 -0.329102 0.102412
+  scale 0.025 0.025 0.025
+}

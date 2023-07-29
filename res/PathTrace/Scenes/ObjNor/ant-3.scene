@@ -1,0 +1,139 @@
+
+renderer
+{
+  resolution 800 800
+  maxdepth 2
+  tilewidth 200
+  tileheight 200
+  envmapintensity 2.0
+}
+camera
+{
+  position .276 .275 -.75
+  lookat .276 .275 .10
+  fov 40
+}
+material pa
+{
+  color 0.725 0.71 0.68
+  roughness 0.150
+  albedotexture  Texture/MyColorBar.png
+}
+material red
+{
+  color 1.00 0.065 0.05
+  metallic 0.122
+  roughness 0.150
+}
+mesh
+{
+  file ant-3.obj
+  name ant-3
+  material pa
+  position .3685 .166 .35125
+  scale 1 1 1
+}
+mesh
+{
+  file glass_sphere.obj
+  parent ant-3
+  material red
+  position 0.775157 -0.423663 -0.013373
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent ant-3
+  material red
+  position -0.112781 -0.670371 0.130793
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent ant-3
+  material red
+  position -0.354584 -0.613661 0.133038
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent ant-3
+  material red
+  position 0.893341 0.081878 0.052384
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent ant-3
+  material red
+  position -0.558667 -0.469011 0.186320
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent ant-3
+  material red
+  position 0.084632 -0.155877 -0.000812
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent ant-3
+  material red
+  position -0.032608 -0.140407 -0.019424
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent ant-3
+  material red
+  position -0.170575 -0.102094 -0.049291
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent ant-3
+  material red
+  position 0.079553 0.132168 -0.018533
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent ant-3
+  material red
+  position 0.352124 0.418355 0.291451
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent ant-3
+  material red
+  position -0.073285 0.164215 -0.052864
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent ant-3
+  material red
+  position 0.237631 0.675732 0.156656
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent ant-3
+  material red
+  position -0.078485 0.742584 0.146040
+  scale 0.025 0.025 0.025
+}

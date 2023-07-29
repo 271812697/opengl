@@ -1,0 +1,99 @@
+
+renderer
+{
+  resolution 800 800
+  maxdepth 2
+  tilewidth 200
+  tileheight 200
+  envmapintensity 2.0
+}
+camera
+{
+  position .276 .275 -.75
+  lookat .276 .275 .10
+  fov 40
+}
+material pa
+{
+  color 0.725 0.71 0.68
+  roughness 0.150
+  albedotexture  Texture/MyColorBar.png
+}
+material red
+{
+  color 1.00 0.065 0.05
+  metallic 0.122
+  roughness 0.150
+}
+mesh
+{
+  file cat-20.obj
+  name cat-20
+  material pa
+  position .3685 .166 .35125
+  scale 1 1 1
+}
+mesh
+{
+  file glass_sphere.obj
+  parent cat-20
+  material red
+  position 0.089409 0.478814 -0.192246
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent cat-20
+  material red
+  position 0.064173 0.498203 0.095517
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent cat-20
+  material red
+  position -0.049737 0.494256 -0.070268
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent cat-20
+  material red
+  position -0.291690 0.519765 0.221905
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent cat-20
+  material red
+  position 0.356340 -0.682200 -0.040641
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent cat-20
+  material red
+  position -0.560041 -0.386351 -0.118115
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent cat-20
+  material red
+  position -0.584934 -0.364185 0.141171
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent cat-20
+  material red
+  position -0.813414 -0.232992 -0.040111
+  scale 0.025 0.025 0.025
+}

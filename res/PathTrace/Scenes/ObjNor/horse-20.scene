@@ -1,0 +1,139 @@
+
+renderer
+{
+  resolution 800 800
+  maxdepth 2
+  tilewidth 200
+  tileheight 200
+  envmapintensity 2.0
+}
+camera
+{
+  position .276 .275 -.75
+  lookat .276 .275 .10
+  fov 40
+}
+material pa
+{
+  color 0.725 0.71 0.68
+  roughness 0.150
+  albedotexture  Texture/MyColorBar.png
+}
+material red
+{
+  color 1.00 0.065 0.05
+  metallic 0.122
+  roughness 0.150
+}
+mesh
+{
+  file horse-20.obj
+  name horse-20
+  material pa
+  position .3685 .166 .35125
+  scale 1 1 1
+}
+mesh
+{
+  file glass_sphere.obj
+  parent horse-20
+  material red
+  position 0.890491 -0.146668 0.058898
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent horse-20
+  material red
+  position 0.622799 -0.291677 -0.004237
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent horse-20
+  material red
+  position -0.067708 0.593918 0.247314
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent horse-20
+  material red
+  position -0.058440 0.569421 -0.237255
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent horse-20
+  material red
+  position -0.188527 0.398469 0.077362
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent horse-20
+  material red
+  position -0.157255 0.398487 -0.204485
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent horse-20
+  material red
+  position -0.200314 -0.419379 -0.037307
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent horse-20
+  material red
+  position -0.471953 0.236873 0.198587
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent horse-20
+  material red
+  position -0.433351 0.232769 -0.207089
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent horse-20
+  material red
+  position 0.715248 -0.231519 0.055432
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent horse-20
+  material red
+  position 0.747750 -0.195439 -0.094720
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent horse-20
+  material red
+  position 0.640603 -0.267091 -0.102974
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent horse-20
+  material red
+  position 0.876232 -0.077814 0.059313
+  scale 0.025 0.025 0.025
+}

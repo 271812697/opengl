@@ -10,6 +10,7 @@
 using namespace UI::Widgets;
 using namespace PathTrace;
 
+extern UI::Widgets::Selection::ComboBox* meshchoice;
 PathInspector::PathInspector
 (
 	const std::string& p_title,
@@ -58,10 +59,18 @@ void PathInspector::InstallUI()
 	for (int i = 0; i < sceneFiles.size(); ++i) {
 		sceneSelectorWidget.choices.emplace(i, sceneFiles[i]);
 
-	}
+	}	
 	sceneSelectorWidget.ValueChangedEvent += [](int cur) {
+
 		LoadScene(sceneFiles[cur]);
-		InitRenderer();
+		InitRenderer();	
+		meshchoice->choices.clear();
+		for (int i = 0; i < GetScene()->meshInstances.size(); i++) {
+			std::string name = GetScene()->meshInstances[i].name;
+			if(name.find("glass")==std::string::npos)
+			meshchoice->choices.emplace(i, GetScene()->meshInstances[i].name);
+		}
+
 	};
 	//ÇÐ»»»·¾³ÌùÍ¼
 	auto& envSelectorWidget = CreateWidget<UI::Widgets::Selection::ComboBox>(0);

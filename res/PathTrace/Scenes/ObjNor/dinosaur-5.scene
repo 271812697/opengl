@@ -1,0 +1,99 @@
+
+renderer
+{
+  resolution 800 800
+  maxdepth 2
+  tilewidth 200
+  tileheight 200
+  envmapintensity 2.0
+}
+camera
+{
+  position .276 .275 -.75
+  lookat .276 .275 .10
+  fov 40
+}
+material pa
+{
+  color 0.725 0.71 0.68
+  roughness 0.150
+  albedotexture  Texture/MyColorBar.png
+}
+material red
+{
+  color 1.00 0.065 0.05
+  metallic 0.122
+  roughness 0.150
+}
+mesh
+{
+  file dinosaur-5.obj
+  name dinosaur-5
+  material pa
+  position .3685 .166 .35125
+  scale 1 1 1
+}
+mesh
+{
+  file glass_sphere.obj
+  parent dinosaur-5
+  material red
+  position 0.532946 -0.647636 0.006443
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent dinosaur-5
+  material red
+  position -0.658528 -0.618928 -0.002004
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent dinosaur-5
+  material red
+  position -0.500576 -0.617020 0.004979
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent dinosaur-5
+  material red
+  position -0.260686 0.463318 -0.128753
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent dinosaur-5
+  material red
+  position -0.227218 0.467460 0.137725
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent dinosaur-5
+  material red
+  position 0.301192 0.337754 0.123408
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent dinosaur-5
+  material red
+  position 0.285034 0.344606 -0.131952
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent dinosaur-5
+  material red
+  position -0.056932 -0.233201 -0.001441
+  scale 0.025 0.025 0.025
+}

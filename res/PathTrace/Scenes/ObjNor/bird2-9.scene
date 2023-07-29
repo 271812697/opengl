@@ -1,0 +1,115 @@
+
+renderer
+{
+  resolution 800 800
+  maxdepth 2
+  tilewidth 200
+  tileheight 200
+  envmapintensity 2.0
+}
+camera
+{
+  position .276 .275 -.75
+  lookat .276 .275 .10
+  fov 40
+}
+material pa
+{
+  color 0.725 0.71 0.68
+  roughness 0.150
+  albedotexture  Texture/MyColorBar.png
+}
+material red
+{
+  color 1.00 0.065 0.05
+  metallic 0.122
+  roughness 0.150
+}
+mesh
+{
+  file bird2-9.obj
+  name bird2-9
+  material pa
+  position .3685 .166 .35125
+  scale 1 1 1
+}
+mesh
+{
+  file glass_sphere.obj
+  parent bird2-9
+  material red
+  position 0.322136 -0.063049 -0.261541
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent bird2-9
+  material red
+  position 0.202343 -0.315590 -0.284987
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent bird2-9
+  material red
+  position 0.003442 0.539610 -0.020047
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent bird2-9
+  material red
+  position 0.194695 0.200370 -0.118599
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent bird2-9
+  material red
+  position 0.024790 -0.354979 0.165265
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent bird2-9
+  material red
+  position -0.040626 0.235929 -0.128150
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent bird2-9
+  material red
+  position -0.620275 0.065259 -0.153625
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent bird2-9
+  material red
+  position -0.758401 -0.188852 -0.113885
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent bird2-9
+  material red
+  position 0.193946 0.497499 -0.028155
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent bird2-9
+  material red
+  position -0.508313 0.096700 -0.112126
+  scale 0.025 0.025 0.025
+}

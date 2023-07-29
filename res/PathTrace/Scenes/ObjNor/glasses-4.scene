@@ -1,0 +1,115 @@
+
+renderer
+{
+  resolution 800 800
+  maxdepth 2
+  tilewidth 200
+  tileheight 200
+  envmapintensity 2.0
+}
+camera
+{
+  position .276 .275 -.75
+  lookat .276 .275 .10
+  fov 40
+}
+material pa
+{
+  color 0.725 0.71 0.68
+  roughness 0.150
+  albedotexture  Texture/MyColorBar.png
+}
+material red
+{
+  color 1.00 0.065 0.05
+  metallic 0.122
+  roughness 0.150
+}
+mesh
+{
+  file glasses-4.obj
+  name glasses-4
+  material pa
+  position .3685 .166 .35125
+  scale 1 1 1
+}
+mesh
+{
+  file glass_sphere.obj
+  parent glasses-4
+  material red
+  position 0.819122 -0.033940 -0.131790
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent glasses-4
+  material red
+  position 0.645967 -0.010105 0.022583
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent glasses-4
+  material red
+  position 0.437957 0.340881 -0.021040
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent glasses-4
+  material red
+  position 0.104785 0.267294 0.026112
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent glasses-4
+  material red
+  position -0.004413 -0.003088 0.031292
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent glasses-4
+  material red
+  position -0.216578 0.203721 0.010772
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent glasses-4
+  material red
+  position -0.556429 0.133741 -0.002878
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent glasses-4
+  material red
+  position -0.696812 0.525953 -0.142142
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent glasses-4
+  material red
+  position -0.611882 -0.254331 0.010769
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent glasses-4
+  material red
+  position 0.037208 -0.151727 0.072207
+  scale 0.025 0.025 0.025
+}

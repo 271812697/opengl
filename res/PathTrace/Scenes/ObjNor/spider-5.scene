@@ -1,0 +1,99 @@
+
+renderer
+{
+  resolution 800 800
+  maxdepth 2
+  tilewidth 200
+  tileheight 200
+  envmapintensity 2.0
+}
+camera
+{
+  position .276 .275 -.75
+  lookat .276 .275 .10
+  fov 40
+}
+material pa
+{
+  color 0.725 0.71 0.68
+  roughness 0.150
+  albedotexture  Texture/MyColorBar.png
+}
+material red
+{
+  color 1.00 0.065 0.05
+  metallic 0.122
+  roughness 0.150
+}
+mesh
+{
+  file spider-5.obj
+  name spider-5
+  material pa
+  position .3685 .166 .35125
+  scale 1 1 1
+}
+mesh
+{
+  file glass_sphere.obj
+  parent spider-5
+  material red
+  position 0.359100 -0.674941 -0.152663
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent spider-5
+  material red
+  position 0.731044 -0.432699 0.109998
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent spider-5
+  material red
+  position -0.355122 -0.630766 -0.373735
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent spider-5
+  material red
+  position 0.531343 0.266079 -0.475303
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent spider-5
+  material red
+  position -0.244045 -0.805523 0.046943
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent spider-5
+  material red
+  position 0.856186 -0.014094 0.158414
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent spider-5
+  material red
+  position 0.784076 0.196317 -0.070457
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent spider-5
+  material red
+  position -0.814515 0.226088 0.007320
+  scale 0.025 0.025 0.025
+}

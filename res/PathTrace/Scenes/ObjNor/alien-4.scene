@@ -1,0 +1,219 @@
+
+renderer
+{
+  resolution 800 800
+  maxdepth 2
+  tilewidth 200
+  tileheight 200
+  envmapintensity 2.0
+}
+camera
+{
+  position .276 .275 -.75
+  lookat .276 .275 .10
+  fov 40
+}
+material pa
+{
+  color 0.725 0.71 0.68
+  roughness 0.150
+  albedotexture  Texture/MyColorBar.png
+}
+material red
+{
+  color 1.00 0.065 0.05
+  metallic 0.122
+  roughness 0.150
+}
+mesh
+{
+  file alien-4.obj
+  name alien-4
+  material pa
+  position .3685 .166 .35125
+  scale 1 1 1
+}
+mesh
+{
+  file glass_sphere.obj
+  parent alien-4
+  material red
+  position 0.713272 0.318667 -0.040979
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent alien-4
+  material red
+  position 0.140695 -0.000127 -0.334309
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent alien-4
+  material red
+  position 0.720703 -0.250698 -0.040812
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent alien-4
+  material red
+  position -0.091046 -0.122307 0.819693
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent alien-4
+  material red
+  position -0.550678 -0.051025 -0.190249
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent alien-4
+  material red
+  position -0.123095 -0.590884 0.023552
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent alien-4
+  material red
+  position -0.119681 -0.595690 0.025198
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent alien-4
+  material red
+  position -0.126545 -0.595887 0.021755
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent alien-4
+  material red
+  position -0.124949 -0.595088 0.024870
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent alien-4
+  material red
+  position -0.125322 -0.598653 0.019265
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent alien-4
+  material red
+  position -0.126222 -0.598695 0.025106
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent alien-4
+  material red
+  position -0.127228 -0.599969 0.021520
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent alien-4
+  material red
+  position -0.126480 -0.601659 0.023632
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent alien-4
+  material red
+  position -0.128293 -0.600537 0.024286
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent alien-4
+  material red
+  position 0.070887 0.684443 0.096915
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent alien-4
+  material red
+  position -0.111184 -0.557484 -0.087824
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent alien-4
+  material red
+  position -0.451130 0.217915 -0.240971
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent alien-4
+  material red
+  position -0.498553 0.124259 -0.203758
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent alien-4
+  material red
+  position -0.129828 -0.600053 0.023860
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent alien-4
+  material red
+  position -0.568536 -0.143857 -0.209517
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent alien-4
+  material red
+  position -0.046630 -0.614037 0.045121
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent alien-4
+  material red
+  position -0.012852 0.664042 0.040093
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent alien-4
+  material red
+  position 0.098327 0.684490 0.143941
+  scale 0.025 0.025 0.025
+}

@@ -1,0 +1,83 @@
+
+renderer
+{
+  resolution 800 800
+  maxdepth 2
+  tilewidth 200
+  tileheight 200
+  envmapintensity 2.0
+}
+camera
+{
+  position .276 .275 -.75
+  lookat .276 .275 .10
+  fov 40
+}
+material pa
+{
+  color 0.725 0.71 0.68
+  roughness 0.150
+  albedotexture  Texture/MyColorBar.png
+}
+material red
+{
+  color 1.00 0.065 0.05
+  metallic 0.122
+  roughness 0.150
+}
+mesh
+{
+  file shark-7.obj
+  name shark-7
+  material pa
+  position .3685 .166 .35125
+  scale 1 1 1
+}
+mesh
+{
+  file glass_sphere.obj
+  parent shark-7
+  material red
+  position 0.731421 -0.433903 0.155801
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent shark-7
+  material red
+  position 0.536486 -0.365259 -0.209126
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent shark-7
+  material red
+  position 0.036152 0.459468 0.100114
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent shark-7
+  material red
+  position 0.115130 -0.084618 0.131037
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent shark-7
+  material red
+  position -0.073021 0.085117 -0.366309
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent shark-7
+  material red
+  position -0.435521 -0.437296 0.028686
+  scale 0.025 0.025 0.025
+}

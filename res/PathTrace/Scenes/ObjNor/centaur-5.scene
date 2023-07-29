@@ -1,0 +1,99 @@
+
+renderer
+{
+  resolution 800 800
+  maxdepth 2
+  tilewidth 200
+  tileheight 200
+  envmapintensity 2.0
+}
+camera
+{
+  position .276 .275 -.75
+  lookat .276 .275 .10
+  fov 40
+}
+material pa
+{
+  color 0.725 0.71 0.68
+  roughness 0.150
+  albedotexture  Texture/MyColorBar.png
+}
+material red
+{
+  color 1.00 0.065 0.05
+  metallic 0.122
+  roughness 0.150
+}
+mesh
+{
+  file centaur-5.obj
+  name centaur-5
+  material pa
+  position .3685 .166 .35125
+  scale 1 1 1
+}
+mesh
+{
+  file glass_sphere.obj
+  parent centaur-5
+  material red
+  position 0.472035 -0.539421 0.358170
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent centaur-5
+  material red
+  position -0.676620 -0.148873 0.128844
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent centaur-5
+  material red
+  position -0.796905 -0.119284 -0.366486
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent centaur-5
+  material red
+  position -0.606446 -0.057462 0.331377
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent centaur-5
+  material red
+  position 0.523999 0.364622 0.142825
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent centaur-5
+  material red
+  position 0.462952 0.381502 0.058181
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent centaur-5
+  material red
+  position 0.078358 0.630652 0.072480
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent centaur-5
+  material red
+  position -0.061180 0.623935 0.106274
+  scale 0.025 0.025 0.025
+}

@@ -1,0 +1,99 @@
+
+renderer
+{
+  resolution 800 800
+  maxdepth 2
+  tilewidth 200
+  tileheight 200
+  envmapintensity 2.0
+}
+camera
+{
+  position .276 .275 -.75
+  lookat .276 .275 .10
+  fov 40
+}
+material pa
+{
+  color 0.725 0.71 0.68
+  roughness 0.150
+  albedotexture  Texture/MyColorBar.png
+}
+material red
+{
+  color 1.00 0.065 0.05
+  metallic 0.122
+  roughness 0.150
+}
+mesh
+{
+  file octopus-8.obj
+  name octopus-8
+  material pa
+  position .3685 .166 .35125
+  scale 1 1 1
+}
+mesh
+{
+  file glass_sphere.obj
+  parent octopus-8
+  material red
+  position 0.715079 0.447620 0.327144
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent octopus-8
+  material red
+  position 0.636060 0.048058 0.444740
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent octopus-8
+  material red
+  position 0.219219 0.519881 -0.589127
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent octopus-8
+  material red
+  position 0.289544 -0.677300 -0.061822
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent octopus-8
+  material red
+  position 0.403409 -0.408627 0.452179
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent octopus-8
+  material red
+  position -0.097891 -0.484179 -0.367586
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent octopus-8
+  material red
+  position -0.089669 0.340360 -0.016139
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent octopus-8
+  material red
+  position -0.266420 -0.031234 -0.231441
+  scale 0.025 0.025 0.025
+}

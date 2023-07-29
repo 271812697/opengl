@@ -9,7 +9,7 @@
 #include"ImGuizmo.h"
 using namespace UI::Widgets;
 using namespace PathTrace;
-
+UI::Widgets::Selection::ComboBox* meshchoice;
 TransformInspector::TransformInspector
 (
 	const std::string& p_title,
@@ -32,13 +32,17 @@ void TransformInspector::InstallUI()
 	m_inspectorHeader->CreateWidget<UI::Widgets::Visual::Separator>();
 	m_inspectorHeader->enabled = true;
 	auto& MeshInstance =CreateWidget<UI::Widgets::Selection::ComboBox>(0);
+	meshchoice = &MeshInstance;
 	MeshInstance.ValueChangedEvent += [](int v) {
 		selectedInstance = v;
 	};
 	for (int i = 0; i < GetScene()->meshInstances.size(); i++) {
-		MeshInstance.choices.emplace(i, GetScene()->meshInstances[i].name);
+		std::string name = GetScene()->meshInstances[i].name;
+		if (name.find("glass") == std::string::npos)
+			meshchoice->choices.emplace(i, GetScene()->meshInstances[i].name);
 	}
-	CreateWidget<UI::Widgets::CustomWidget>().DrawIn += [&MeshInstance]() {
+
+	CreateWidget<UI::Widgets::CustomWidget>().DrawIn += []() {
 		objectPropChanged = false;
 		ImGui::Text("Material Properties");
 		Material* mat = &GetScene()->materials[GetScene()->meshInstances[selectedInstance].materialID];

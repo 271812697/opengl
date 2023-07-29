@@ -151,8 +151,8 @@ namespace PathTrace
         int sampleCounter;
         float pixelRatio;
 
-        Vec3* denoiserInputFramePtr;
-        Vec3* frameOutputPtr;
+        float* denoiserInputFramePtr;
+        float* frameOutputPtr;
         bool denoised;
 
         bool initialized;

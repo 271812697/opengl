@@ -1,0 +1,91 @@
+
+renderer
+{
+  resolution 800 800
+  maxdepth 2
+  tilewidth 200
+  tileheight 200
+  envmapintensity 2.0
+}
+camera
+{
+  position .276 .275 -.75
+  lookat .276 .275 .10
+  fov 40
+}
+material pa
+{
+  color 0.725 0.71 0.68
+  roughness 0.150
+  albedotexture  Texture/MyColorBar.png
+}
+material red
+{
+  color 1.00 0.065 0.05
+  metallic 0.122
+  roughness 0.150
+}
+mesh
+{
+  file flamingo-4.obj
+  name flamingo-4
+  material pa
+  position .3685 .166 .35125
+  scale 1 1 1
+}
+mesh
+{
+  file glass_sphere.obj
+  parent flamingo-4
+  material red
+  position 0.657891 -0.131606 -0.016770
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent flamingo-4
+  material red
+  position -0.236140 -0.773264 0.076080
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent flamingo-4
+  material red
+  position -0.240480 -0.773897 -0.082569
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent flamingo-4
+  material red
+  position -0.671269 -0.140776 0.032256
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent flamingo-4
+  material red
+  position -0.176094 -0.792071 0.126914
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent flamingo-4
+  material red
+  position -0.194504 -0.786273 -0.139260
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent flamingo-4
+  material red
+  position -0.186722 -0.787754 0.025358
+  scale 0.025 0.025 0.025
+}

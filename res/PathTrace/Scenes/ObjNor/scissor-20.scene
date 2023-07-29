@@ -1,0 +1,131 @@
+
+renderer
+{
+  resolution 800 800
+  maxdepth 2
+  tilewidth 200
+  tileheight 200
+  envmapintensity 2.0
+}
+camera
+{
+  position .276 .275 -.75
+  lookat .276 .275 .10
+  fov 40
+}
+material pa
+{
+  color 0.725 0.71 0.68
+  roughness 0.150
+  albedotexture  Texture/MyColorBar.png
+}
+material red
+{
+  color 1.00 0.065 0.05
+  metallic 0.122
+  roughness 0.150
+}
+mesh
+{
+  file scissor-20.obj
+  name scissor-20
+  material pa
+  position .3685 .166 .35125
+  scale 1 1 1
+}
+mesh
+{
+  file glass_sphere.obj
+  parent scissor-20
+  material red
+  position 0.764800 -0.483974 -0.028084
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent scissor-20
+  material red
+  position 0.548221 0.662941 0.006618
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent scissor-20
+  material red
+  position 0.180871 -0.060699 0.019669
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent scissor-20
+  material red
+  position 0.182110 0.244394 0.001312
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent scissor-20
+  material red
+  position -0.202277 -0.062719 0.029030
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent scissor-20
+  material red
+  position -0.277180 0.110980 0.018018
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent scissor-20
+  material red
+  position -0.568156 0.642615 -0.007022
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent scissor-20
+  material red
+  position -0.753415 -0.491509 -0.017584
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent scissor-20
+  material red
+  position 0.839172 -0.338744 0.025599
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent scissor-20
+  material red
+  position -0.833026 -0.341316 0.022760
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent scissor-20
+  material red
+  position -0.195809 0.236457 0.000811
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent scissor-20
+  material red
+  position 0.262406 0.130582 0.015313
+  scale 0.025 0.025 0.025
+}
