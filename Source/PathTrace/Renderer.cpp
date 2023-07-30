@@ -9,8 +9,9 @@ namespace PathTrace {
 extern bool space_down;
 extern float screenX[2] ;
 extern float screenY[2] ;
-}
 
+}
+inline bool raster = false;
 namespace PathTrace
 {
     // 加载shader的源码

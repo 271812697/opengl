@@ -9,6 +9,7 @@
 #include"ImGuizmo.h"
 using namespace UI::Widgets;
 using namespace PathTrace;
+inline  bool raster ;
 
 extern UI::Widgets::Selection::ComboBox* meshchoice;
 PathInspector::PathInspector
@@ -43,7 +44,7 @@ void PathInspector::InstallUI()
 		GetRenderer()->SaveFrame();
 
 	};
-	CreateWidget<UI::Widgets::Selection::CheckBox>(false, "Raster").AddPlugin<UI::Plugins::DataDispatcher<bool>>().RegisterReference(GetRenderer()->raster);
+	CreateWidget<UI::Widgets::Selection::CheckBox>(false, "Raster").AddPlugin<UI::Plugins::DataDispatcher<bool>>().RegisterReference(raster);
 	auto& Sample = (CreateWidget<UI::Widgets::Texts::TextColored>("Samples", UI::Types::Color(1.0f, 1.0f, 0.0f, 1.0f))).AddPlugin<UI::Plugins::DataDispatcher<std::string>>();
 	Sample.RegisterGatherer([]() {
 		std::string a = "Samples: ";
@@ -67,7 +68,7 @@ void PathInspector::InstallUI()
 		meshchoice->choices.clear();
 		for (int i = 0; i < GetScene()->meshInstances.size(); i++) {
 			std::string name = GetScene()->meshInstances[i].name;
-			if(name.find("glass")==std::string::npos)
+			if(name.find("glass_sphere")==std::string::npos)
 			meshchoice->choices.emplace(i, GetScene()->meshInstances[i].name);
 		}
 

@@ -15,15 +15,14 @@ camera
 }
 material pa
 {
-  color 0.725 0.71 0.68
-  roughness 0.150
-  albedotexture  Texture/MyColorBar.png
+  color 1.0 1.0 1.0
+  roughness 0.001
 }
 material red
 {
   color 1.00 0.065 0.05
   metallic 0.122
-  roughness 0.150
+  roughness 0.001
 }
 mesh
 {

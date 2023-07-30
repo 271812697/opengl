@@ -173,7 +173,6 @@ namespace PathTrace
         float GetProgress();
         int GetSampleCount();
         void GetOutputBuffer(unsigned char**, int& w, int& h);
-        bool raster=false;
 
     private:
         void InitGPUDataBuffers();

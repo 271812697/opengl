@@ -38,7 +38,7 @@ void TransformInspector::InstallUI()
 	};
 	for (int i = 0; i < GetScene()->meshInstances.size(); i++) {
 		std::string name = GetScene()->meshInstances[i].name;
-		if (name.find("glass") == std::string::npos)
+		if (name.find("glass_sphere") == std::string::npos)
 			meshchoice->choices.emplace(i, GetScene()->meshInstances[i].name);
 	}
 

@@ -1,0 +1,917 @@
+
+renderer
+{
+  resolution 800 800
+  maxdepth 2
+  tilewidth 200
+  tileheight 200
+  envmapintensity 2.0
+}
+camera
+{
+  position .276 .275 -.75
+  lookat .276 .275 .10
+  fov 40
+}
+material pa
+{
+  color 1.0 1.0 1.0
+  roughness 0.001
+}
+material red
+{
+  color 1.00 0.065 0.05
+  metallic 0.122
+  roughness 0.001
+}
+mesh
+{
+  file alien-20.obj
+  name alien-20
+  material pa
+  position .3685 .166 .35125
+  scale 1 1 1
+}
+mesh
+{
+  file glass_sphere.obj
+  parent alien-20
+  material red
+  position 0.499672 0.486332 -0.384943
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent alien-20
+  material red
+  position -0.422267 0.349278 -0.237056
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent alien-20
+  material red
+  position 0.751878 0.076595 0.049527
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent alien-20
+  material red
+  position -0.457534 0.278518 -0.160743
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent alien-20
+  material red
+  position -0.458427 0.274436 -0.159661
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent alien-20
+  material red
+  position -0.459658 0.272349 -0.159238
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent alien-20
+  material red
+  position 0.173573 -0.090198 -0.276848
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent alien-20
+  material red
+  position -0.596939 -0.074402 -0.307311
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent alien-20
+  material red
+  position -0.602026 -0.177756 -0.331135
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent alien-20
+  material red
+  position 0.478498 -0.483422 -0.112959
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent alien-20
+  material red
+  position -0.088671 -0.652628 -0.222126
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent alien-20
+  material red
+  position 0.572659 0.528364 -0.217838
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent alien-20
+  material red
+  position -0.064985 -0.701008 -0.139102
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent alien-20
+  material red
+  position -0.022410 -0.581522 -0.258809
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent alien-20
+  material red
+  position -0.221690 -0.151605 0.460739
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent alien-20
+  material red
+  position 0.542106 0.506937 -0.298717
+  scale 0.025 0.025 0.025
+}
+
+
+mesh
+{
+  file ant-6.obj
+  name ant-6
+  material pa
+  position .3685 .166 .35125
+  scale 1 1 1
+}
+mesh
+{
+  file glass_sphere.obj
+  parent ant-6
+  material red
+  position 0.297317 -0.664671 -0.007716
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent ant-6
+  material red
+  position 0.852671 -0.304273 0.070658
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent ant-6
+  material red
+  position 0.069014 -0.779040 0.043037
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent ant-6
+  material red
+  position -0.332092 -0.734609 -0.014885
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent ant-6
+  material red
+  position 0.057316 -0.134374 -0.054088
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent ant-6
+  material red
+  position -0.098325 -0.150019 -0.044692
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent ant-6
+  material red
+  position 0.240773 0.447755 -0.178712
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent ant-6
+  material red
+  position 0.674510 0.566519 -0.024067
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent ant-6
+  material red
+  position -0.102594 0.350889 -0.127802
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent ant-6
+  material red
+  position 0.120524 0.145418 0.010335
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent ant-6
+  material red
+  position -0.142611 0.107045 0.003016
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent ant-6
+  material red
+  position -0.410942 0.379010 -0.192523
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent ant-6
+  material red
+  position -0.756915 0.190070 0.111843
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent ant-6
+  material red
+  position -0.083370 0.376594 -0.187799
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent ant-6
+  material red
+  position -0.017864 0.111093 0.008918
+  scale 0.025 0.025 0.025
+}
+
+
+mesh
+{
+  file armadillo-4.obj
+  name armadillo-4
+  material pa
+  position .3685 .166 .35125
+  scale 1 1 1
+}
+mesh
+{
+  file glass_sphere.obj
+  parent armadillo-4
+  material red
+  position 0.291279 0.804447 0.084756
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent armadillo-4
+  material red
+  position 0.807363 0.224967 0.224601
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent armadillo-4
+  material red
+  position -0.615445 0.172370 0.208324
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent armadillo-4
+  material red
+  position -0.330758 -0.007754 0.411384
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent armadillo-4
+  material red
+  position 0.309559 -0.011756 -0.380865
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent armadillo-4
+  material red
+  position 0.803243 -0.288295 0.191052
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent armadillo-4
+  material red
+  position -0.633488 -0.149592 0.239967
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent armadillo-4
+  material red
+  position -0.349257 -0.732059 0.084537
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent armadillo-4
+  material red
+  position -0.215489 -0.804270 0.086901
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent armadillo-4
+  material red
+  position 0.799508 0.291629 0.188542
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent armadillo-4
+  material red
+  position 0.799032 -0.150995 0.180856
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent armadillo-4
+  material red
+  position 0.798901 -0.222596 0.210489
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent armadillo-4
+  material red
+  position 0.814148 0.158460 0.194077
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent armadillo-4
+  material red
+  position -0.173726 0.780925 0.080810
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent armadillo-4
+  material red
+  position -0.227770 0.814257 0.094324
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent armadillo-4
+  material red
+  position -0.286451 -0.784137 0.088452
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent armadillo-4
+  material red
+  position -0.158245 -0.775748 0.071272
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent armadillo-4
+  material red
+  position -0.332244 0.768008 0.068558
+  scale 0.025 0.025 0.025
+}
+
+
+mesh
+{
+  file bird1-3.obj
+  name bird1-3
+  material pa
+  position .3685 .166 .35125
+  scale 1 1 1
+}
+mesh
+{
+  file glass_sphere.obj
+  parent bird1-3
+  material red
+  position 0.837997 0.036997 -0.224047
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent bird1-3
+  material red
+  position 0.147307 -0.595177 0.028431
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent bird1-3
+  material red
+  position -0.007468 0.442493 0.240046
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent bird1-3
+  material red
+  position -0.194122 -0.573500 -0.018475
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent bird1-3
+  material red
+  position -0.855395 0.039685 -0.169689
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent bird1-3
+  material red
+  position 0.831913 0.172412 -0.205520
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent bird1-3
+  material red
+  position 0.753345 -0.064226 -0.165897
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent bird1-3
+  material red
+  position 0.654291 -0.137213 -0.084154
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent bird1-3
+  material red
+  position -0.857136 0.162793 -0.159235
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent bird1-3
+  material red
+  position -0.754720 -0.065023 -0.140479
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent bird1-3
+  material red
+  position -0.656931 -0.131215 -0.092292
+  scale 0.025 0.025 0.025
+}
+
+
+mesh
+{
+  file cat-20.obj
+  name cat-20
+  material pa
+  position .3685 .166 .35125
+  scale 1 1 1
+}
+mesh
+{
+  file glass_sphere.obj
+  parent cat-20
+  material red
+  position 0.089409 0.478814 -0.192246
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent cat-20
+  material red
+  position 0.064173 0.498203 0.095517
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent cat-20
+  material red
+  position -0.049737 0.494256 -0.070268
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent cat-20
+  material red
+  position -0.291690 0.519765 0.221905
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent cat-20
+  material red
+  position 0.356340 -0.682200 -0.040641
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent cat-20
+  material red
+  position -0.560041 -0.386351 -0.118115
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent cat-20
+  material red
+  position -0.584934 -0.364185 0.141171
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent cat-20
+  material red
+  position -0.813414 -0.232992 -0.040111
+  scale 0.025 0.025 0.025
+}
+
+
+mesh
+{
+  file dog2-3.obj
+  name dog2-3
+  material pa
+  position .3685 .166 .35125
+  scale 1 1 1
+}
+mesh
+{
+  file glass_sphere.obj
+  parent dog2-3
+  material red
+  position 0.804870 -0.269126 0.064918
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent dog2-3
+  material red
+  position 0.241227 0.329852 -0.224828
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent dog2-3
+  material red
+  position -0.759383 -0.249594 0.079858
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent dog2-3
+  material red
+  position 0.261517 0.398458 0.152550
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent dog2-3
+  material red
+  position -0.753490 -0.231933 -0.089882
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent dog2-3
+  material red
+  position 0.141836 0.654564 -0.177638
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent dog2-3
+  material red
+  position 0.136153 0.635224 0.203971
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent dog2-3
+  material red
+  position -0.871341 0.099974 -0.009028
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glasses-20.obj
+  name glasses-20
+  material pa
+  position .3685 .166 .35125
+  scale 1 1 1
+}
+mesh
+{
+  file glass_sphere.obj
+  parent glasses-20
+  material red
+  position 0.132896 0.528506 -0.089663
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent glasses-20
+  material red
+  position 0.139401 0.417927 0.202114
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent glasses-20
+  material red
+  position 0.169030 0.141627 0.200266
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent glasses-20
+  material red
+  position -0.864981 -0.004917 0.210837
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent glasses-20
+  material red
+  position 0.187785 0.006362 -0.003147
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent glasses-20
+  material red
+  position -0.848404 -0.105214 0.214212
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent glasses-20
+  material red
+  position 0.178700 -0.134716 0.193021
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent glasses-20
+  material red
+  position 0.189151 -0.415366 0.177025
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent glasses-20
+  material red
+  position 0.211956 -0.500684 -0.119986
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent glasses-20
+  material red
+  position 0.208368 0.015134 -0.133219
+  scale 0.025 0.025 0.025
+}
+
+mesh
+{
+  file gorilla-20.obj
+  name gorilla-20
+  material pa
+  position .3685 .166 .35125
+  scale 1 1 1
+}
+mesh
+{
+  file glass_sphere.obj
+  parent gorilla-20
+  material red
+  position 0.453740 0.024168 0.310262
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent gorilla-20
+  material red
+  position 0.394656 0.363830 0.393655
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent gorilla-20
+  material red
+  position 0.256123 0.270646 0.420462
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent gorilla-20
+  material red
+  position 0.083689 0.164155 0.318966
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent gorilla-20
+  material red
+  position -0.044647 -0.515006 0.209798
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent gorilla-20
+  material red
+  position 0.054633 -0.241349 0.366785
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent gorilla-20
+  material red
+  position -0.682414 -0.201168 0.320033
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent gorilla-20
+  material red
+  position 0.169515 0.223405 0.368495
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent gorilla-20
+  material red
+  position -0.068959 -0.170816 0.453008
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent gorilla-20
+  material red
+  position 0.054302 -0.521955 0.200806
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent gorilla-20
+  material red
+  position -0.679939 -0.261639 0.264600
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent gorilla-20
+  material red
+  position -0.068210 -0.514075 0.169263
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent gorilla-20
+  material red
+  position -0.054140 -0.510212 0.081220
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent gorilla-20
+  material red
+  position 0.031881 -0.236710 0.449618
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent gorilla-20
+  material red
+  position 0.002706 -0.220712 0.481658
+  scale 0.025 0.025 0.025
+}
+mesh
+{
+  file glass_sphere.obj
+  parent gorilla-20
+  material red
+  position 0.433272 -0.026371 0.356888
+  scale 0.025 0.025 0.025
+}
