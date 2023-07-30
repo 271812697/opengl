@@ -219,7 +219,7 @@ float SphereIntersect(float rad, vec3 pos, Ray r)
 
     return INF;
 }
-//pos ��ʾ���ε���� plane ��ʾ�������ڵ�ƽ��,u��v��ʾ����������ķ��򡢳���Ϊ�䵹����������
+//pos the start of rectangle , plane that includes the the rectangle ,u v the two axis of rectangle and the lenght is inverse
 float RectIntersect(in vec3 pos, in vec3 u, in vec3 v, in vec4 plane, in Ray r)
 {
     vec3 n = vec3(plane);
@@ -257,6 +257,7 @@ float AABBIntersect(vec3 minCorner, vec3 maxCorner, Ray r)
 
     return (t1 >= t0) ? (t0 > 0.f ? t0 : t1) : -1.0;
 }
+//The Normal Distrubtion function
 float GTR1(float NDotH, float a)
 {
     if (a >= 1.0)
@@ -266,6 +267,16 @@ float GTR1(float NDotH, float a)
     return (a2 - 1.0) / (PI * log(a2) * t);
 }
 
+float GTR2(float NDotH, float a)
+{
+    float a2 = a * a;
+    float t = 1.0 + (a2 - 1.0) * NDotH * NDotH;
+    return a2 / (PI * t * t);
+}
+//this is used to sample a vec3 in hemisphere with roughness importance 
+//the roughness can decide the angle of cosTheta which limits the range of sample
+//when roughness is equal to 1,cosTheta  is pi/2 ,and 0 -> 0
+//this can be useful to query the direction of specular light 
 vec3 SampleGTR1(float rgh, float r1, float r2)
 {
     float a = max(0.001, rgh);
@@ -279,13 +290,6 @@ vec3 SampleGTR1(float rgh, float r1, float r2)
     float cosPhi = cos(phi);
 
     return vec3(sinTheta * cosPhi, sinTheta * sinPhi, cosTheta);
-}
-
-float GTR2(float NDotH, float a)
-{
-    float a2 = a * a;
-    float t = 1.0 + (a2 - 1.0) * NDotH * NDotH;
-    return a2 / (PI * t * t);
 }
 
 vec3 SampleGTR2(float rgh, float r1, float r2)

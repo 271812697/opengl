@@ -22,11 +22,11 @@ cmake ..
 
 ## Render by two ways
 
-1. acquired by path Trace
+1. **acquired by path Tracing**
 
 ![image-20230723223149759](README.assets/image-20230723223149759.png)
 
- 2.acquired by by Raster
+ 2**.acquired by by Raster**
 
 ![image-20230723223315971](README.assets/image-20230723223315971.png)
 
