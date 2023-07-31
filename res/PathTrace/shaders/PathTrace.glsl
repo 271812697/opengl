@@ -305,7 +305,7 @@ vec3 SampleGTR2(float rgh, float r1, float r2)
 
     return vec3(sinTheta * cosPhi, sinTheta * sinPhi, cosTheta);
 }
-
+//Sample a H
 vec3 SampleGGXVNDF(vec3 V, float ax, float ay, float r1, float r2)
 {
     vec3 Vh = normalize(vec3(ax * V.x, ay * V.y, V.z));
@@ -325,7 +325,7 @@ vec3 SampleGGXVNDF(vec3 V, float ax, float ay, float r1, float r2)
 
     return normalize(vec3(ax * Nh.x, ay * Nh.y, max(0.0, Nh.z)));
 }
-
+//Consideration of Anisotropic Normal Distribution Equation
 float GTR2Aniso(float NDotH, float HDotX, float HDotY, float ax, float ay)
 {
     float a = HDotX / ax;
@@ -382,7 +382,7 @@ float DielectricFresnel(float cosThetaI, float eta)
 
     return 0.5f * (rs * rs + rp * rp);
 }
-//z�������,�������ڰ������
+
 vec3 CosineSampleHemisphere(float r1, float r2)
 {
     vec3 dir;
@@ -393,14 +393,14 @@ vec3 CosineSampleHemisphere(float r1, float r2)
     dir.z = sqrt(max(0.0, 1.0 - dir.x * dir.x - dir.y * dir.y));
     return dir;
 }
-//z�������,�������ڰ������
+
 vec3 UniformSampleHemisphere(float r1, float r2)
 {
     float r = sqrt(max(0.0, 1.0 - r1 * r1));
     float phi = TWO_PI * r2;
     return vec3(r * cos(phi), r * sin(phi), r1);
 }
-//�������������
+
 vec3 UniformSampleSphere(float r1, float r2)
 {
     float z = 1.0 - 2.0 * r1;
@@ -414,7 +414,7 @@ float PowerHeuristic(float a, float b)
     float t = a * a;
     return t / (b * b + t);
 }
-//��N �õ�һ��TBN
+
 void Onb(in vec3 N, inout vec3 T, inout vec3 B)
 {
     vec3 up = abs(N.z) < 0.9999999 ? vec3(0, 0, 1) : vec3(1, 0, 0);
@@ -517,7 +517,7 @@ float PhaseHG(float cosTheta, float g)
 
 #ifdef OPT_ENVMAP
 #ifndef OPT_UNIFORM_LIGHT
-//�ɶ��ֲ��ҵõ�value��ת��uv
+//find the position of first element whose value is greater than the value, then convert to uv
 vec2 BinarySearch(float value)
 {
     ivec2 envMapResInt = ivec2(envMapRes);
@@ -578,6 +578,7 @@ vec4 SampleEnvMap(inout vec3 color)
 #endif
 #endif
 
+//to query BVH for Ray r to konw whether if r hit the scene
 bool AnyHit(Ray r, float maxDist)
 {
 
@@ -855,7 +856,7 @@ if(state.depth > 0)
     Ray rTrans;
     rTrans.origin = r.origin;
     rTrans.direction = r.direction;
-    //��ջģ��ݹ�
+
     while (index != -1)
     {
         ivec3 LRLeaf = ivec3(texelFetch(BVH, index * 3 + 2).xyz);
@@ -867,7 +868,6 @@ if(state.depth > 0)
         if (leaf > 0) // Leaf node of BLAS
         {
         
-        //����������
             for (int i = 0; i < rightIndex; i++) // Loop through tris
             {
                 ivec3 vertIndices = ivec3(texelFetch(vertexIndicesTex, leftIndex + i).xyz);
@@ -1651,7 +1651,7 @@ vec4 PathTrace(Ray r)
     for (state.depth = 0;; state.depth++)
     {
         bool hit = ClosestHit(r, state, lightSample);
-        //����볡�����ཻ������㻷����
+        //don't hit the scene,compute the contribution of Environment Light
         if (!hit)
         {
 #if defined(OPT_BACKGROUND) || defined(OPT_TRANSPARENT_BACKGROUND)
@@ -1687,7 +1687,7 @@ vec4 PathTrace(Ray r)
              }
              break;
         }
-
+        //in this case， hit the scene
         GetMaterial(state, r);
 
         // Gather radiance from emissive objects. Emission from meshes is not importance sampled
