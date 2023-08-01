@@ -1692,7 +1692,8 @@ vec4 PathTrace(Ray r)
 
         // Gather radiance from emissive objects. Emission from meshes is not importance sampled
         radiance += state.mat.emission * throughput;
-        
+
+        //in this case,hit the light,then evaluate the result of this path and return      
 #ifdef OPT_LIGHTS
 
         // Gather radiance from light and use scatterSample.pdf from previous bounce for MIS
@@ -1713,6 +1714,7 @@ vec4 PathTrace(Ray r)
             break;
         }
 #endif
+    
         // Stop tracing ray if maximum depth was reached
         if(state.depth == maxDepth)
             break;
@@ -1763,6 +1765,7 @@ vec4 PathTrace(Ray r)
         if (!mediumSampled)
         {
 #endif
+         // when ALPHA_TEST is Enabled，the ray of path should keep going and -- depth
 #ifdef OPT_ALPHA_TEST
 
             // Ignore intersection and continue ray based on alpha test
