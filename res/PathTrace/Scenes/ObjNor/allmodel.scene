@@ -1265,3 +1265,13 @@ mesh
   position -0.521821 -0.281129 -0.181910
   scale 0.025 0.025 0.025
 }
+light
+{
+	position 0.0 1.0 0.0
+	emission 1.0 1.0 1.0
+	radius 0.01
+	v1 0.0 0.0 0.0
+	v2 0.0 0.0 0.0
+	type sphere
+}
+

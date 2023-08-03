@@ -1237,34 +1237,12 @@ layout(location = 0) in _vtx {
 
 layout(location = 0) out vec4 color;
 
-layout(std140, binding = 1) uniform PL {
-    vec4  color;
-    vec4  position;
-    float intensity;
-    float linear;
-    float quadratic;
-    float range;
-} pl;
-
-layout(std140, binding = 2) uniform SL {
-    vec4  color;
-    vec4  position;
-    vec4  direction;
-    float intensity;
-    float inner_cos;
-    float outer_cos;
-    float range;
-} sl;
-
-layout(std140, binding = 3) uniform DL {
-    vec4  color;
-    vec4  direction[6];
-    float intensity;
-    int lightnum;
-} dl;
-
-
-
+//lights data
+layout(location = 932)uniform int numOfLights;
+layout(binding = 7) uniform sampler2D lightsTex;
+#define QUAD_LIGHT 0
+#define SPHERE_LIGHT 1
+#define DISTANT_LIGHT 2
 
 void main() {
       Pixel px;
@@ -1279,9 +1257,45 @@ void main() {
    
 
       Lo += EvaluateIBL(px) * 1.5;
-      for(int i=0;i<dl.lightnum;i++)
-            Lo +=EvaluateADL( px, dl.direction[i].xyz, 1.0)*dl.color.rgb*dl.intensity ;
-      //Lo =Reinhard(Lo);
+
+      for (int i = 0; i < numOfLights; i++)
+      {
+ 
+        // Fetch light Data
+        vec3 position = texelFetch(lightsTex, ivec2(i * 5 + 0, 0), 0).xyz;
+        vec3 emission = texelFetch(lightsTex, ivec2(i * 5 + 1, 0), 0).xyz;
+        vec3 u        = texelFetch(lightsTex, ivec2(i * 5 + 2, 0), 0).xyz;
+        vec3 v        = texelFetch(lightsTex, ivec2(i * 5 + 3, 0), 0).xyz;
+        vec3 params   = texelFetch(lightsTex, ivec2(i * 5 + 4, 0), 0).xyz;
+        float radius  = params.x;
+        float area    = params.y;
+        float type    = params.z;
+
+        // Distant light
+        if (type == DISTANT_LIGHT)
+        {
+            Lo+=EvaluateADL( px, position, 1.0f)*emission;
+
+        }
+        // Intersect rectangular area light
+        if (type == QUAD_LIGHT)
+        {
+            vec3 normal = normalize(cross(u, v));
+            Lo+=EvaluateASL(px, position, normal,15.0f,12.0f,30.0f)*emission;
+
+        }
+
+
+        //Point light
+        if (type == SPHERE_LIGHT)
+        {
+
+            Lo+=EvaluateAPL(px,  position, 225.0f, 0.09f, 0.032f, 1.0f)*emission;
+         
+        } 
+        
+      }
+     //Lo =Reinhard(Lo);
       Lo =ApproxACES(Lo);
       //color = vec4((_normal+1)/2,1.0);
       color = vec4(Lo, 1.0);

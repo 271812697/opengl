@@ -915,3 +915,31 @@ mesh
   position 0.433272 -0.026371 0.356888
   scale 0.025 0.025 0.025
 }
+
+light
+{
+	position 0.0 1.0 0.0
+	emission 1.0 1.0 1.0
+	radius 0.01
+	v1 0.0 0.0 0.0
+	v2 0.0 0.0 0.0
+	type distant
+}
+light
+{
+	type quad
+	position  .34299999 .54779997 .22700010
+	v1 .34299999 .54779997 .33200008
+	v2 .21300001 .54779997 .22700010
+	emission 17 12 4
+}
+light
+{
+	position 0.0 1.0 0.0
+	emission 1.0 1.0 0.0
+	radius 0.01
+	v1 0.0 0.0 0.0
+	v2 0.0 0.0 0.0
+	type sphere
+}
+

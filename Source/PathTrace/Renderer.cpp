@@ -399,65 +399,13 @@ namespace PathTrace
             prefilter_fence.ClientWaitSync();
             prefiltered_map->UnbindILS(1);
         }
-
-       
         BRDF_LUT->BindILS(0, 2, GL_WRITE_ONLY);
-
         if (envBRDF_shader.Bind(); true) {
             envBRDF_shader.Dispatch(1024 / 32, 1024 / 32, 1);
             envBRDF_shader.SyncWait(GL_ALL_BARRIER_BITS);
             core::Sync::WaitFinish();
             BRDF_LUT->UnbindILS(2);
         }
-
-
-        const GLenum props[] = { GL_BUFFER_BINDING };
-        GLint n_blocks = 0;
-        glGetProgramInterfaceiv(pbrShader->ID(), GL_UNIFORM_BLOCK, GL_ACTIVE_RESOURCES, &n_blocks);
-
-        for (int idx = 0; idx < n_blocks; ++idx) {
-            GLint binding_index = 0;
-            glGetProgramResourceiv(pbrShader->ID(), GL_UNIFORM_BLOCK, idx, 1, props, 1, NULL, &binding_index);
-            GLuint binding_point = static_cast<GLuint>(binding_index);
-            UBOs.try_emplace(binding_point, pbrShader->ID(), idx);  // construct UBO in-place
-          
-        }
-        int lightnum = 0;
-        float dir[24];
-        for (auto& li:scene->lights) {
-            if (li.type == LightType::SphereLight) {
-         
-                auto& ubo = UBOs[1];
-                
-                float linear[4] = { 0.03f };
-                float quadratic[4] = { 0.015f };
-                float range[4] = { 30.0f };
-                float instensity[4] = {1.0f};
-                ubo.SetUniform(0, &li.emission.x);
-                ubo.SetUniform(1, &li.position.x);
-                ubo.SetUniform(2, instensity);
-                ubo.SetUniform(3, linear);
-                ubo.SetUniform(4, quadratic);
-                ubo.SetUniform(5, range);
-
-            }
-            else if(li.type == LightType::DistantLight&&lightnum<6) {
-                
-                auto& ubo = UBOs[3];
-                float instensity[4] = {1.0f};
-                ubo.SetUniform(0, &li.emission.x);
-               // ubo.SetUniform(1, &li.position.x);
-                dir[4 * lightnum] = li.position.x;
-                dir[4 * lightnum+1] = li.position.y;
-                dir[4 * lightnum+2] = li.position.z;
-                //memcpy(dir+16*lightnum, &li.position.x,12);
-                 
-                ubo.SetUniform(2, instensity);
-                lightnum++;
-            }
-        }
-        UBOs[3].SetUniform(1,dir);
-        UBOs[3].SetUniform(3, &lightnum);
     }
     void Renderer::InitShaders()
     {
@@ -648,6 +596,10 @@ namespace PathTrace
         glProgramUniformMatrix4fv(pbrShader->ID(), 1001, 1, GL_FALSE, viewMatrix);
         glProgramUniformMatrix4fv(pbrShader->ID(), 1002, 1, GL_FALSE, projMatrix);
         glProgramUniform3fv(pbrShader->ID(), 1003, 1, &scene->camera->position.x);
+       
+        //设置场景中光源的数量
+        glProgramUniform1i(pbrShader->ID(), 932, scene->lights.size());
+
         unsigned int model[2] = { 1,0 };
         glProgramUniform2uiv(pbrShader->ID(), 999, 1, model);
         for (auto& meshinstace : scene->meshInstances) {
