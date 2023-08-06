@@ -1,0 +1,38 @@
+
+#pragma once
+
+#include <functional>
+
+namespace UI::Widgets::Menu
+{
+    class MenuList;
+}
+
+namespace Core::ECS
+{
+    class Actor;
+}
+
+namespace Editor::Utils
+{
+    /**
+    * Class exposing tools to generate an actor creation menu
+    */
+    class ActorCreationMenu
+    {
+    public:
+        /**
+        * Disabled constructor
+        */
+        ActorCreationMenu() = delete;
+
+        /**
+        * Generates an actor creation menu under the given MenuList item.
+        * Also handles custom additionnal OnClick callback
+        * @param p_menuList
+        * @param p_parent
+        * @param p_onItemClicked
+        */
+        static void GenerateActorCreationMenu(UI::Widgets::Menu::MenuList& p_menuList, ::Core::ECS::Actor* p_parent = nullptr, std::optional<std::function<void()>> p_onItemClicked = {});
+    };
+}

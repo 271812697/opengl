@@ -7,7 +7,7 @@
 
 
 
-#define OVSERVICE(Type) Core::Global::ServiceLocator::Get<Type>()
+#define OVSERVICE(Type) ::Core::Global::ServiceLocator::Get<Type>()
 
 namespace Core::Global
 {

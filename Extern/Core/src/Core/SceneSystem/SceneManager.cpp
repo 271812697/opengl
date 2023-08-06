@@ -76,7 +76,7 @@ void Core::SceneSystem::SceneManager::LoadEmptyLightedScene()
     //m_context.editorResources->GetModel("Arrow_Translate");
    
     auto model=Core::Global::ServiceLocator::Get<Core::ResourceManagement::ModelManager>().GetResource(":Models/Cube.fbx"); 
-    auto material= Core::Global::ServiceLocator::Get<Core::ResourceManagement::MaterialManager>().GetResource(":Materials\\Default.ovmat");
+    auto material= Core::Global::ServiceLocator::Get<Core::ResourceManagement::MaterialManager>().GetResource(":Materials\\Default.mat");
     cube.AddComponent<ECS::Components::CModelRenderer>().SetModel(model);
     if(material)
     cube.AddComponent<ECS::Components::CMaterialRenderer>().FillWithMaterial(*material);
