@@ -34,9 +34,11 @@ cmake ..
 
 ## Fluid simulation
 
-![image-20230706192959316](README.assets/image-20230706192959316.png)![image-20230706192957271](README.assets/image-20230706192957271.png
+![image-20230706192959316](README.assets/image-20230706192959316.png)
 
-![fluid3](D:\Others\opengl\fluid3.png
+## Particle With Trail
+
+![image-20230807214506809](README.assets/image-20230807214506809.png)
 
 ## tiled forward renderer
 
@@ -69,6 +71,8 @@ cmake ..
 ![image-20230712194416099](README.assets/image-20230712194416099.png)
 
 
+
+## Bloom
 
 ![image-20230806185529315](README.assets/image-20230806185529315.png)
 

@@ -150,6 +150,11 @@ using namespace utils;
     static float interval = 0;
     static float total_time = 0.0f;
     static int frame_cnt = 0;
+    static float speed=100;
+    static float angle=0.01;
+    static int particles_count = 500;
+    static float radius = 2.0f;
+    static float weight[3] = {0.99f,0.93f,0.99f};
     struct FrameBuffer{
         int width;
         int height;
@@ -320,6 +325,14 @@ using namespace utils;
         renderer_input->SetUniform(2U, &dt);
 
         renderer_input->SetUniform(5U,(void*)&frame_cnt);
+        particleMoveProgram->SetUniform(1,speed);
+        particleMoveProgram->SetUniform(2, angle);
+        particleMoveProgram->SetUniform(3, particles_count);
+
+        outPutProgram->SetUniform(1,radius);
+        
+        outPutProgram->SetUniform(2, glm::vec3(weight[0], weight[1], weight[2]));
+        outPutProgram->SetUniform(3, particles_count);
  
     }
 
@@ -330,8 +343,9 @@ using namespace utils;
         particle->swap();
 
         outPutProgram->Bind();
-        coloroutput->read->attach(0);
-        particle->read->attach(1);
+        
+        particle->read->attach(0);
+        coloroutput->read->attach(1);
         blit(coloroutput->write.get());
         coloroutput->swap();
 
@@ -340,8 +354,17 @@ using namespace utils;
     void Scene08::OnImGuiRender(float dt) {   
         ImGui::Text("res:(%d,%d)",width,height);
         auto it=ImGui::GetMousePos();
-       
         ImGui::Text("mouse:(%f,%f)",it.x,it.y);
+        ImGui::SliderFloat("Speed",&speed,100,500);
+        ImGui::SliderFloat("Angle", &angle, 0.01,0.1);
+        ImGui::SliderFloat("Radius", &radius, 2.0f, 20.0f);
+        ImGui::SliderFloat3("Weight",weight,0,1.2);
+
+        if (ImGui::SliderInt("Particle cnt", &particles_count, 1, 2000)) {
+            total_time = 0.0f;
+            frame_cnt = 0;
+        }
+
         
     }
     void Scene08::Resize(int w, int h)

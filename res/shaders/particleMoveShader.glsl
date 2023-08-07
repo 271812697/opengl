@@ -28,11 +28,14 @@ layout(location = 0) in _vtx {
 
 };
 layout(binding = 0) uniform sampler2D iChannel0;
+layout(location = 1) uniform float speed;
+layout(location = 2) uniform float angle;
+layout(location = 3) uniform int particles_count;
 out vec4 FragColor;
 
-vec2 rotate(vec2 v, float angle) {
-	float a = sin(angle);
-	float b = cos(angle);
+vec2 rotate(vec2 v, float an) {
+	float a = sin(an);
+	float b = cos(an);
 	mat2 m = mat2(b, -a, a, b);
 	return m * v;
 }
@@ -41,7 +44,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     vec4 out_color = vec4(0.0, 0.0, 0.0, 0.0);
     ivec2 frag_coord_int = ivec2(fragCoord);
 	int index = frag_coord_int.x + frag_coord_int.y * int(iResolution.x);
-    int particles_count = 500;
     
     if (index < particles_count)
     {
@@ -58,8 +60,8 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
         else
         {
             vec4 color = texelFetch(iChannel0, frag_coord_int,0).xyzw;
-            float speed = 100.0 + 40.0 * sin(float(index));
-            float move_step = speed * iTimeDelta;
+            //float speed = 100.0 + 40.0 * sin(float(index));
+            float move_step = (speed+40.0 * sin(iTime)) * iTimeDelta;
             vec2 dir = color.zw;
             float new_x = color.x + move_step * dir.x;
             float new_y = color.y + move_step * dir.y;
@@ -72,28 +74,25 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
             {
                 dir.y = -dir.y;
             }
-            else if (new_x > (iResolution.x ))
+            else if (new_x > (iResolution.x+30))
             {
                 dir.x = -dir.x;
             }
-            else if (new_y > (iResolution.y ))
+            else if (new_y > (iResolution.y +30))
             {
                 dir.y = -dir.y;
             }
             else
             {
-                float angle = 0.01;
-                if (index % 2 == 0)
-                {
-                    angle = -0.01;
-                }
-                dir.xy = rotate(dir.xy, angle);
+
+              dir.xy = rotate(dir.xy, angle);
+
+               
             }
             out_color = vec4(new_x, new_y,dir.x,dir.y); 
                   
         }
 
-   // out_color=vec4(1.0,0.0,0.0,1.0);
     }
 
     fragColor = out_color;

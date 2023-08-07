@@ -28,8 +28,11 @@ layout(location = 0) in _vtx {
 
 };
 
-layout(binding = 0) uniform sampler2D iChannel0;
-layout(binding = 1) uniform sampler2D iChannel1;
+layout(binding = 1) uniform sampler2D iChannel0;
+layout(binding = 0) uniform sampler2D iChannel1;
+layout(location = 1) uniform float r;
+layout(location = 2) uniform vec3 w;
+layout(location = 3) uniform int particles_count;
 out vec4 FragColor;
 
 vec3 hsv2rgb( in vec3 c )
@@ -43,7 +46,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
 	vec2 uv = vUv;
     vec4 prev_color = texture(iChannel0, uv);  
     vec4 out_color = vec4(0.0, 0.0, 0.0, 1.0);
-    int particles_count = 500;
+   
     
     prev_color.y = prev_color.y *0.9;
     
@@ -51,7 +54,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     {
         ivec2 adress = ivec2(i % int(iResolution.x),i / int(iResolution.x));
         vec2 position = texelFetch(iChannel1,adress,0).xy;
-    	float radius = float(i % 4) + 2.0;
+    	float radius = float(i % 4) + r;
         float dist = distance(fragCoord.xy, position);
         float diff = (radius - dist) / radius;
 		vec3 color2 = hsv2rgb(vec3(0.5 + 0.5 * sin(iTime + float(i)*0.01), 0.5, 1.0)) * diff;
@@ -61,7 +64,8 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     	}       
     }
     
-	fragColor = (out_color *0.99+ prev_color * 0.93) * 0.99;   
+	fragColor = (out_color *w.x+ prev_color *w.y) * w.z;   
+   
 }
 void main()
 {
