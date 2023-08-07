@@ -102,8 +102,6 @@ void main() {
     // yield results that are hardly distinguishable. The last one uses cosine-weighted
     // sampling, it's a lot more performant and requires much fewer samples to converge.
 
-    // vec3 irradiance = NaiveConvolution(N, 0.01, 0.01);
-    // vec3 irradiance = UniformConvolution(N, 16384);
     vec3 irradiance = CosineConvolution(N, 16384);
 
     imageStore(irradiance_map, ils_coordinate, vec4(irradiance, 1.0));

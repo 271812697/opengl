@@ -27,6 +27,7 @@ add_subdirectory(scene04)
 add_subdirectory(scene05)
 add_subdirectory(scene06)
 add_subdirectory(scene07)
+add_subdirectory(scene08)
 add_subdirectory(PathTrace)
 add_subdirectory(Editor)
 

@@ -2,7 +2,7 @@
 
 #ifdef compute_shader
 
-#define PI       3.141592653589793
+#define PI       3.141592653589793 
 #define PI2      6.283185307179586
 #define INV_PI   0.318309886183791  // 1 over PI
 

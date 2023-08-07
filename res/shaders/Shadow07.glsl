@@ -40,10 +40,7 @@ layout(location = 4) in vec3 tangent;
 layout(location = 5) in vec3 binormal;
 layout(location = 6) in ivec4 bone_id;
 layout(location = 7) in vec4 bone_wt;
-
 layout(location = 250) uniform mat4 light_transform;
-
-
 void main() {
     
     
