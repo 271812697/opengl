@@ -243,8 +243,18 @@ void Physics::Entities::PhysicalObject::UpdateFTransform()
 	if (!m_kinematic)
 	{
 		const btTransform& result = m_body->getWorldTransform();
-		m_transform->SetLocalPosition(Conversion::ToVector3(result.getOrigin()));
-		m_transform->SetLocalRotation(Conversion::ToOvQuaternion(result.getRotation()));
+		if (m_transform->HasParent()) {
+			
+			auto Local=Conversion::ToBtTransform(*(m_transform->m_parent)).inverse()*result;
+			m_transform->SetLocalPosition(Conversion::ToVector3(Local.getOrigin()));
+			m_transform->SetLocalRotation(Conversion::ToOvQuaternion(Local.getRotation()));
+
+		}
+		else {
+		   m_transform->SetLocalPosition(Conversion::ToVector3(result.getOrigin()));
+		   m_transform->SetLocalRotation(Conversion::ToOvQuaternion(result.getRotation()));
+		}
+
 	}
 }
 

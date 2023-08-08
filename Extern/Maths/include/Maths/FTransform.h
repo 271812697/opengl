@@ -80,6 +80,7 @@ namespace Maths
 	public:
 		Internal::TransformNotifier Notifier;
 		Internal::TransformNotifier::NotificationHandlerID m_notificationHandlerID;
+		FTransform*	m_parent;
 
 	private:
 		void PreDecomposeWorldMatrix();
@@ -95,6 +96,6 @@ namespace Maths
 		FMatrix4 m_localMatrix;
 		FMatrix4 m_worldMatrix;
 
-		FTransform*	m_parent;
+		
 	};
 }
