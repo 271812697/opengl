@@ -157,14 +157,14 @@ void Rendering::Resources::Shader::QueryUniforms()
 
 			switch (static_cast<UniformType>(type))
 			{
-			case Rendering::Resources::UniformType::UNIFORM_BOOL:			defaultValue = std::make_any<bool>(GetUniformInt(name));					break;
-			case Rendering::Resources::UniformType::UNIFORM_INT:			defaultValue = std::make_any<int>(GetUniformInt(name));	                    break;
-            case Rendering::Resources::UniformType::UNIFORM_UINT:			defaultValue = std::make_any<unsigned int>(GetUniformUInt(name));           break;
+			case Rendering::Resources::UniformType::UNIFORM_BOOL:		defaultValue = std::make_any<bool>(GetUniformInt(name));					break;
+			case Rendering::Resources::UniformType::UNIFORM_INT:		defaultValue = std::make_any<int>(GetUniformInt(name));	                    break;
+            case Rendering::Resources::UniformType::UNIFORM_UINT:		defaultValue = std::make_any<unsigned int>(GetUniformUInt(name));           break;
 			case Rendering::Resources::UniformType::UNIFORM_FLOAT:		defaultValue = std::make_any<float>(GetUniformFloat(name));					break;
 			case Rendering::Resources::UniformType::UNIFORM_FLOAT_VEC2:	defaultValue = std::make_any<Maths::FVector2>(GetUniformVec2(name));		break;
 			case Rendering::Resources::UniformType::UNIFORM_FLOAT_VEC3:	defaultValue = std::make_any<Maths::FVector3>(GetUniformVec3(name));		break;
 			case Rendering::Resources::UniformType::UNIFORM_FLOAT_VEC4:	defaultValue = std::make_any<Maths::FVector4>(GetUniformVec4(name));		break;
-			case Rendering::Resources::UniformType::UNIFORM_SAMPLER_2D:	defaultValue = std::make_any<Rendering::Resources::Texture*>(nullptr);	break;
+			case Rendering::Resources::UniformType::UNIFORM_SAMPLER_2D:	defaultValue = std::make_any<Rendering::Resources::Texture*>(nullptr);	    break;
             case Rendering::Resources::UniformType::UNIFORM_FLOAT_MAT4:	defaultValue = std::make_any<Maths::FMatrix4>(GetUniformMat4(name));	    break;
             }
 

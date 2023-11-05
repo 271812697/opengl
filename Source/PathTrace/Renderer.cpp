@@ -606,7 +606,7 @@ namespace PathTrace
             Mesh* mesh = scene->meshes[meshinstace.meshID];
             auto&mat=scene->materials[meshinstace.materialID];           
             float scale[2] = { 1.0,1.0 };
-            float anisotropy[3] = {1.0,0.0,0.0};
+            float anisotropy[3] = {0.0,0.0,0.0};
             // shared properties
             glProgramUniform3fv(pbrShader->ID(), 912, 1,&mat.baseColor.x);
             glProgramUniform1f(pbrShader->ID(), 913,  mat.roughness); 

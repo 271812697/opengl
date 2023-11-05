@@ -40,7 +40,7 @@ namespace component {
         std::vector<GLuint> indices;
         vertices.reserve(n_verts);
         indices.reserve(n_tris * 3);
-
+       
         for (unsigned int col = 0; col <= n_cols; ++col) {
             for (unsigned int row = 0; row <= n_rows; ++row) {
                 // unscaled uv coordinates ~ [0, 1]

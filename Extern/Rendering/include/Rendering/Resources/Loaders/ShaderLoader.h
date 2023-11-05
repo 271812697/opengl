@@ -44,8 +44,8 @@ namespace Rendering::Resources::Loaders
 		static bool Destroy(Shader*& p_shader);
 
 	private:
-		static std::pair<std::string, std::string> ParseShader(const std::string& p_filePath);
-		static uint32_t CreateProgram(const std::string& p_vertexShader, const std::string& p_fragmentShader);
+		static std::tuple<std::string, std::string,std::string> ParseShader(const std::string& p_filePath);
+		static uint32_t CreateProgram(const std::string& p_vertexShader, const std::string& p_fragmentShader,const std::string& p_geomeoryShader);
 		static uint32_t CompileShader(uint32_t p_type, const std::string& p_source);
 
 		static std::string __FILE_TRACE;

@@ -51,6 +51,21 @@ if(NOT TARGET std_image)
     target_include_directories(std_image PUBLIC $<BUILD_INTERFACE:${std_image_SOURCE_DIR_}/include>)
     set_target_properties(std_image PROPERTIES FOLDER ${lib_folder}/std_image)
 endif()
+
+if(NOT TARGET tinygltf)
+    set(tinygltf_SOURCE_DIR_ ${CMAKE_CURRENT_SOURCE_DIR}/tinygltf)
+    file(GLOB_RECURSE tinygltf_impl CONFIGURE_DEPENDS  
+    "${tinygltf_SOURCE_DIR_}/*.cpp")
+    file(GLOB_RECURSE tinygltf_head CONFIGURE_DEPENDS  
+    "${tinygltf_SOURCE_DIR_}/*.h")
+    source_group(TREE "${tinygltf_SOURCE_DIR_}" FILES ${tinygltf_head} ${tinygltf_impl})
+    add_library(tinygltf STATIC ${tinygltf_head} ${tinygltf_impl})
+    target_link_libraries(tinygltf PUBLIC std_image)
+    set_target_properties(tinygltf PROPERTIES LINKER_LANGUAGE CXX)
+    target_include_directories(tinygltf PUBLIC $<BUILD_INTERFACE:${tinygltf_SOURCE_DIR_}/include>)
+    set_target_properties(tinygltf PROPERTIES FOLDER ${lib_folder}/tinygltf)
+endif()
+
 if(NOT TARGET spdlog)
     option(SPDLOG_BUILD_EXAMPLE "" OFF)
     option(SPDLOG_INSTALL "" OFF)

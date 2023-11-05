@@ -216,11 +216,11 @@ int main(int, char**)
         }
         GetRenderer()->Update(clock.GetDeltaTime());
         GetRenderer()->Render();
-        //GetRenderer()->RenderPBR();
+        
         m_panelsManager->GetPanelAs<UI::Panels::AView>("Scene View").Update(1);
         m_panelsManager->GetPanelAs<UI::Panels::AView>("Scene View").Bind();
         GetRenderer()->Present();
-        //GetRenderer()->PresentPBR();
+        
         m_panelsManager->GetPanelAs<UI::Panels::AView>("Scene View").UnBind();
         uiManager->Render();
         ImGui::Render();

@@ -1000,13 +1000,13 @@ vec3 EvaluateAL(const Pixel px, const vec3 L) {
 // initializes the current pixel (fragment), values are computed from the material inputs
 void InitPixel(inout Pixel px, const vec3 camera_pos) {
     px.position = px._position;
-    px.uv = px._uv * uv_scale;
+    px.uv = px._uv* uv_scale;
     px.TBN = px._has_tbn ? mat3(px._tangent, px._binormal, px._normal) :
         ComputeTBN(px._position, px._normal, px.uv);  // approximate using partial derivatives
 
     px.V = normalize(camera_pos - px.position);
     px.N = sample_normal ? normalize(px.TBN * (texture(normal_map, px.uv).rgb * 2.0 - 1.0)) : px._normal;
-    px.N = px._normal;
+   // px.N = px._normal;
     px.R = reflect(-px.V, px.N);
     px.NoV = max(dot(px.N, px.V), 1e-4);
 
@@ -1256,8 +1256,13 @@ void main() {
       vec3 Lo = vec3(0.0);
    
 
-      Lo += EvaluateIBL(px) * 1.5;
-
+      Lo += EvaluateIBL(px) * 11.5;
+      Lo+=EvaluateADL( px,vec3(1.0,0,0), 1.0f)*vec3(1.0,1.0,1.0)*10;
+      //Lo+=EvaluateADL( px,vec3(-1.0,0,0), 1.0f)*vec3(1.0,1.0,1.0)*10;
+      //Lo+=EvaluateADL( px,vec3(0,1.0,0), 1.0f)*vec3(1.0,1.0,1.0)*10;
+      //Lo+=EvaluateADL( px,vec3(0,-1.0,0), 1.0f)*vec3(1.0,1.0,1.0)*10;
+      //Lo+=EvaluateADL( px,vec3(0,0,1.0), 1.0f)*vec3(1.0,1.0,1.0)*10;
+      //Lo+=EvaluateADL( px,vec3(0,0,-1.0), 1.0f)*vec3(1.0,1.0,1.0)*10;
       for (int i = 0; i < numOfLights; i++)
       {
  
@@ -1274,14 +1279,14 @@ void main() {
         // Distant light
         if (type == DISTANT_LIGHT)
         {
-            Lo+=EvaluateADL( px, position, 1.0f)*emission;
+            //Lo+=EvaluateADL( px, position, 1.0f)*emission;
 
         }
         // Intersect rectangular area light
         if (type == QUAD_LIGHT)
         {
             vec3 normal = normalize(cross(u, v));
-            Lo+=EvaluateASL(px, position, normal,15.0f,12.0f,30.0f)*emission;
+           // Lo+=EvaluateASL(px, position, normal,15.0f,12.0f,30.0f)*emission;
 
         }
 
@@ -1290,7 +1295,7 @@ void main() {
         if (type == SPHERE_LIGHT)
         {
 
-            Lo+=EvaluateAPL(px,  position, 225.0f, 0.09f, 0.032f, 1.0f)*emission;
+            //Lo+=EvaluateAPL(px,  position, 225.0f, 0.09f, 0.032f, 1.0f)*emission;
          
         } 
         

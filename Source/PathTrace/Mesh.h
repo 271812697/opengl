@@ -17,7 +17,7 @@ namespace PathTrace
         ~Mesh() { delete bvh; glDeleteBuffers(1,&vao); glDeleteBuffers(1, &vbop); glDeleteBuffers(1, &vbon);
         
         }
-
+        void GenVAO();
         void BuildBVH();
         bool LoadFromFile(const std::string& filename);
         void Draw();

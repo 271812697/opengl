@@ -1,6 +1,6 @@
 
 
-#define STB_IMAGE_RESIZE_IMPLEMENTATION
+//#define STB_IMAGE_RESIZE_IMPLEMENTATION
 
 #include <iostream>
 #include <vector>

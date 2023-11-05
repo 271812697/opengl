@@ -19,7 +19,7 @@ namespace PathTrace {
     float screenY[2] = { 0,0 };
 
     std::string shadersDir = "../../../res/PathTrace/shaders/";
-    std::string assetsDir = "../../../res/PathTrace/Scenes/";
+    std::string assetsDir = "../../../res/PathTrace/Scenes/assets/";
     std::string envMapDir = "../../../res/PathTrace/Scenes/HDR/";
 
     RenderOptions renderOptions;
@@ -40,7 +40,7 @@ namespace PathTrace {
         for (auto& item : std::filesystem::directory_iterator(p_directory))
             if (!item.is_directory()) {
                 auto ext = item.path().extension();
-                if (ext == ".scene")
+                if (ext == ".scene" || ext == ".gltf" || ext == ".glb")
                 {
                     sceneFiles.push_back(item.path().generic_string());
                 }
@@ -69,6 +69,10 @@ namespace PathTrace {
 
         if (ext == "scene")
             success = LoadSceneFromFile(sceneName, scene, renderOptions);
+        else if (ext == "gltf")
+            success = LoadGLTF(sceneName, scene, renderOptions, xform, false);
+        else if (ext == "glb")
+            success = LoadGLTF(sceneName, scene, renderOptions, xform, true);
 
         if (!success)
         {

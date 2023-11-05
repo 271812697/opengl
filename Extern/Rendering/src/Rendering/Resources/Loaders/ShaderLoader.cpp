@@ -2,7 +2,7 @@
 
 #include <sstream>
 #include <fstream>
-#include<glad/glad.h>
+#include <glad/glad.h>
 
 #include <Debug/Logger.h>
 
@@ -14,9 +14,9 @@ Rendering::Resources::Shader* Rendering::Resources::Loaders::ShaderLoader::Creat
 {
 	__FILE_TRACE = p_filePath;
 
-	std::pair<std::string, std::string> source = ParseShader(p_filePath);
+	std::tuple<std::string, std::string,std::string> source = ParseShader(p_filePath);
 
-	uint32_t programID = CreateProgram(source.first, source.second);
+	uint32_t programID = CreateProgram(std::get<0>(source), std::get<1>(source), std::get<2>(source));
 
 	if (programID)
 		return new Shader(p_filePath, programID);
@@ -26,7 +26,7 @@ Rendering::Resources::Shader* Rendering::Resources::Loaders::ShaderLoader::Creat
 
 Rendering::Resources::Shader* Rendering::Resources::Loaders::ShaderLoader::CreateFromSource(const std::string& p_vertexShader, const std::string& p_fragmentShader)
 {
-	uint32_t programID = CreateProgram(p_vertexShader, p_fragmentShader);
+	uint32_t programID = CreateProgram(p_vertexShader, p_fragmentShader,"");
 
 	if (programID)
 		return new Shader("", programID);
@@ -38,10 +38,10 @@ void Rendering::Resources::Loaders::ShaderLoader::Recompile(Shader& p_shader, co
 {
 	__FILE_TRACE = p_filePath;
 
-	std::pair<std::string, std::string> source = ParseShader(p_filePath);
+	std::tuple<std::string, std::string,std::string> source = ParseShader(p_filePath);
 
 	/* Create the new program */
-	uint32_t newProgram = CreateProgram(source.first, source.second);
+	uint32_t newProgram = CreateProgram(std::get<0>(source), std::get<1>(source), std::get<2>(source));
 
 	if (newProgram)
 	{
@@ -77,15 +77,15 @@ bool Rendering::Resources::Loaders::ShaderLoader::Destroy(Shader*& p_shader)
 	return false;
 }
 
-std::pair<std::string, std::string> Rendering::Resources::Loaders::ShaderLoader::ParseShader(const std::string& p_filePath)
+std::tuple<std::string, std::string,std::string> Rendering::Resources::Loaders::ShaderLoader::ParseShader(const std::string& p_filePath)
 {
 	std::ifstream stream(p_filePath);
 
-	enum class ShaderType { NONE = -1, VERTEX = 0, FRAGMENT = 1 };
+	enum class ShaderType { NONE = -1, VERTEX = 0, FRAGMENT = 1 ,GEOMEORY=2 };
 
 	std::string line;
 
-	std::stringstream ss[2];
+	std::stringstream ss[3];
 
 	ShaderType type = ShaderType::NONE;
 
@@ -95,6 +95,7 @@ std::pair<std::string, std::string> Rendering::Resources::Loaders::ShaderLoader:
 		{
 			if (line.find("vertex") != std::string::npos)			type = ShaderType::VERTEX;
 			else if (line.find("fragment") != std::string::npos)	type = ShaderType::FRAGMENT;
+			else if (line.find("geomery") != std::string::npos)     type = ShaderType::GEOMEORY;
 		}
 		else if (type != ShaderType::NONE)
 		{
@@ -105,22 +106,28 @@ std::pair<std::string, std::string> Rendering::Resources::Loaders::ShaderLoader:
 	return 
 	{ 
 		ss[static_cast<int>(ShaderType::VERTEX)].str(),
-		ss[static_cast<int>(ShaderType::FRAGMENT)].str()
+		ss[static_cast<int>(ShaderType::FRAGMENT)].str(),
+		ss[static_cast<int>(ShaderType::GEOMEORY)].str()
 	};
 }
 
-uint32_t Rendering::Resources::Loaders::ShaderLoader::CreateProgram(const std::string& p_vertexShader, const std::string& p_fragmentShader)
+uint32_t Rendering::Resources::Loaders::ShaderLoader::CreateProgram(const std::string& p_vertexShader, const std::string& p_fragmentShader, const std::string& p_geomeoryShader)
 {
 	const uint32_t program = glCreateProgram();
 
 	const uint32_t vs = CompileShader(GL_VERTEX_SHADER, p_vertexShader);
 	const uint32_t fs = CompileShader(GL_FRAGMENT_SHADER, p_fragmentShader);
+	uint32_t gs = 1;
+	if(p_geomeoryShader !="")
+	    gs = CompileShader(GL_GEOMETRY_SHADER,p_geomeoryShader);
 
-	if (vs == 0 || fs == 0)
+	if (vs == 0 || fs == 0|| gs==0)
 		return 0;
 
 	glAttachShader(program, vs);
 	glAttachShader(program, fs);
+	if (p_geomeoryShader != "")
+	    glAttachShader(program, gs);
 	glLinkProgram(program);
 
 	GLint linkStatus;
@@ -144,6 +151,8 @@ uint32_t Rendering::Resources::Loaders::ShaderLoader::CreateProgram(const std::s
 	glValidateProgram(program);
 	glDeleteShader(vs);
 	glDeleteShader(fs);
+	if(p_geomeoryShader!="")
+	   glDeleteShader(gs);
 
 	return program;
 }
@@ -170,6 +179,7 @@ uint32_t Rendering::Resources::Loaders::ShaderLoader::CompileShader(uint32_t p_t
 		glGetShaderInfoLog(id, maxLength, &maxLength, errorLog.data());
 
 		std::string shaderTypeString = p_type == GL_VERTEX_SHADER ? "VERTEX SHADER" : "FRAGMENT SHADER";
+		shaderTypeString = p_type == GL_FRAGMENT_SHADER ?  "FRAGMENT SHADER":"GEOMERY SHADER";
 		std::string errorHeader = "[" + shaderTypeString + "] \"";
 		OVLOG_ERROR(errorHeader + __FILE_TRACE + "\":\n" + errorLog);
 
