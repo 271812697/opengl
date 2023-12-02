@@ -6,5 +6,6 @@ set(BUILD_SHARED_LIBS OFF)
 
 set(THIRD_PARTY_DIR ${PROJECT_SOURCE_DIR}/Extern)
 
+add_subdirectory(DX11)
 add_subdirectory(Source)
 add_subdirectory(Extern)
