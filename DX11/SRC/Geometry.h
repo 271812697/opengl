@@ -85,7 +85,7 @@ namespace Geometry
 		const std::function<DirectX::XMFLOAT3(float, float)>& normalFunc = [](float x, float z) { return XMFLOAT3(0.0f, 1.0f, 0.0f); },
 		const std::function<DirectX::XMFLOAT4(float, float)>& colorFunc = [](float x, float z) { return XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f); });
 
-	inline void Gennormal(MeshData<VertexPosNormalColor>& meshData) {
+	inline void Gennormal(MeshData<VertexPosNormalColorTex>& meshData) {
 		//	float3 N = cross(input[1].PosW-input[0].PosW, input[2].PosW - input[0].PosW);
 		//  N = normalize(N);
 		std::vector<int>cnt(meshData.vertexVec.size(), 0);
@@ -115,31 +115,43 @@ namespace Geometry
 		}
 	
 	}
-	inline MeshData<VertexPosNormalColor>loadFromFile(const char* path = nullptr) {
+	inline MeshData<VertexPosNormalColorTex>loadFromFile(const char* path = nullptr) {
 		std::ifstream f;
-		
 		f.open(path);f.sync_with_stdio(false);		
-		int Vertexnum, Facenum;
-		f >> Vertexnum >> Facenum;
-		MeshData<VertexPosNormalColor> meshData;
-		meshData.vertexVec.resize(Vertexnum);
-		meshData.indexVec.resize(Facenum * 3);
-		float x, y, z,r,g,bb;
-		for (int i = 0; i < Vertexnum; i++) {
-			f >> x >> y >> z>>r>>g>>bb;
-			meshData.vertexVec[i] = { {x,y,z} ,{0,0,0},{r,g,bb,1.0}};
-		}
-		int a, b, c;
-		for (int i = 0; i < Facenum; i++) {
-			f >> a >> b >> c;
-			meshData.indexVec[3 * i] = a;
-			meshData.indexVec[3 * i + 1] = b;
-			meshData.indexVec[3 * i + 2] = c;
+
+		MeshData<VertexPosNormalColorTex> meshData;
+        std::string op;
+        std::vector<DirectX::XMFLOAT3>pos;
+        std::vector<DirectX::XMFLOAT4>color;
+        std::vector<DirectX::XMFLOAT4>tex;
+        float a, b, c, d, e, g;
+        std::string indexa,indexb,indexc;
+        while (f>>op)
+        {
+            //需要从处理坐标系的不同
+            if (op == "v") {
+                f >> a >> b >> c >> d >> e >> g;
+                pos.push_back({-a,b,c});
+                color.push_back({d,e,g,1.0});
+            }
+            else if (op == "vt") {
+                f >> a >> b;
+                tex.push_back({a,b,1.0,1.0});
+            }
+            else if (op=="f") {
+                f >> indexa>>indexb>>indexc;
+                meshData.indexVec.push_back(stoi(indexc.substr(0,indexc.find('/')))-1);
+                meshData.indexVec.push_back(stoi(indexb.substr(0, indexb.find('/')))-1);
+                meshData.indexVec.push_back(stoi(indexa.substr(0, indexa.find('/')))-1);
+            }
+        }
+		meshData.vertexVec.resize(pos.size());
+		for (int i = 0; i < meshData.vertexVec.size(); i++) {
+            meshData.vertexVec[i] = { pos[i] ,{0,0,0},color[i],tex[i]};
 		}
 		f.close();
 		//求法线
 		Gennormal(meshData);
-
 		return meshData;
 	}
 	inline std::vector<std::pair<DirectX::XMFLOAT3, DirectX::XMFLOAT3>>loadSpherePosFromFile(const char* path = nullptr) {
@@ -151,7 +163,7 @@ namespace Geometry
 		float x, y, z;
 		for (int i = 0; i < num; i++) {
 			f >> x >> y >> z;
-			ans.push_back(std::make_pair(DirectX::XMFLOAT3{ x ,y ,z }, DirectX::XMFLOAT3{ 1 ,0 ,0 }));
+			ans.push_back(std::make_pair(DirectX::XMFLOAT3{ -x ,y ,z }, DirectX::XMFLOAT3{ 1 ,0 ,0 }));
 		}
 		f.close();
 		return ans;
@@ -176,7 +188,7 @@ namespace Geometry
 		f.close();
 		return ans;     
 	}
-	inline void loadFromFile(MeshData<VertexPosNormalColor>*meshData, std::vector<Geometry::MeshData<VertexPosNormalColor>>*poi,const char* path = nullptr,float radius=0.015) {
+	inline void loadFromFile(MeshData<VertexPosNormalColorTex>*meshData, std::vector<Geometry::MeshData<VertexPosNormalColorTex>>*poi,const char* path = nullptr,float radius=0.015) {
 		
 		
 		std::ifstream f;
@@ -190,7 +202,7 @@ namespace Geometry
 		float x, y, z, r, g, bb;
 		for (int i = 0; i < Vertexnum; i++) {
 			f >> x >> y >> z >> r >> g >> bb;
-			meshData->vertexVec[i] = { {x,y,z},{0,0,0} ,{r,g,bb,1.0}};
+            meshData->vertexVec[i] = { {x,y,z},{0,0,0} ,{r,g,bb,1.0},{0,0,0,0} };
 		}
 		int a, b, c;
 		for (int i = 0; i < Facenum; i++) {
@@ -203,12 +215,12 @@ namespace Geometry
 		Gennormal(*meshData);
 		int num;
 		f >> num;
-		MeshData<VertexPosNormalColor> mesh;
+		MeshData<VertexPosNormalColorTex> mesh;
 
 		
 		for (int i = 0; i < num; i++) {
 			f >> x >> y >> z;
-			mesh = CreateSphere<VertexPosNormalColor>(radius, 20, 20, { 1.0f,1.0f,0.0f,1.0f });
+			mesh = CreateSphere<VertexPosNormalColorTex>(radius, 20, 20, { 1.0f,1.0f,0.0f,1.0f });
 			for (auto& it : mesh.vertexVec) {
 				it.pos = DirectX::XMFLOAT3{ x + it.pos.x,y + it.pos.y,z + it.pos.z };
 			}
@@ -216,19 +228,19 @@ namespace Geometry
 		}
 		f.close();
 	}
-	inline std::pair<MeshData<VertexPosNormalColor>, std::vector<std::pair<DirectX::XMFLOAT3, DirectX::XMFLOAT3>>>loadGroundTruth(const char* path = nullptr) {
+	inline std::pair<MeshData<VertexPosNormalColorTex>, std::vector<std::pair<DirectX::XMFLOAT3, DirectX::XMFLOAT3>>>loadGroundTruth(const char* path = nullptr) {
 		std::ifstream f;
 		f.open(path);
 		//先读取模型
 		int Vertexnum, Facenum;
 		f >> Vertexnum >> Facenum;
-		MeshData<VertexPosNormalColor>meshData;
+		MeshData<VertexPosNormalColorTex>meshData;
 		meshData.vertexVec.resize(Vertexnum);
 		meshData.indexVec.resize(Facenum * 3);
 		float x, y, z, r, g, bb;
 		for (int i = 0; i < Vertexnum; i++) {
 			f >> x >> y >> z >> r >> g >> bb;
-			meshData.vertexVec[i] = { {x,y,z},{0,0,0} ,{r,g,bb,1.0}};
+            meshData.vertexVec[i] = { {x,y,z},{0,0,0} ,{r,g,bb,1.0},{0,0,0,0} };
 		}
 		int a, b, c;
 		for (int i = 0; i < Facenum; i++) {
@@ -250,7 +262,7 @@ namespace Geometry
 		Gennormal(meshData);
 		return std::make_pair(meshData,poi);
 	}
-	inline void loadFromFile(MeshData<VertexPosNormalColor>* meshData, std::vector<std::pair<DirectX::XMFLOAT3, Geometry::MeshData<VertexPosNormalColor>>>* poi, const char* path = nullptr) {
+	inline void loadFromFile(MeshData<VertexPosNormalColorTex>* meshData, std::vector<std::pair<DirectX::XMFLOAT3, Geometry::MeshData<VertexPosNormalColorTex>>>* poi, const char* path = nullptr) {
 
 
 		std::ifstream f;
@@ -264,7 +276,7 @@ namespace Geometry
 		float x, y, z, r, g, bb;
 		for (int i = 0; i < Vertexnum; i++) {
 			f >> x >> y >> z >> r >> g >> bb;
-			meshData->vertexVec[i] = { {x,y,z},{0,0,0} ,{r,g,bb,1.0} };
+            meshData->vertexVec[i] = { {x,y,z},{0,0,0} ,{r,g,bb,1.0} ,{0,0,0,0} };
 		}
 		int a, b, c;
 		for (int i = 0; i < Facenum; i++) {
@@ -278,12 +290,12 @@ namespace Geometry
 
 		int num;
 		f >> num;
-		MeshData<VertexPosNormalColor> mesh;
+		MeshData<VertexPosNormalColorTex> mesh;
 
 
 		for (int i = 0; i < num; i++) {
 			f >> x >> y >> z;
-			mesh = CreateSphere<VertexPosNormalColor>(0.015, 20, 20, { 1.0f,0.0f,0.0f,1.0f });
+            mesh = CreateSphere<VertexPosNormalColorTex>(0.015, 20, 20, { 1.0f,0.0f,0.0f,1.0f });
 			for (auto& it : mesh.vertexVec) {
 				it.pos = DirectX::XMFLOAT3{ x + it.pos.x,y + it.pos.y,z + it.pos.z };
 			}
@@ -291,13 +303,13 @@ namespace Geometry
 		}
 		f.close();
 	}
-	inline void StoreToFile(std::vector<std::pair<DirectX::XMFLOAT3, Geometry::MeshData<VertexPosNormalColor>>>* poi, const char* path = nullptr) {
+	inline void StoreToFile(std::vector<std::pair<DirectX::XMFLOAT3, Geometry::MeshData<VertexPosNormalColorTex>>>* poi, const char* path = nullptr) {
 
 		std::ofstream f;
 		f.open(path, std::ios::out);
 		//先读取模型
 		for (int i = 0; i < poi->size(); i++) {
-			f << (*poi)[i].first.x << " " << (*poi)[i].first.y << " " << (*poi)[i].first.z << "\n";
+			f << -(*poi)[i].first.x << " " << (*poi)[i].first.y << " " << (*poi)[i].first.z << "\n";
 		}
 		f.close();
 	}
@@ -307,7 +319,7 @@ namespace Geometry
 		//先读取模型
 		f << pos.size() << "\n";
 		for (int i = 0; i < pos.size(); i++) {
-			f << pos[i].first.x << " " << pos[i].first.y << " " << pos[i].first.z << "\n";
+			f << -pos[i].first.x << " " << pos[i].first.y << " " << pos[i].first.z << "\n";
 		}
 		f.close();
 	}

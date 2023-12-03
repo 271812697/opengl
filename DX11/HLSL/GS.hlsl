@@ -5,6 +5,7 @@ struct Vertex
     float3 PosW : POSITION; // 在世界中的位置
     float3 normal : NORMAL;
     float4 Color : COLOR;
+    float4 texcoord: TEXCOORD;
 };
 
 struct GSOutput
@@ -13,6 +14,7 @@ struct GSOutput
 	float3 PosW : POSITION;     // 在世界中的位置
 	float3 Nor :NORMAL;
 	float4 Color : COLOR;
+    float4 texcoord: TEXCOORD;
 };
 
 [maxvertexcount(3)]
@@ -30,6 +32,7 @@ void GS(
 		element.PosW = input[i].PosW;
 		element.Color = input[i].Color;
         element.Nor = input[i].normal;
+        element.texcoord=input[i].texcoord;
 		output.Append(element);
 	}
 }

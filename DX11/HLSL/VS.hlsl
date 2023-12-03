@@ -2,6 +2,7 @@ struct VertexIn {
     float3 PosL : POSITION;
     float3 normal : NORMAL;
     float4 Color : COLOR;
+    float4 texcoord: TEXCOORD;
 };
 
 struct VertexOut
@@ -10,6 +11,7 @@ struct VertexOut
     float3 PosW : POSITION;     // 在世界中的位置
     float3 normal : NORMAL;
     float4 Color : COLOR;
+    float4 texcoord: TEXCOORD;
 };
 cbuffer VSConstantBuffer : register(b0)
 {
@@ -27,6 +29,7 @@ VertexOut VS(VertexIn vIn)
     vOut.PosH = mul(vOut.PosH, g_Proj);               // Cij = Aij * Bij
     vOut.Color = vIn.Color;                         // 这里alpha通道的值默认为1.0
     vOut.PosW = mul(float4(vIn.PosL, 1.0f), g_World).xyz;
+    vOut.texcoord=vIn.texcoord;
    
     return vOut;
 }

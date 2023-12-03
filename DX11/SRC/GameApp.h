@@ -18,43 +18,46 @@ public:
 	void DrawScene();
 	LRESULT MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 private:
-	//PNG¸ñÊ½
+	//PNGæ ¼å¼
 	void* getScreenRect(float prex, float prey, float endx, float endy,int* w,int*h);
 	void drawRect(float prex,float prey,float endx,float endy);
 	bool InitEffect();
 	bool InitResource();
-	bool ResetMesh(const Geometry::MeshData<VertexPosNormalColor>& meshData);
+	bool ResetMesh(const Geometry::MeshData<VertexPosNormalColorTex>& meshData);
 	std::string getModelName(std::string path);
+    void VertexDraw(bool left);
+    
 private:
 
-	//ÁĞ±í²ÎÊı
+	//åˆ—è¡¨å‚æ•°
 	 const char* item[601];
 
-	 //Òª±ê¼ÇµÄÄ£ĞÍ²Î¿¼ÁĞ±íÂ·¾¶£¬Õâ¸öÄ£ĞÍ²Î¿¼°üÀ¨ÁËÄ£ĞÍºÍĞËÈ¤µã
+	 //è¦æ ‡è®°çš„æ¨¡å‹å‚è€ƒåˆ—è¡¨è·¯å¾„ï¼Œè¿™ä¸ªæ¨¡å‹å‚è€ƒåŒ…æ‹¬äº†æ¨¡å‹å’Œå…´è¶£ç‚¹
 	 std::vector<std::string>markmodellist;
-	 Geometry::MeshData<VertexPosNormalColor>makr_meshdata;//¼ÓÔØµÄÈıÎ¬Ä£ĞÍ
-	 //²Î¿¼µÄĞËÈ¤µã
-	 std::vector<std::pair<DirectX::XMFLOAT3, Geometry::MeshData<VertexPosNormalColor>>>mark_poilShperelist;
-	 //ÊÖ¶¯±ê¼ÇµÄĞËÈ¤µã
-	 std::vector<std::pair<DirectX::XMFLOAT3, Geometry::MeshData<VertexPosNormalColor>>>_mark_poilShperelist;//ĞËÈ¤µã
+	 Geometry::MeshData<VertexPosNormalColorTex>makr_meshdata;//åŠ è½½çš„ä¸‰ç»´æ¨¡å‹
+	 //å‚è€ƒçš„å…´è¶£ç‚¹
+	 std::vector<std::pair<DirectX::XMFLOAT3, Geometry::MeshData<VertexPosNormalColorTex>>>mark_poilShperelist;
+	 //æ‰‹åŠ¨æ ‡è®°çš„å…´è¶£ç‚¹
+	 std::vector<std::pair<DirectX::XMFLOAT3, Geometry::MeshData<VertexPosNormalColorTex>>>_mark_poilShperelist;//å…´è¶£ç‚¹
 	 const char* markitem[601];
 	 
-	 //µ±Ç°µÄ»æÖÆÄ£Ê½
+	 //å½“å‰çš„ç»˜åˆ¶æ¨¡å¼
 	 DrawSceneMode curDraw;
 
 	CModelViewerCamera g_camera;
 	CameraMode curMode;
 	//std::shared_ptr<Camera> camera;
-	ComPtr<ID3D11InputLayout> m_pVertexLayout;	    // ¶¥µãÊäÈë²¼¾Ö
-	ComPtr<ID3D11Buffer> m_pVertexBuffer;			// ¶¥µã»º³åÇø
-	ComPtr<ID3D11Buffer> m_pIndexBuffer;			// Ë÷Òı»º³åÇø
-	UINT m_IndexCount;							    // »æÖÆÎïÌåµÄË÷ÒıÊı×é´óĞ¡
+	ComPtr<ID3D11InputLayout> m_pVertexLayout;	    // é¡¶ç‚¹è¾“å…¥å¸ƒå±€
+    ComPtr<ID3D11InputLayout> m_pVertexLayoutInstance;	    // é¡¶ç‚¹è¾“å…¥å¸ƒå±€
+	ComPtr<ID3D11Buffer> m_pVertexBuffer;			// é¡¶ç‚¹ç¼“å†²åŒº
+	ComPtr<ID3D11Buffer> m_pIndexBuffer;			// ç´¢å¼•ç¼“å†²åŒº
+	UINT m_IndexCount;							    // ç»˜åˆ¶ç‰©ä½“çš„ç´¢å¼•æ•°ç»„å¤§å°
 
-	DirectionalLight m_DirLight;					// Ä¬ÈÏ»·¾³¹â
-	PointLight m_PointLight;						// Ä¬ÈÏµã¹â
-	SpotLight m_SpotLight;						    // Ä¬ÈÏ»ã¾Û¹â
-	ComPtr<ID3D11RasterizerState> m_pRSWireframe;	// ¹âÕ¤»¯×´Ì¬: Ïß¿òÄ£Ê½
+	DirectionalLight m_DirLight;					// é»˜è®¤ç¯å¢ƒå…‰
+	PointLight m_PointLight;						// é»˜è®¤ç‚¹å…‰
+	SpotLight m_SpotLight;						    // é»˜è®¤æ±‡èšå…‰
+	ComPtr<ID3D11RasterizerState> m_pRSWireframe;	// å…‰æ …åŒ–çŠ¶æ€: çº¿æ¡†æ¨¡å¼
 	ComPtr<ID3D11RasterizerState> m_pRSnoCull;
-	bool m_IsWireframeMode;							// µ±Ç°ÊÇ·ñÎªÏß¿òÄ£Ê½
+	bool m_IsWireframeMode;							// å½“å‰æ˜¯å¦ä¸ºçº¿æ¡†æ¨¡å¼
 };
 #endif

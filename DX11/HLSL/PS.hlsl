@@ -68,6 +68,7 @@ struct GSOutput
     float3 PosW : POSITION;     // 在世界中的位置
     float3 Nor :NORMAL;
     float4 Color : COLOR;
+    float4 texcoord: TEXCOORD;
 };
 Texture2D g_DiffuseMap : register(t0);
 SamplerState g_Sam : register(s0);
@@ -659,7 +660,7 @@ float4 PBRColor(GSOutput pIn)
         alpha = BackEaseOut(pIn.Color.r); //pow(pIn.Color.r,0.25);
     if (coffi == 9)
         alpha = BounceEaseOut(pIn.Color.r); //pow(pIn.Color.r,0.25);
-    px.albedo = alpha * m_color + (1 - alpha) * c_color;
+    px.albedo = pIn.Color;//alpha * m_color + (1 - alpha) * c_color;
     if (poiflag)
         //px.albedo = float4(poi_color.r,poi_color.g,poi_color.b,1.0);
         px.albedo = float4(poi_color.rgb, 1.0);
@@ -727,5 +728,5 @@ float4 PS(GSOutput pIn) : SV_Target
         return pIn.Color;
     }
     //basic
-    return basic*float4(1, 1, 1, 1.0) * color;  
+    return basic*float4(1, 1, 1, 1.0) * pIn.Color;  
 }

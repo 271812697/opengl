@@ -82,24 +82,25 @@ struct VertexPosSize
 	static const D3D11_INPUT_ELEMENT_DESC inputLayout[2];
 };
 
-struct VertexPosNormalColor
+struct VertexPosNormalColorTex
 {
-	VertexPosNormalColor() = default;
+	VertexPosNormalColorTex() = default;
 
-	VertexPosNormalColor(const VertexPosNormalColor&) = default;
-	VertexPosNormalColor& operator=(const VertexPosNormalColor&) = default;
+	VertexPosNormalColorTex(const VertexPosNormalColorTex&) = default;
+	VertexPosNormalColorTex& operator=(const VertexPosNormalColorTex&) = default;
 
-	VertexPosNormalColor(VertexPosNormalColor&&) = default;
-	VertexPosNormalColor& operator=(VertexPosNormalColor&&) = default;
+	VertexPosNormalColorTex(VertexPosNormalColorTex&&) = default;
+	VertexPosNormalColorTex& operator=(VertexPosNormalColorTex&&) = default;
 
-	constexpr VertexPosNormalColor(const DirectX::XMFLOAT3& _pos, const DirectX::XMFLOAT3& _normal,
-		const DirectX::XMFLOAT4& _color) :
-		pos(_pos), normal(_normal), color(_color) {}
+	constexpr VertexPosNormalColorTex(const DirectX::XMFLOAT3& _pos, const DirectX::XMFLOAT3& _normal,
+		const DirectX::XMFLOAT4& _color, const DirectX::XMFLOAT4& uv) :
+		pos(_pos), normal(_normal), color(_color),tex(uv) {}
 
 	DirectX::XMFLOAT3 pos;
 	DirectX::XMFLOAT3 normal;
 	DirectX::XMFLOAT4 color;
-	static const D3D11_INPUT_ELEMENT_DESC inputLayout[3];
+    DirectX::XMFLOAT4 tex;
+	static const D3D11_INPUT_ELEMENT_DESC inputLayout[4];
 };
 
 
