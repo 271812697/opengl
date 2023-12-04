@@ -170,7 +170,7 @@ std::vector<std::filesystem::path> getFiles(const std::filesystem::path& directo
 }
 static Settings g_settings;
 static bool listenClicked = false;
-static bool _pbrflag = false;
+static bool _basicflag = false;
 static bool _poiflag = true;
 static bool _drawmodel = true;
 static bool _modelline = true;
@@ -598,47 +598,62 @@ void GameApp::UpdateScene(float dt)
 		if (ImGui::BeginTabItem("model")) {
 			auto io = ImGui::GetIO();
 			ImGui::TextColored({ 1.0,1.0,0.0,1.0 }, "CurPos %f %f", io.MousePos.x, io.MousePos.y);
-			static bool light = true;
-			static bool probility = false;
-			static bool basic = false;
-            ImGui::Checkbox("PBR", &_pbrflag);
+			static bool pbr = true;
+			static bool light = false;
+			static bool probality = false;
+            static bool deepth = false;
+            ImGui::Checkbox("basic", &_basicflag);
             ImGui::SameLine();
-			if (ImGui::Checkbox("light", &light)) {
-				probility = false;
-				basic = false;
+			if (ImGui::Checkbox("pbr", &pbr)) {
+				light = false;
+				probality = false;
+                deepth = false;
 				effect.GetConstantBufferVariable("moade")->SetSInt(0);
 			}
 			ImGui::SameLine();
 
-			if (ImGui::Checkbox("probility", &probility)) {
-				light = false;
-				basic = false;
+			if (ImGui::Checkbox("light", &light)) {
+				pbr = false;
+                probality = false;
+                deepth = false;
 				effect.GetConstantBufferVariable("moade")->SetSInt(1);
 			}
 			ImGui::SameLine();
 
-			if (ImGui::Checkbox("basic", &basic)) {
-				probility = false;
+			if (ImGui::Checkbox("probality", &probality)) {
+				pbr = false;
 				light = false;
-				effect.GetConstantBufferVariable("moade")->SetSInt(3);
+                deepth = false;
+				effect.GetConstantBufferVariable("moade")->SetSInt(2);
 			}
-			if (basic) {
-				static float density = 0.3;
-				ImGui::SliderFloat("density", &density, 0, 1);
-				effect.GetConstantBufferVariable("basic")->SetFloat(density);
-			}
-			if (light || probility) {
-				//static float colorA[4] = { 0xEE/256.0,0xBD/256.0,0x89/256.0,1.0 };
-				//static float colorB[4] = { 0xD1 / 256.0,0x3A / 256.0,0xBD / 256.0,1.0 };
+            ImGui::SameLine();
+            if (ImGui::Checkbox("depth", &deepth)) {
+                pbr = false;
+                light = false;
+                probality = false;
+                effect.GetConstantBufferVariable("moade")->SetSInt(3);
+            }
+            ImGui::Checkbox("listenClicked", &listenClicked);
+            ImGui::SameLine();
+            ImGui::Checkbox("show poi", &_poiflag);
+            ImGui::SameLine();
+            ImGui::Checkbox("modelDraw", &_drawmodel);
+            ImGui::SameLine();
+            ImGui::Checkbox("modelLine", &_modelline);
+            ImGui::SameLine();
+            ImGui::Checkbox("wireframe", &_WireFrame);
+			if (_basicflag) {
 				static float colorA[4] = { 1,0,0,1.0 };
 				static float colorB[4] = { 0,1,1,1.0 };
 				ImGui::ColorEdit4("ColorA", colorA);
 				ImGui::ColorEdit4("ColorB", colorB);
-				//ImGui::Text("%f %f %f %f", color[0], color[1], color[2], color[3]);
 				effect.GetConstantBufferVariable("m_color")->SetFloatVector(4, colorA);
 				effect.GetConstantBufferVariable("c_color")->SetFloatVector(4, colorB);
-
-			}
+                effect.GetConstantBufferVariable("basicflag")->SetSInt(1);
+            }
+            else {
+                effect.GetConstantBufferVariable("basicflag")->SetSInt(0);
+            }
 			curDraw = VIEW;
 #pragma region poi结果对比
 			static int meshindex = 0;
@@ -656,11 +671,14 @@ void GameApp::UpdateScene(float dt)
 				cur_model = item[meshindex];
 			}
 
-			ImGui::Checkbox("listenClicked", &listenClicked);
-			ImGui::Checkbox("show poi", &_poiflag);
-
+            static float roughness = 0.1;
+            static float metallic = 0.1;
+            ImGui::SliderFloat("roughness", &roughness, 0, 1);
+            ImGui::SliderFloat("metallic", &metallic, 0, 1);
+            effect.GetConstantBufferVariable("roughness")->SetFloat(roughness);
+            effect.GetConstantBufferVariable("metallic")->SetFloat(metallic);
+            ImGui::SliderFloat("vertex_clip", &_vertex_clip, 0.0f, 1.0f);
 			if (_poiflag) {
-				ImGui::Text("this is a test");
 				if (resultpoi_pos.count(StringToID(cur_model))) {
 					int id = 0;
 					for (auto& it : resultpoi_pos[StringToID(cur_model)]) {
@@ -673,26 +691,6 @@ void GameApp::UpdateScene(float dt)
 					}
 				}
 			}
-
-			
-			if (_pbrflag) {
-				effect.GetConstantBufferVariable("pbrflag")->SetSInt(1);
-				static float roughness = 0.1;
-				static float metallic = 0.1;
-				ImGui::SliderFloat("roughness", &roughness, 0, 1);
-				ImGui::SliderFloat("metallic", &metallic, 0, 1);
-				effect.GetConstantBufferVariable("roughness")->SetFloat(roughness);
-				effect.GetConstantBufferVariable("metallic")->SetFloat(metallic);
-			}
-			else {
-				effect.GetConstantBufferVariable("pbrflag")->SetSInt(0);
-			}
-            ImGui::Checkbox("modelDraw",&_drawmodel);
-            ImGui::SameLine();
-            ImGui::Checkbox("modelLine",&_modelline);
-            ImGui::SameLine();
-			ImGui::Checkbox("wireframe", &_WireFrame);
-            ImGui::SliderFloat("vertex_clip",&_vertex_clip,0.0f,1.0f);
         
 			ImGui::Checkbox("Draw vertexX", &_DrawVertexX);
             if (_DrawVertexX) {

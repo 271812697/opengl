@@ -88,10 +88,10 @@ cbuffer PSConstantBuffer : register(b1)
 }
 cbuffer ST : register(b3)
 {
-    float basic;//基础颜色强度
+   
     int moade;
     int poiflag;
-    int pbrflag;
+    int basicflag;
     float4 poi_color;
     float4 m_color;//
     float4 c_color;
@@ -686,11 +686,12 @@ float4 PS(GSOutput pIn) : SV_Target
     //color = g_DiffuseMap.Sample(g_Sam, float2(alpha,alpha));
    // return color;
     //color = float4(1.0, 1.0, 0, 1.0);
+    if(basicflag==1){
+      pIn.Color=m_color;
+    }
     if(_Clip)
         clip(pow(alpha, 0.25) - k);
-    if (pbrflag==1) {
-        return PBRColor(pIn);
-    }
+
     float4 A = float4(0,0,0,0);
     float4 D = float4(0, 0, 0, 0);
     float4 S = float4(0, 0, 0, 0);
@@ -702,36 +703,25 @@ float4 PS(GSOutput pIn) : SV_Target
     ComputePointLight(g_Material, g_PointLight[i], pIn.PosW, pIn.Nor, g_EyePosW, A, D, S);
     color+= D+A;  
     }
-   
-
-    //diffuse项
-    float4 res = alpha * m_color + (1 - alpha) * c_color;
     if (poiflag == 1) {
         //这里设置兴趣点的颜色
-        return m_color*color;
+        return c_color*color;
     }
     if (moade == 0) {
+      //pbr
+       return PBRColor(pIn);
+    }
+    else if (moade == 1) { 
         //light
-        float3 Lo = res * color.xyz;
-       // Lo = Lo / (Lo + 1.0);
-        //Lo = pow(Lo, 1.0 / 2.2);
+        float3 Lo = pIn.Color.xyz * color.xyz;
         return float4(Lo, 1.0);
-          //return res * color;
-        //return pIn.Color*color;
     }
-    else if (moade == 1) {
+    else if (moade==2) { 
         //probility
-       return res;//pIn.Color;
+        return float4(pIn.texcoord.y,0,0,1.0);
     }
-    else if (moade==2) {
-        //poi
-        return pIn.Color;
-    }
-    
     //绘制深度信息
-     //float d=pIn.texcoord.w/5;
-     // d=pow2(d);
-    //return  float4(d,d,d,1.0);
-    basic
-    return basic*float4(1, 1, 1, 1.0) * pIn.Color;  
+    float d=pIn.texcoord.w/5;
+    d=pow2(d);
+    return  float4(d,d,d,1.0); 
 }
