@@ -22,11 +22,12 @@ cbuffer VSConstantBuffer : register(b0)
     matrix g_Proj;
     matrix g_WorldInvTranspose;
 }
-cbuffer VSConstantBufferInstance : register(b3)
+cbuffer VSConstantBufferInstance : register(b8)
 {
       float vertex_scale;
       float4 vertex_color;
       int vertex_mode;
+      float vertex_clip;
 
 }
 
@@ -43,6 +44,10 @@ VertexOut main( VertexIn vIn)
     vOut.normal = normalize(mul(vIn.normal, (float3x3) g_World));
     vOut.PosH = mul(vOut.PosH, g_View);               // 行列数相等的两个矩阵，结果为
     vOut.PosH = mul(vOut.PosH, g_Proj);               // Cij = Aij * Bij
+    if(vIn.spheretexcoord.y<vertex_clip){
+    vOut.PosH.z=vOut.PosH.w*1.1;
+    
+    }
     vOut.Color = float4(1.0,0.0,0.0,1.0);                         // 这里alpha通道的值默认为1.0
     vOut.PosW = mul(float4(vIn.PosL, 1.0f), g_World).xyz;
     vOut.texcoord=float4(vIn.texcoord,1.0,1.0);

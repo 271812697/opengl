@@ -172,9 +172,12 @@ static Settings g_settings;
 static bool listenClicked = false;
 static bool _pbrflag = false;
 static bool _poiflag = true;
+static bool _drawmodel = true;
+static bool _modelline = true;
 static bool _WireFrame = false;
 static bool _DrawVertexX = false;
 static bool _DrawVertexY = false;
+static float _vertex_clip = 0.0f;
 static float _VertexRadiusX = 1.0f;
 static float _VertexRadiusY = 1.0f;
 static float VertexRadiusXcolor[4] = { 1,0,0,1.0 };
@@ -582,6 +585,7 @@ void GameApp::UpdateScene(float dt)
 #pragma region 操作相机部分
 	effect.GetConstantBufferVariable("g_View")->SetVal(XMMatrixTranspose(XMMatrixMultiply(mWorld, mView)));
 	effect.GetConstantBufferVariable("g_EyePosW")->SetVal(g_camera.GetEyePt());
+    
 #pragma endregion
 #ifdef USE_IMGUI
 	static bool flag = true;
@@ -597,6 +601,8 @@ void GameApp::UpdateScene(float dt)
 			static bool light = true;
 			static bool probility = false;
 			static bool basic = false;
+            ImGui::Checkbox("PBR", &_pbrflag);
+            ImGui::SameLine();
 			if (ImGui::Checkbox("light", &light)) {
 				probility = false;
 				basic = false;
@@ -668,7 +674,7 @@ void GameApp::UpdateScene(float dt)
 				}
 			}
 
-			ImGui::Checkbox("PBR", &_pbrflag);
+			
 			if (_pbrflag) {
 				effect.GetConstantBufferVariable("pbrflag")->SetSInt(1);
 				static float roughness = 0.1;
@@ -681,7 +687,13 @@ void GameApp::UpdateScene(float dt)
 			else {
 				effect.GetConstantBufferVariable("pbrflag")->SetSInt(0);
 			}
+            ImGui::Checkbox("modelDraw",&_drawmodel);
+            ImGui::SameLine();
+            ImGui::Checkbox("modelLine",&_modelline);
+            ImGui::SameLine();
 			ImGui::Checkbox("wireframe", &_WireFrame);
+            ImGui::SliderFloat("vertex_clip",&_vertex_clip,0.0f,1.0f);
+        
 			ImGui::Checkbox("Draw vertexX", &_DrawVertexX);
             if (_DrawVertexX) {
                 ImGui::SliderFloat("VertexRadiusX",&_VertexRadiusX,0.0,10.0);
@@ -694,6 +706,7 @@ void GameApp::UpdateScene(float dt)
             }
 
 			ImGui::Checkbox("Mirroring", &_Mirroring);
+            ImGui::SameLine();
 			if (ImGui::Checkbox("Clip", &_Clip)) {
 				if (!_Clip) {
 					effect.GetConstantBufferVariable("_Clip")->SetSInt(0);
@@ -946,8 +959,10 @@ void GameApp::DrawScene()
 		m_ScreenViewport.TopLeftX = 0;
 		m_pd3dImmediateContext->RSSetViewports(1, &m_ScreenViewport);
        
-
-		Draw(cur_model, m_pd3dImmediateContext.Get());
+        if (_drawmodel) {
+           Draw(cur_model, m_pd3dImmediateContext.Get());
+        }
+		
 		if (_poiflag) {
 			effect.GetConstantBufferVariable("poiflag")->SetSInt(1);
 			effect.GetEffectPass("model")->Apply(m_pd3dImmediateContext.Get());;
@@ -956,14 +971,22 @@ void GameApp::DrawScene()
 			effect.GetEffectPass("model")->Apply(m_pd3dImmediateContext.Get());;
 		}
         //
-        effect.GetEffectPass("modelLine")->Apply(m_pd3dImmediateContext.Get());;
-        Draw(cur_model, m_pd3dImmediateContext.Get());
+        if (_modelline) {
+            effect.GetConstantBufferVariable("vertex_clip")->SetFloat(_vertex_clip);
+            effect.GetEffectPass("modelLine")->Apply(m_pd3dImmediateContext.Get());;
+            Draw(cur_model, m_pd3dImmediateContext.Get());
+        }
+
 
 		//设置右边视口
-        effect.GetEffectPass("model")->Apply(m_pd3dImmediateContext.Get());;
+       
 		m_ScreenViewport.TopLeftX = static_cast<float>(m_ClientWidth) / 2;
 		m_pd3dImmediateContext->RSSetViewports(1, &m_ScreenViewport);
-		DrawRightModel(cur_model, m_pd3dImmediateContext.Get());
+        if (_drawmodel) {
+           effect.GetEffectPass("model")->Apply(m_pd3dImmediateContext.Get());;
+		   DrawRightModel(cur_model, m_pd3dImmediateContext.Get());
+        }
+
 		if (_poiflag) {
 			effect.GetConstantBufferVariable("poiflag")->SetSInt(1);
 			effect.GetEffectPass("model")->Apply(m_pd3dImmediateContext.Get());;
@@ -971,14 +994,19 @@ void GameApp::DrawScene()
 			effect.GetConstantBufferVariable("poiflag")->SetSInt(0);
 			effect.GetEffectPass("model")->Apply(m_pd3dImmediateContext.Get());;
 		}
-        effect.GetEffectPass("modelLine")->Apply(m_pd3dImmediateContext.Get());;
-        DrawRightModel(cur_model, m_pd3dImmediateContext.Get());
+        if (_modelline) {
+            effect.GetConstantBufferVariable("vertex_clip")->SetFloat(_vertex_clip);
+            effect.GetEffectPass("modelLine")->Apply(m_pd3dImmediateContext.Get());;
+            DrawRightModel(cur_model, m_pd3dImmediateContext.Get());
+        }
+
 
 		if (_DrawVertexX) {
-            //m_pd3dImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
+            
             effect.GetConstantBufferVariable("vertex_scale")->SetFloat(_VertexRadiusX);
             effect.GetConstantBufferVariable("vertex_color")->SetFloatVector(4, VertexRadiusXcolor);
             effect.GetConstantBufferVariable("vertex_mode")->SetSInt(0);
+            effect.GetConstantBufferVariable("vertex_clip")->SetFloat(_vertex_clip);
             m_ScreenViewport.TopLeftX = 0;
             m_pd3dImmediateContext->RSSetViewports(1, &m_ScreenViewport);
             effect.GetEffectPass("point")->Apply(m_pd3dImmediateContext.Get());;
@@ -993,6 +1021,7 @@ void GameApp::DrawScene()
             effect.GetConstantBufferVariable("vertex_scale")->SetFloat(_VertexRadiusY);
             effect.GetConstantBufferVariable("vertex_color")->SetFloatVector(4, VertexRadiusYcolor);
             effect.GetConstantBufferVariable("vertex_mode")->SetSInt(1);
+            effect.GetConstantBufferVariable("vertex_clip")->SetFloat(_vertex_clip);
             m_ScreenViewport.TopLeftX = 0;
             m_pd3dImmediateContext->RSSetViewports(1, &m_ScreenViewport);
             effect.GetEffectPass("point")->Apply(m_pd3dImmediateContext.Get());;
@@ -1278,7 +1307,9 @@ bool GameApp::InitEffect()
 		blob->GetBufferPointer(), blob->GetBufferSize(), m_pVertexLayout.GetAddressOf()));
 	effect.CreateShaderFromFile("PS", L"HLSL//PS.hlsl", m_pd3dDevice.Get(), "PS", "ps_5_0");
 	effect.CreateShaderFromFile("GS", L"HLSL//GS.hlsl", m_pd3dDevice.Get(), "GS", "gs_5_0");
+    effect.CreateShaderFromFile("VSLine", L"HLSL//VSLine.hlsl", m_pd3dDevice.Get(), "VS", "vs_5_0");
     effect.CreateShaderFromFile("LineGS", L"HLSL//GSLine.hlsl", m_pd3dDevice.Get(), "GS", "gs_5_0");
+    effect.CreateShaderFromFile("LinePS", L"HLSL//PSLine.hlsl", m_pd3dDevice.Get(), "main", "ps_5_0");
 	effect.CreateShaderFromFile("HS", L"HLSL//HS.hlsl", m_pd3dDevice.Get(), "main", "hs_5_0");
 	effect.CreateShaderFromFile("DS", L"HLSL//DS.hlsl", m_pd3dDevice.Get(), "main", "ds_5_0");
 	effect.CreateShaderFromFile("LineV", L"HLSL//LineV.hlsl", m_pd3dDevice.Get(), "main", "vs_5_0");
@@ -1286,15 +1317,12 @@ bool GameApp::InitEffect()
     effect.CreateShaderFromFile("PointVS", L"HLSL//PointVS.hlsl", m_pd3dDevice.Get(), "main", "vs_5_0", nullptr, blob.ReleaseAndGetAddressOf());
     const D3D11_INPUT_ELEMENT_DESC inputdesc[] =
     {
-
-
         { "POSITION",    0, DXGI_FORMAT_R32G32B32_FLOAT,    0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
         { "NORMAL",      0, DXGI_FORMAT_R32G32B32_FLOAT,    0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
         { "TEXCOORD",    0, DXGI_FORMAT_R32G32_FLOAT,       0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
         { "SPHEREPOSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 1, 0, D3D11_INPUT_PER_INSTANCE_DATA, 1},
         { "SPHERECOLOR", 0,DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 24, D3D11_INPUT_PER_INSTANCE_DATA, 1},
         { "SPHERETEXCOORD", 0,DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 40, D3D11_INPUT_PER_INSTANCE_DATA, 1}
-
     };
     // 创建并绑定顶点布局
     HR(m_pd3dDevice->CreateInputLayout(inputdesc, ARRAYSIZE(inputdesc),
@@ -1308,10 +1336,11 @@ bool GameApp::InitEffect()
 	pass.nameVS = "VS";
 	pass.nameGS = "GS";
 	pass.namePS = "PS";
-	//pass.nameDS = "DS";
-	//pass.nameHS = "HS";
+
 	effect.AddEffectPass("model", m_pd3dDevice.Get(), &pass);
+    pass.nameVS = "VSLine";
     pass.nameGS = "LineGS";
+    pass.namePS = "LinePS";
     effect.AddEffectPass("modelLine", m_pd3dDevice.Get(), &pass);
 
 	pass.nameVS = "LineV";

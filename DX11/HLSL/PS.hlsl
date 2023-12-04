@@ -672,7 +672,7 @@ float4 PBRColor(GSOutput pIn)
     // contribution of directional light
     Lo += EvaluateADL(px, g_DirLight.Direction.xyz, 1.0) * g_DirLight.Diffuse.rgb * density;
     Lo += EvaluateIBL(px);    
-    Lo += float3(0.4, 0.4, 0.4) * px.diffuse_color;
+    //Lo += float3(0.2, 0.2, 0.2) * px.diffuse_color;
     Lo = ApproxACES(Lo);
     Lo = Linear2Gamma(Lo);
     return float4(Lo, px.albedo.a);
@@ -727,6 +727,11 @@ float4 PS(GSOutput pIn) : SV_Target
         //poi
         return pIn.Color;
     }
-    //basic
+    
+    //绘制深度信息
+     //float d=pIn.texcoord.w/5;
+     // d=pow2(d);
+    //return  float4(d,d,d,1.0);
+    basic
     return basic*float4(1, 1, 1, 1.0) * pIn.Color;  
 }

@@ -86,11 +86,12 @@ cbuffer PSConstantBuffer : register(b1)
     float g_Pad;
     int mode;
 }
-cbuffer VSConstantBufferInstance : register(b3)
+cbuffer VSConstantBufferInstance : register(b8)
 {
       float vertex_scale;
       float4 vertex_color;
       int vertex_mode;
+      float vertex_clip;
 
 }
 cbuffer PBR : register(b4)
@@ -379,7 +380,7 @@ float4 PBRColor(GSOutput pIn)
     // contribution of directional light
     Lo += EvaluateADL(px, g_DirLight.Direction.xyz, 1.0) * g_DirLight.Diffuse.rgb * density;
     Lo += EvaluateIBL(px);    
-    Lo += float3(0.4, 0.4, 0.4) * px.diffuse_color;
+    Lo += float3(0.1, 0.1, 0.1) * px.diffuse_color;
     Lo = ApproxACES(Lo);
     Lo = Linear2Gamma(Lo);
     return float4(Lo, px.albedo.a);
