@@ -98,8 +98,6 @@ cmake ..
 
 ![image-20231205220727247](README.assets/image-20231205220727247.png)
 
-![img](https://z13qslsjsa3.feishu.cn/space/api/box/stream/download/asynccode/?code=MWQ5MmU2MTNiOTk2Njc0MTRjNzc1MGJlMTQ3MmY5NGRfSFlsT214Qm1sdUMwVUJ5Wk9VbjdGTzBOSWNUN2ZLbmpfVG9rZW46U2pXaWJqSGhpb1ZUZEN4ZXZmU2NaYVdibkpkXzE3MDE3ODUxNTA6MTcwMTc4ODc1MF9WNA)![img](https://z13qslsjsa3.feishu.cn/space/api/box/stream/download/asynccode/?code=NzZhN2VlYTA1Njk2MGIxNDJhOTc5NWUyZGYxODlkMGJfcnF1aGRORU9xMk0zRDZPbUVVTWtXYXdsZmRlVjNWVGpfVG9rZW46SktLZmJpSldlb240MXh4NDQ0WWNYcTBDbjljXzE3MDE3ODUxNTA6MTcwMTc4ODc1MF9WNA)![img](https://z13qslsjsa3.feishu.cn/space/api/box/stream/download/asynccode/?code=ZTk4YWU1NGZjNTY2NDI4YzZjZTIxNmQxMDA3N2Y1NDJfWkZuN1hJSE9lV0V0SkZGSUZKbjNYNWV2WlR6Z2RRbmVfVG9rZW46UG9wc2I1Qlgzb2syTzJ4NkdQZWNtY3FybnpoXzE3MDE3ODUxNTA6MTcwMTc4ODc1MF9WNA)
-
 ### from my work by Path Tracing
 
 ![image-20231205221011279](README.assets/image-20231205221011279.png)
@@ -110,11 +108,23 @@ cmake ..
 
 ## DX11
 
-### **Purpose**
+### **Purpose**&&background
 
-This renderer was written to visualize the results of the experiment
+这个渲染器是为了可视化三维模型兴趣点检测的实验结果而编写的，因为是采用图形API DX编写的因此自由度非常高，实现了非常多的自定义效果, 而不必受限于成熟引擎。最开始本人是在unity 上实现了这一套实验结果可视化流程,但是unity必须在它的既有框架下去编写代码，并且在一些自定义效果实现上支持不好，后面就转投DX去实现。
 
-**my paper is to Dectecing  points of interest on 3D model** 
+**三维兴趣点检测**：
+
+三维模型兴趣点检测是在三维模型上检测出一类特殊的顶点，这类特殊顶点通常对应于三维模型上具有特殊语义的部位。
+
+**论文PipeLine**
+
+![overview](README.assets/overview-17018432479684.png)
+
+**Ground Truth and Learned**:
+
+三维模型上每一个顶点预测兴趣点相对该顶点的球面坐标和置信度
+
+![image-20231206142124550](README.assets/image-20231206142124550.png)
 
 **example show:**
 
@@ -153,13 +163,13 @@ This renderer was written to visualize the results of the experiment
 
 ![image-20231205224612704](README.assets/image-20231205224612704.png)
 
-点云绘制
+#### 点云绘制
 
 ![image-20231205230831903](README.assets/image-20231205230831903.png)
 
 ![image-20231205230937326](README.assets/image-20231205230937326.png)
 
-pbr+IBL渲染、phong渲染、深度模式、线框模式
+#### pbr+IBL渲染、phong渲染、深度模式、线框模式
 
 ![image-20231205231058914](README.assets/image-20231205231058914.png)
 
@@ -169,11 +179,11 @@ pbr+IBL渲染、phong渲染、深度模式、线框模式
 
 ![image-20231205231314942](README.assets/image-20231205231314942.png)
 
-截屏
+#### 截屏
 
 ![image-20231205231520607](README.assets/image-20231205231520607.png)
 
-标注模型
+#### 标注模型
 
 ![image-20231205231749940](README.assets/image-20231205231749940.png)
 

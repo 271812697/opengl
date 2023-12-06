@@ -567,8 +567,10 @@ void GameApp::OnResize()
 	D3DApp::OnResize();
 	m_ScreenViewport.Width = static_cast<float>(m_ClientWidth) / 2;
 	//
+
 	if (effect.GetConstantBufferVariable("g_Proj"))
-		effect.GetConstantBufferVariable("g_Proj")->SetVal(XMMatrixTranspose(XMMatrixPerspectiveFovLH(XM_PIDIV4, AspectRatio() / 2, 0.1f, 1000.0f)));
+		effect.GetConstantBufferVariable("g_Proj")->SetVal(XMMatrixTranspose(XMMatrixPerspectiveFovLH(XM_PIDIV4, AspectRatio() / 2, 0.01f, 1000.0f)));
+        //effect.GetConstantBufferVariable("g_Proj")->SetVal(XMMatrixTranspose(XMMatrixOrthographicLH(2.0f,2.0f,0.01f,1000.0f)));
 	g_camera.SetProjParams(XM_PIDIV4, AspectRatio() / 4, 0.1f, 1000.0f);
 	g_camera.SetWindow(m_ClientWidth, m_ClientHeight);
 	g_camera.SetButtonMasks(0, 0, MOUSE_RIGHT_BUTTON);
@@ -580,9 +582,11 @@ void GameApp::UpdateScene(float dt)
 	g_camera.FrameMove(dt);
 	curraduis = g_camera.GetRadius();
 	XMMATRIX mView = g_camera.GetViewMatrix();
+   
 	XMMATRIX mWorld = g_camera.GetWorldMatrix();
 	//g_camera.SetDrag(true);
 #pragma region 操作相机部分
+    
 	effect.GetConstantBufferVariable("g_View")->SetVal(XMMatrixTranspose(XMMatrixMultiply(mWorld, mView)));
 	effect.GetConstantBufferVariable("g_EyePosW")->SetVal(g_camera.GetEyePt());
     

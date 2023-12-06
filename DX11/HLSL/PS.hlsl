@@ -721,7 +721,7 @@ float4 PS(GSOutput pIn) : SV_Target
         return float4(pIn.texcoord.y,0,0,1.0);
     }
     //绘制深度信息
-    float d=pIn.texcoord.w/5;
-    d=pow2(d);
+    float d=pIn.texcoord.w/4.0;
+    d=pow(d,5);
     return  float4(d,d,d,1.0); 
 }
