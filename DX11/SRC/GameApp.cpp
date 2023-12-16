@@ -177,6 +177,8 @@ static bool _modelline = true;
 static bool _WireFrame = false;
 static bool _DrawVertexX = false;
 static bool _DrawVertexY = false;
+static bool _OrthProj = false;
+static float _OrthViewWith = 2.0f;
 static float _vertex_clip = 0.0f;
 static float _VertexRadiusX = 1.0f;
 static float _VertexRadiusY = 1.0f;
@@ -569,8 +571,8 @@ void GameApp::OnResize()
 	//
 
 	if (effect.GetConstantBufferVariable("g_Proj"))
-		effect.GetConstantBufferVariable("g_Proj")->SetVal(XMMatrixTranspose(XMMatrixPerspectiveFovLH(XM_PIDIV4, AspectRatio() / 2, 0.01f, 1000.0f)));
-        //effect.GetConstantBufferVariable("g_Proj")->SetVal(XMMatrixTranspose(XMMatrixOrthographicLH(2.0f,2.0f,0.01f,1000.0f)));
+		//effect.GetConstantBufferVariable("g_Proj")->SetVal(XMMatrixTranspose(XMMatrixPerspectiveFovLH(XM_PIDIV4, AspectRatio() / 2, 0.01f, 1000.0f)));
+        effect.GetConstantBufferVariable("g_Proj")->SetVal(XMMatrixTranspose(XMMatrixOrthographicLH(0.5f,0.5f,0.01f,1000.0f)));
 	g_camera.SetProjParams(XM_PIDIV4, AspectRatio() / 4, 0.1f, 1000.0f);
 	g_camera.SetWindow(m_ClientWidth, m_ClientHeight);
 	g_camera.SetButtonMasks(0, 0, MOUSE_RIGHT_BUTTON);
@@ -589,6 +591,12 @@ void GameApp::UpdateScene(float dt)
     
 	effect.GetConstantBufferVariable("g_View")->SetVal(XMMatrixTranspose(XMMatrixMultiply(mWorld, mView)));
 	effect.GetConstantBufferVariable("g_EyePosW")->SetVal(g_camera.GetEyePt());
+    if (_OrthProj) {
+        effect.GetConstantBufferVariable("g_Proj")->SetVal(XMMatrixTranspose(XMMatrixOrthographicLH(_OrthViewWith, _OrthViewWith, 0.01f, 1000.0f)));
+    }
+    else {
+        effect.GetConstantBufferVariable("g_Proj")->SetVal(XMMatrixTranspose(XMMatrixPerspectiveFovLH(XM_PIDIV4, AspectRatio() / 2, 0.01f, 1000.0f)));
+    }
     
 #pragma endregion
 #ifdef USE_IMGUI
@@ -646,6 +654,10 @@ void GameApp::UpdateScene(float dt)
             ImGui::Checkbox("modelLine", &_modelline);
             ImGui::SameLine();
             ImGui::Checkbox("wireframe", &_WireFrame);
+            ImGui::Checkbox("Orthproj",&_OrthProj);
+            if (_OrthProj) {
+                ImGui::SliderFloat("OrthViewWith",&_OrthViewWith,0.1f,3.0f);
+            }
 			if (_basicflag) {
 				static float colorA[4] = { 1,0,0,1.0 };
 				static float colorB[4] = { 0,1,1,1.0 };
