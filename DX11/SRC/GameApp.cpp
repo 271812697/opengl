@@ -551,7 +551,7 @@ bool GameApp::Init()
 		return false;
     effect.GetEffectPass("model")->SetDepthStencilState(RenderStates::DSSLessEqual.Get(), 0);
     effect.GetEffectPass("WireFrame")->SetDepthStencilState(RenderStates::DSSLessEqual.Get(), 0);
-    effect.GetEffectPass("modelLine")->SetDepthStencilState(RenderStates::DSSNoDepthTest.Get(), 0);
+    //effect.GetEffectPass("modelLine")->SetDepthStencilState(RenderStates::DSSNoDepthTest.Get(), 0);
 	//加载纹理并创建采样器
 	it=loadTextureFromFile(m_pd3dDevice.Get(),"Army.jpg");
 	CD3D11_SAMPLER_DESC sampDesc(CD3D11_DEFAULT{});

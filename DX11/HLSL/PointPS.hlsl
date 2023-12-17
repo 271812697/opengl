@@ -100,6 +100,86 @@ cbuffer PBR : register(b4)
     float metallic = 0.1;
 
 }
+//计算平行光
+void ComputeDirectionalLight(Material mat, DirectionalLight L,
+    float3 normal, float3 toEye,
+    out float4 ambient,
+    out float4 diffuse,
+    out float4 spec)
+{
+    
+
+    // 初始化输出
+    ambient = float4(0.0f, 0.0f, 0.0f, 0.0f);
+    diffuse = float4(0.0f, 0.0f, 0.0f, 0.0f);
+    spec = float4(0.0f, 0.0f, 0.0f, 0.0f);
+
+    // 光向量与照射方向相反
+    float3 lightVec = -L.Direction;
+
+    // 添加环境光
+    ambient = mat.Ambient * L.Ambient;
+
+    // 添加漫反射光和镜面光
+    float diffuseFactor = dot(lightVec, normal);
+   // diffuseFactor = (diffuseFactor + 1) / 2;
+
+    // 展开，避免动态分支
+    [flatten]
+    if (diffuseFactor > 0.0f)
+    {
+        float3 v = reflect(-lightVec, normal);
+        float specFactor = pow(max(dot(v, toEye), 0.0f), mat.Specular.w);
+
+        diffuse = diffuseFactor * mat.Diffuse * L.Diffuse;
+        spec = specFactor * mat.Specular * L.Specular;
+    }
+}
+//计算点光源的光照
+void ComputePointLight(Material mat, PointLight L, float3 pos, float3 normal, float3 toEye,
+    out float4 ambient, out float4 diffuse, out float4 spec)
+{
+    // 初始化输出
+    ambient = float4(0.0f, 0.0f, 0.0f, 0.0f);
+    diffuse = float4(0.0f, 0.0f, 0.0f, 0.0f);
+    spec = float4(0.0f, 0.0f, 0.0f, 0.0f);
+
+    // 从表面到光源的向量
+    float3 lightVec = L.Position - pos;
+
+    // 表面到光线的距离
+    float d = length(lightVec);
+
+    // 灯光范围测试
+    if (d > L.Range)
+        return;
+
+    // 标准化光向量
+    lightVec /= d;
+
+    // 环境光计算
+    ambient = mat.Ambient * L.Ambient;
+
+    // 漫反射和镜面计算
+    float diffuseFactor = dot(lightVec, normal);
+    //diffuseFactor = (diffuseFactor + 1) / 2;
+    // 展开以避免动态分支
+    [flatten]
+    if (diffuseFactor > 0.0f)
+    {
+        float3 v = reflect(-lightVec, normal);
+        float specFactor = pow(max(dot(v, toEye), 0.0f), mat.Specular.w);
+
+        diffuse = diffuseFactor * mat.Diffuse * L.Diffuse;
+        spec = specFactor * mat.Specular * L.Specular;
+    }
+
+    // 光的衰弱
+    float att = 1.0f / dot(L.Att, float3(1.0f, d, d * d));
+
+    diffuse *= att;
+    spec *= att;
+}
 float DistributionGGX(float3 N, float3 H, float roughness)
 {
     float a = roughness * roughness;
@@ -387,5 +467,17 @@ float4 PBRColor(GSOutput pIn)
 }
 float4 PS(GSOutput pIn) : SV_Target
 {    
-    return PBRColor(pIn);
+    float4 A = float4(0,0,0,0);
+    float4 D = float4(0, 0, 0, 0);
+    float4 S = float4(0, 0, 0, 0);
+    ComputeDirectionalLight(g_Material, g_DirLight, pIn.Nor, g_EyePosW, A, D, S);
+    float4 color = A + D;
+    [unroll]
+    for (int i = 0; i < 5; i++)
+    {
+    ComputePointLight(g_Material, g_PointLight[i], pIn.PosW, pIn.Nor, g_EyePosW, A, D, S);
+    color+= D+A;  
+    }
+    return float4(color.xyz*vertex_color.xyz,1.0);
+
 }
