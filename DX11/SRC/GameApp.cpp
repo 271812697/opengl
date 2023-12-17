@@ -1,4 +1,7 @@
-
+/*
+已使用
+0 1 2 3 4 6 8 9
+*/
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 #include "GameApp.h"
@@ -175,6 +178,7 @@ static bool _poiflag = true;
 static bool _drawmodel = true;
 static bool _modelline = true;
 static bool _WireFrame = false;
+static bool _PreZ = false;
 static bool _DrawVertexX = false;
 static bool _DrawVertexY = false;
 static bool _OrthProj = false;
@@ -182,8 +186,10 @@ static float _OrthViewWith = 2.0f;
 static float _vertex_clip = 0.0f;
 static float _VertexRadiusX = 1.0f;
 static float _VertexRadiusY = 1.0f;
+static float _LineWith = 2.0f;
 static float VertexRadiusXcolor[4] = { 1,0,0,1.0 };
 static float VertexRadiusYcolor[4] = { 0,1,1,1.0 };
+static float WireFrameColor[4] = {1.0,1.0,1.0,1.0};
 static bool _Clip = false;
 static bool _Mirroring = false;
 static char savepicpath[128] = "ALL";
@@ -289,11 +295,6 @@ float theta = 0;
 	effect.GetConstantBufferVariable("g_World")->SetFloatMatrix(4, 4, (float*)DirectX::XMMatrixIdentity().r);
 	effect.GetEffectPass("model")->Apply(m_pd3dImmediateContext);;
 #endif // DEBUG
-
-	
-
-
-
 }
 void DrawRightModel(std::string cur_model, ID3D11DeviceContext* m_pd3dImmediateContext) {
 	//检查模型是否已经加载
@@ -548,6 +549,9 @@ bool GameApp::Init()
 		return false;
 	if (!InitResource())
 		return false;
+    effect.GetEffectPass("model")->SetDepthStencilState(RenderStates::DSSLessEqual.Get(), 0);
+    effect.GetEffectPass("WireFrame")->SetDepthStencilState(RenderStates::DSSLessEqual.Get(), 0);
+    effect.GetEffectPass("modelLine")->SetDepthStencilState(RenderStates::DSSNoDepthTest.Get(), 0);
 	//加载纹理并创建采样器
 	it=loadTextureFromFile(m_pd3dDevice.Get(),"Army.jpg");
 	CD3D11_SAMPLER_DESC sampDesc(CD3D11_DEFAULT{});
@@ -592,12 +596,15 @@ void GameApp::UpdateScene(float dt)
 	effect.GetConstantBufferVariable("g_View")->SetVal(XMMatrixTranspose(XMMatrixMultiply(mWorld, mView)));
 	effect.GetConstantBufferVariable("g_EyePosW")->SetVal(g_camera.GetEyePt());
     if (_OrthProj) {
-        effect.GetConstantBufferVariable("g_Proj")->SetVal(XMMatrixTranspose(XMMatrixOrthographicLH(_OrthViewWith, _OrthViewWith, 0.01f, 1000.0f)));
+        effect.GetConstantBufferVariable("g_Proj")->SetVal(XMMatrixTranspose(XMMatrixOrthographicLH(_OrthViewWith, _OrthViewWith*2/AspectRatio(), 0.01f, 1000.0f)));
     }
     else {
         effect.GetConstantBufferVariable("g_Proj")->SetVal(XMMatrixTranspose(XMMatrixPerspectiveFovLH(XM_PIDIV4, AspectRatio() / 2, 0.01f, 1000.0f)));
     }
-    
+    float  _ScreenParams[2] = { static_cast<float>(m_ClientWidth) / 2, static_cast<float>(m_ClientHeight) };
+    effect.GetConstantBufferVariable("_ScreenParams")->SetFloatVector(2,_ScreenParams);
+    effect.GetConstantBufferVariable("_Thickness")->SetFloat(_LineWith);
+    effect.GetConstantBufferVariable("_LineColor")->SetFloatVector(4, WireFrameColor);
 #pragma endregion
 #ifdef USE_IMGUI
 	static bool flag = true;
@@ -654,9 +661,11 @@ void GameApp::UpdateScene(float dt)
             ImGui::Checkbox("modelLine", &_modelline);
             ImGui::SameLine();
             ImGui::Checkbox("wireframe", &_WireFrame);
+            ImGui::SameLine();
+            ImGui::Checkbox("PreZ", &_PreZ);
             ImGui::Checkbox("Orthproj",&_OrthProj);
             if (_OrthProj) {
-                ImGui::SliderFloat("OrthViewWith",&_OrthViewWith,0.1f,3.0f);
+                ImGui::SliderFloat("OrthViewWith",&_OrthViewWith,0.001f,3.0f);
             }
 			if (_basicflag) {
 				static float colorA[4] = { 1,0,0,1.0 };
@@ -707,6 +716,10 @@ void GameApp::UpdateScene(float dt)
 					}
 				}
 			}
+            if (_WireFrame) {
+                ImGui::SliderFloat("WireFrameWith", &_LineWith,1,20);
+                ImGui::ColorPicker4("WireFrameColor",WireFrameColor);
+            }
         
 			ImGui::Checkbox("Draw vertexX", &_DrawVertexX);
             if (_DrawVertexX) {
@@ -758,13 +771,7 @@ void GameApp::UpdateScene(float dt)
 			effect.GetConstantBufferVariable("coffi")->SetSInt(coffi);
 
 
-			if (_WireFrame) {
-				effect.GetEffectPass("model")->SetRasterizerState(m_pRSWireframe.Get());
-                
-			}
-			else {
-				effect.GetEffectPass("model")->SetRasterizerState(m_pRSnoCull.Get());
-			}
+
 
 			ImGui::InputText("savepicpath", savepicpath, len);
 			ImGui::SliderFloat("zoom", &g_camera.m_fRadius, 0.1, 4);
@@ -972,8 +979,19 @@ void GameApp::DrawScene()
 		// 设置左边视口
 		m_ScreenViewport.TopLeftX = 0;
 		m_pd3dImmediateContext->RSSetViewports(1, &m_ScreenViewport);
-       
+        if (_PreZ) {
+           effect.GetEffectPass("PreZ")->Apply(m_pd3dImmediateContext.Get());;
+           Draw(cur_model, m_pd3dImmediateContext.Get());
+        }
         if (_drawmodel) {
+
+           effect.GetEffectPass("model")->Apply(m_pd3dImmediateContext.Get());;
+           Draw(cur_model, m_pd3dImmediateContext.Get());
+
+
+        }
+        if (_WireFrame) {
+           effect.GetEffectPass("WireFrame")->Apply(m_pd3dImmediateContext.Get());;
            Draw(cur_model, m_pd3dImmediateContext.Get());
         }
 		
@@ -996,11 +1014,19 @@ void GameApp::DrawScene()
        
 		m_ScreenViewport.TopLeftX = static_cast<float>(m_ClientWidth) / 2;
 		m_pd3dImmediateContext->RSSetViewports(1, &m_ScreenViewport);
+        if (_PreZ) {
+            effect.GetEffectPass("PreZ")->Apply(m_pd3dImmediateContext.Get());;
+            DrawRightModel(cur_model, m_pd3dImmediateContext.Get());
+        }
         if (_drawmodel) {
+
            effect.GetEffectPass("model")->Apply(m_pd3dImmediateContext.Get());;
 		   DrawRightModel(cur_model, m_pd3dImmediateContext.Get());
         }
-
+        if (_WireFrame) {
+            effect.GetEffectPass("WireFrame")->Apply(m_pd3dImmediateContext.Get());;
+            DrawRightModel(cur_model, m_pd3dImmediateContext.Get());
+        }
 		if (_poiflag) {
 			effect.GetConstantBufferVariable("poiflag")->SetSInt(1);
 			effect.GetEffectPass("model")->Apply(m_pd3dImmediateContext.Get());;
@@ -1319,8 +1345,15 @@ bool GameApp::InitEffect()
 	// 创建并绑定顶点布局
 	HR(m_pd3dDevice->CreateInputLayout(VertexPosNormalColorTex::inputLayout, ARRAYSIZE(VertexPosNormalColorTex::inputLayout),
 		blob->GetBufferPointer(), blob->GetBufferSize(), m_pVertexLayout.GetAddressOf()));
-	effect.CreateShaderFromFile("PS", L"HLSL//PS.hlsl", m_pd3dDevice.Get(), "PS", "ps_5_0");
+
+    effect.CreateShaderFromFile("PreZVS", L"HLSL//PreZVS.hlsl", m_pd3dDevice.Get(), "VS", "vs_5_0");
+    effect.CreateShaderFromFile("PS", L"HLSL//PS.hlsl", m_pd3dDevice.Get(), "PS", "ps_5_0");
 	effect.CreateShaderFromFile("GS", L"HLSL//GS.hlsl", m_pd3dDevice.Get(), "GS", "gs_5_0");
+
+    effect.CreateShaderFromFile("WireFrameVS", L"HLSL//WireFrameVS.hlsl", m_pd3dDevice.Get(), "VS", "vs_5_0");
+    effect.CreateShaderFromFile("WireFramePS", L"HLSL//WireFramePS.hlsl", m_pd3dDevice.Get(), "PS", "ps_5_0");
+    effect.CreateShaderFromFile("WireFrameGS", L"HLSL//WireFrameGS.hlsl", m_pd3dDevice.Get(), "GS", "gs_5_0");
+
     effect.CreateShaderFromFile("VSLine", L"HLSL//VSLine.hlsl", m_pd3dDevice.Get(), "VS", "vs_5_0");
     effect.CreateShaderFromFile("LineGS", L"HLSL//GSLine.hlsl", m_pd3dDevice.Get(), "GS", "gs_5_0");
     effect.CreateShaderFromFile("LinePS", L"HLSL//PSLine.hlsl", m_pd3dDevice.Get(), "main", "ps_5_0");
@@ -1347,11 +1380,22 @@ bool GameApp::InitEffect()
 	effect.CreateShaderFromFile("PointPS", L"HLSL//PointPS.hlsl", m_pd3dDevice.Get(), "PS", "ps_5_0");
 	effect.CreateShaderFromFile("PointGS", L"HLSL//PointGS.hlsl", m_pd3dDevice.Get(), "main", "gs_5_0");
 	EffectPassDesc pass;
-	pass.nameVS = "VS";
+	
+    pass.nameVS = "VS";
 	pass.nameGS = "GS";
 	pass.namePS = "PS";
-
 	effect.AddEffectPass("model", m_pd3dDevice.Get(), &pass);
+   
+    pass.nameVS = "PreZVS";
+    pass.nameGS = "";
+    pass.namePS = "";
+    effect.AddEffectPass("PreZ",m_pd3dDevice.Get(),&pass);
+    
+    pass.nameVS = "WireFrameVS";
+    pass.nameGS = "WireFrameGS";
+    pass.namePS = "WireFramePS";
+    effect.AddEffectPass("WireFrame", m_pd3dDevice.Get(), &pass);
+    
     pass.nameVS = "VSLine";
     pass.nameGS = "LineGS";
     pass.namePS = "LinePS";
@@ -1363,13 +1407,15 @@ bool GameApp::InitEffect()
 	pass.nameDS = "";
 	pass.nameHS = "";
 	effect.AddEffectPass("line", m_pd3dDevice.Get(), &pass);
-	pass.nameVS = "PointVS";
+	
+    pass.nameVS = "PointVS";
 	pass.nameGS = "";
 	pass.namePS = "PointPS";
 	pass.nameDS = "";
 	pass.nameHS = "";
 	effect.AddEffectPass("point", m_pd3dDevice.Get(), &pass);
-	auto it = Geometry::CreateSphere<VertexPos, unsigned int>(0.004, 7, 7);
+	
+    auto it = Geometry::CreateSphere<VertexPos, unsigned int>(0.004, 7, 7);
 	float* p = new float[it.vertexVec.size() * 4];
 	float* q = p;
 	for (int i = 0; i < it.vertexVec.size(); i++) {
@@ -1533,7 +1579,8 @@ bool GameApp::InitResource()
 	rasterizerDesc.FillMode = D3D11_FILL_SOLID;
 	rasterizerDesc.CullMode = D3D11_CULL_NONE;
 	HR(m_pd3dDevice->CreateRasterizerState(&rasterizerDesc, m_pRSnoCull.GetAddressOf()));
-	// ******************
+
+    // ******************
 	// 给渲染管线各个阶段绑定好所需资源
 	//
 	// 设置图元类型，设定输入布局
