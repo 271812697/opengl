@@ -718,8 +718,6 @@ float4 PS(GSOutput pIn) : SV_Target
     }
     else if (moade==2) { 
         //probility
-
-
         return float4(color.xyz*lerp( m_color.rgb,c_color.rgb, pIn.texcoord.y), 1.0);
     }
     //绘制深度信息
