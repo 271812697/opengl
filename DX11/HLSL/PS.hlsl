@@ -681,10 +681,10 @@ float4 PS(GSOutput pIn) : SV_Target
 {    float alpha = pIn.Color.x;   
     //光滑插值
     //alpha = alpha * alpha * (3.0f - 2.0f * alpha);
-     //可视化法线
+    //可视化法线
     //color = float4(pIn.Nor * 0.5 + 0.5, 1.0);
     //color = g_DiffuseMap.Sample(g_Sam, float2(alpha,alpha));
-   // return color;
+    //return color;
     //color = float4(1.0, 1.0, 0, 1.0);
     if(basicflag==1){
       pIn.Color=m_color;

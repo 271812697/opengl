@@ -74,9 +74,7 @@ void PreComputeIBL(ID3D11DeviceContext* context) {
 		context->Dispatch(4, 4, 6);
 		context->CopyResource(irradiance->GetTexture(), cubemap->GetTexture());
 		delete cubemap;
-
 	}
-
 	{
 		EffectHelper effect;
 		effect.CreateShaderFromFile("CS", L"HLSL//prefilter_envmap.hlsl", m_pd3dDevice, "CS", "cs_5_0", nullptr, nullptr);
@@ -92,12 +90,10 @@ void PreComputeIBL(ID3D11DeviceContext* context) {
 		prefilter_map = new TextureCube(m_pd3dDevice, 2048, 2048, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_BIND_SHADER_RESOURCE);
 		D3D11_BOX box = { 0,0,0,2048,2048,1 };
 		for (int i = 0; i < 6; i++) {
-
 			context->CopySubresourceRegion(cubemap->GetTexture(),
 				D3D11CalcSubresource(0, i, 12), 0, 0, 0,
 				skybox->GetTexture(),
 				D3D11CalcSubresource(0, i, 1), nullptr);
-
 		}
 		effect.SetSamplerStateByName("g_SamLinear", RenderStates::SSAnistropicWrap16x.Get());
 		effect.SetShaderResourceByName("environment_map", skybox->GetShaderResource());
@@ -117,8 +113,6 @@ void PreComputeIBL(ID3D11DeviceContext* context) {
 		context->CopyResource(prefilter_map->GetTexture(), cubemap->GetTexture());
 		delete cubemap;
 	}
-
-
 	{
 		EffectHelper effect;
 		effect.CreateShaderFromFile("CS", L"HLSL//environment_BRDF.hlsl", m_pd3dDevice, "CS", "cs_5_0", nullptr, nullptr);
@@ -138,11 +132,6 @@ void PreComputeIBL(ID3D11DeviceContext* context) {
 		context->CopyResource(BRDF_LUT->GetTexture(), BRDF->GetTexture());
 	}
 }
-
-
-
-
-
 #define PI 3.141592654
 //特效助理
 EffectHelper effect;
@@ -150,12 +139,10 @@ using namespace std;
 vector<string> listFiles(string dir)
 {
 	vector<string>ans;
-	
 	std::filesystem::directory_entry p_directory(dir);
 	for (auto& item : std::filesystem::directory_iterator(p_directory))
 		if (!item.is_directory()) {
          ans.push_back(item.path().generic_string());
-			
 		}
 	return ans;
 }
@@ -273,7 +260,6 @@ void Draw(std::string cur_model, ID3D11DeviceContext* m_pd3dImmediateContext) {
 	m_pd3dImmediateContext->IASetVertexBuffers(0, 1, &V, &stride, &offset);
 	m_pd3dImmediateContext->IASetIndexBuffer(I, DXGI_FORMAT_R32_UINT, 0);
 	m_pd3dImmediateContext->DrawIndexed(M, 0, 0);
-
 #ifdef test
 float theta = 0;
 	float omiga = 0;
@@ -300,8 +286,7 @@ void DrawRightModel(std::string cur_model, ID3D11DeviceContext* m_pd3dImmediateC
 	//检查模型是否已经加载
 	if (groundtruth_Buffer.find(StrToID(cur_model)) == groundtruth_Buffer.end()) {
 		auto it = Geometry::loadFromFile(groundtruth_path[StrToID(cur_model)].c_str());
-		groundtruth_Buffer[StrToID(cur_model)] = make_Buffer(it, m_pd3dImmediateContext);
-       
+		groundtruth_Buffer[StrToID(cur_model)] = make_Buffer(it, m_pd3dImmediateContext); 
 	}
 	auto [V, I, M] = groundtruth_Buffer[StrToID(cur_model)];
 	UINT stride = sizeof(VertexPosNormalColorTex);	// 跨越字节数
@@ -331,11 +316,9 @@ void GameApp::VertexDraw(bool left)
         pInit.pSysMem = meshData.indexVec.data();
         m_pd3dDevice->CreateBuffer(&pDesc, &pInit, &m_pIndexBuffer);
     }
-
     auto [V, I, M] = left ? resultmodel_Buffer[StrToID(cur_model)] : groundtruth_Buffer[StrToID(cur_model)];
     UINT stride[2] = { sizeof(VertexPosNormalTex),sizeof(VertexPosNormalColorTex) };
     UINT offset[2] = { 0 ,0 };
-
     ID3D11Buffer* Vb[2] = {m_pVertexBuffer,V };
     D3D11_BUFFER_DESC pDesc;
     V->GetDesc(&pDesc);
@@ -344,10 +327,6 @@ void GameApp::VertexDraw(bool left)
     m_pd3dImmediateContext->IASetInputLayout(m_pVertexLayoutInstance.Get());
     m_pd3dImmediateContext->DrawIndexedInstanced(m_IndexCount, pDesc.ByteWidth/ sizeof(VertexPosNormalColorTex), 0, 0, 0);
     m_pd3dImmediateContext->IASetInputLayout(m_pVertexLayout.Get());
-
-
-
-
 }
 
 void Drawpoi(std::string cur_model, ID3D11DeviceContext* m_pd3dImmediateContext, bool left = true) {
@@ -361,9 +340,7 @@ void Drawpoi(std::string cur_model, ID3D11DeviceContext* m_pd3dImmediateContext,
 		m_pIndexBuffer = IndexBuffer;
 		m_IndexCount = IndexCount;
 	}
-
 	if (left && resultpoi_pos.find(StrToID(cur_model)) == resultpoi_pos.end()) {
-
 		resultpoi_pos[StrToID(cur_model)] = Geometry::loadSpherePosFromFile(resultpoi_path[StrToID(cur_model)].c_str());
 	}
 	UINT stride = sizeof(VertexPosNormalColorTex);	// 跨越字节数
@@ -405,13 +382,11 @@ Microsoft::WRL::ComPtr <ID3D11ShaderResourceView> loadTextureFromFile(ID3D11Devi
 		Microsoft::WRL::ComPtr<ID3D11Texture2D> tex;
 		Microsoft::WRL::ComPtr <ID3D11ShaderResourceView>res;
 		HR(m_pd3dDevice->CreateTexture2D(&texDesc, nullptr, tex.GetAddressOf()));
-
 		// 上传纹理数据
 		m_pd3dImmediateContext->UpdateSubresource(tex.Get(), 0, nullptr, img_data, width * sizeof(uint32_t), 0);
 		CD3D11_SHADER_RESOURCE_VIEW_DESC srvDesc(D3D11_SRV_DIMENSION_TEXTURE2D, DXGI_FORMAT_R8G8B8A8_UNORM);
 		// 创建SRV
 		HR(m_pd3dDevice->CreateShaderResourceView(tex.Get(), &srvDesc, res.ReleaseAndGetAddressOf()));
-		
 		return res;
 	}
 	return nullptr;
@@ -432,25 +407,18 @@ XMVECTOR XM_CALLCONV Unproject
 )
 {
 	static const XMVECTORF32 D = { { { -1.0f, 1.0f, 0.0f, 0.0f } } };
-
 	//得到逆视口变换的位移变换和缩放变换
 	XMVECTOR Scale = XMVectorSet(ViewportWidth * 0.5f, -ViewportHeight * 0.5f, ViewportMaxZ - ViewportMinZ, 1.0f);
 	Scale = XMVectorReciprocal(Scale);
-
 	XMVECTOR Offset = XMVectorSet(-ViewportX, -ViewportY, -ViewportMinZ, 0.0f);
 	Offset = XMVectorMultiplyAdd(Scale, Offset, D.v);
-
-
 	XMMATRIX Transform = XMMatrixMultiply(View, Projection);
 	Transform = XMMatrixInverse(nullptr, Transform);
-
 	//逆视口变换, 此步到NDC坐标
 	XMVECTOR Result = XMVectorMultiplyAdd(V, Scale, Offset);
 	//逆VP，此步到世界坐标
 	return XMVector3TransformCoord(Result, Transform);
 }
-
-
 struct Ray
 {
 	Ray();
@@ -526,8 +494,6 @@ bool XM_CALLCONV Ray::Hit(FXMVECTOR V0, FXMVECTOR V1, FXMVECTOR V2, float* pOutD
 			*pOutDist = dist;
 			return true;
 		}
-
-
 		return false;
 	}
 	return false;
@@ -538,7 +504,6 @@ GameApp::GameApp(HINSTANCE hInstance)
 }
 GameApp::~GameApp()
 {
-
 }
 Microsoft::WRL::ComPtr <ID3D11ShaderResourceView>it=nullptr;
 bool GameApp::Init()
@@ -572,8 +537,6 @@ void GameApp::OnResize()
 {
 	D3DApp::OnResize();
 	m_ScreenViewport.Width = static_cast<float>(m_ClientWidth) / 2;
-	//
-
 	if (effect.GetConstantBufferVariable("g_Proj"))
 		//effect.GetConstantBufferVariable("g_Proj")->SetVal(XMMatrixTranspose(XMMatrixPerspectiveFovLH(XM_PIDIV4, AspectRatio() / 2, 0.01f, 1000.0f)));
         effect.GetConstantBufferVariable("g_Proj")->SetVal(XMMatrixTranspose(XMMatrixOrthographicLH(0.5f,0.5f,0.01f,1000.0f)));
@@ -582,17 +545,14 @@ void GameApp::OnResize()
 	g_camera.SetButtonMasks(0, 0, MOUSE_RIGHT_BUTTON);
 }
 
-
 void GameApp::UpdateScene(float dt)
 {
 	g_camera.FrameMove(dt);
 	curraduis = g_camera.GetRadius();
 	XMMATRIX mView = g_camera.GetViewMatrix();
-   
 	XMMATRIX mWorld = g_camera.GetWorldMatrix();
 	//g_camera.SetDrag(true);
 #pragma region 操作相机部分
-    
 	effect.GetConstantBufferVariable("g_View")->SetVal(XMMatrixTranspose(XMMatrixMultiply(mWorld, mView)));
 	effect.GetConstantBufferVariable("g_EyePosW")->SetVal(g_camera.GetEyePt());
     if (_OrthProj) {
@@ -610,8 +570,6 @@ void GameApp::UpdateScene(float dt)
 	static bool flag = true;
 	ImGui::Begin("Tools", &flag, ImGuiWindowFlags_None);
 	if (ImGui::BeginTabBar("ControlTabs", ImGuiTabBarFlags_None)) {
-
-
 #pragma region 
 		//观察模式
 		if (ImGui::BeginTabItem("model")) {
@@ -630,7 +588,6 @@ void GameApp::UpdateScene(float dt)
 				effect.GetConstantBufferVariable("moade")->SetSInt(0);
 			}
 			ImGui::SameLine();
-
 			if (ImGui::Checkbox("light", &light)) {
 				pbr = false;
                 probality = false;
@@ -695,7 +652,6 @@ void GameApp::UpdateScene(float dt)
 				//切换poi 和model
 				cur_model = item[meshindex];
 			}
-
             static float roughness = 0.1;
             static float metallic = 0.1;
             ImGui::SliderFloat("roughness", &roughness, 0, 1);
@@ -708,11 +664,8 @@ void GameApp::UpdateScene(float dt)
 					int id = 0;
 					for (auto& it : resultpoi_pos[StringToID(cur_model)]) {
 						string a = "color " + to_string(id);
-						//static float color[4] = { it.second.x ,it.second.y, it.second.z ,1.0};
 						ImGui::ColorEdit4(a.c_str(),&it.second.x);
-					//ImGui::Text("poi %f %f %f\n",it.second.x,it.second.y,it.second.z);
 						id++;
-
 					}
 				}
 			}
@@ -748,7 +701,6 @@ void GameApp::UpdateScene(float dt)
 				ImGui::SliderFloat("clipval", &clipval, 0, 1);
 				effect.GetConstantBufferVariable("k")->SetFloat(clipval);
 			}
-
 			static int coffi = 0;
 			ImGui::RadioButton("QuarticEaseOut",&coffi,0);
 			ImGui::SameLine();
@@ -769,34 +721,25 @@ void GameApp::UpdateScene(float dt)
 			ImGui::SameLine();
 			ImGui::RadioButton("BounceEaseOut", &coffi, 9);
 			effect.GetConstantBufferVariable("coffi")->SetSInt(coffi);
-
-
-
-
 			ImGui::InputText("savepicpath", savepicpath, len);
 			ImGui::SliderFloat("zoom", &g_camera.m_fRadius, 0.1, 4);
 			if (ImGui::SliderFloat("dis", &dis, 5, 30)) {
 				m_PointLight.position = XMFLOAT3(0.0f, 0.0f, -dis);
 				effect.GetConstantBufferVariable("g_PointLight")->SetRaw(&m_PointLight);
-			
 			}
 			ImGui::SliderFloat("sphereradius", &sphere_radius, 1, 3);
 			if (ImGui::TreeNode("pic")) {
 				for (auto it : picArray) {
-					//ImGui::SameLine();
 					ImGui::Image(it.SRV, { (float)it.w,(float)it.h });
 				}
-
 				ImGui::TreePop();
 			}
-
 #pragma endregion
 			ImGui::EndTabItem();		
 			if (listenClicked) {
-			if (1) {
 				static ImVec2 pos;
 				//鼠标的点击动作
-			if (ImGui::IsMouseClicked(0)) {
+			if (ImGui::IsMouseClicked(0)){
 					ImGuiIO& io = ImGui::GetIO();
 					pos = io.MouseClickedPos[0];
 					//构建射线
@@ -805,7 +748,6 @@ void GameApp::UpdateScene(float dt)
 					Ray tempRay = Ray::makeFromScreen(it, pos.x, pos.y, XMMatrixPerspectiveFovLH(XM_PIDIV4, AspectRatio() / 2, 0.1f, 1000.0f), XMMatrixMultiply(mWorld, mView), g_camera.GetEyePt());
 					//首先与已有小球求交，如果相交则需要销毁点中小球
 					int index = -1;
-
 					for (int i = 0; i < resultpoi_pos[StrToID(cur_model)].size(); i++) {
 						if (tempRay.IsHitShpere(resultpoi_pos[StrToID(cur_model)][i].first, 0.015)) {
 							index = i;
@@ -819,42 +761,28 @@ void GameApp::UpdateScene(float dt)
 						resultpoi_pos[StrToID(cur_model)].pop_back();
 					}
 					else {
-
 						//对射线求出与三维模型最近的交点
 						float dis = FLT_MAX;
 						for (int i = 0; i < result_mesh[StrToID(cur_model)].indexVec.size() / 3; i++) {
-
 							tempRay.Hit(XMLoadFloat3(&result_mesh[StrToID(cur_model)].vertexVec[result_mesh[StrToID(cur_model)].indexVec[3 * i]].pos),
 								XMLoadFloat3(&result_mesh[StrToID(cur_model)].vertexVec[result_mesh[StrToID(cur_model)].indexVec[3 * i + 1]].pos),
 								XMLoadFloat3(&result_mesh[StrToID(cur_model)].vertexVec[result_mesh[StrToID(cur_model)].indexVec[3 * i + 2]].pos), &dis, dis);
-
 						}
 						if (dis < FLT_MAX) {
 							DirectX::XMFLOAT3 Worldpos = tempRay.getPosition(dis);
 							resultpoi_pos[StrToID(cur_model)].push_back(std::make_pair(Worldpos, DirectX::XMFLOAT3(1.0,0.0,0.0)));
-
 						}
-
-
-
-
-
 					}
-				}
+		    }
 			if (ImGui::IsKeyPressed('W', false)) {
 				std::string p = g_settings.correct_poi_path + cur_model + ".off.poicoord.txt";
 				Geometry::StoreToFile(resultpoi_pos[StrToID(cur_model)], p.c_str());
 				MessageBox(nullptr, L"save done", L"success", 0);
 			}
-			}
-
 		    }
 
 		}
 		//检测鼠标点击
-
-
-
 #pragma endregion
 #pragma region 
 		//标记模式
@@ -911,7 +839,6 @@ void GameApp::UpdateScene(float dt)
 			ImGui::EndTabItem();
 #pragma region 鼠标拾取
 			//----------鼠标拾取
-
 			static ImVec2 pos;
 			//鼠标的点击动作
 			if (ImGui::IsMouseClicked(0)) {
@@ -936,12 +863,9 @@ void GameApp::UpdateScene(float dt)
 				else {
 					//对射线求出与三维模型最近的交点
 					float dis = FLT_MAX;
-
 					for (int i = 0; i < makr_meshdata.indexVec.size() / 3; i++) {
-
 						tempRay.Hit(XMLoadFloat3(&makr_meshdata.vertexVec[makr_meshdata.indexVec[3 * i]].pos),
 							XMLoadFloat3(&makr_meshdata.vertexVec[makr_meshdata.indexVec[3 * i + 1]].pos), XMLoadFloat3(&makr_meshdata.vertexVec[makr_meshdata.indexVec[3 * i + 2]].pos), &dis, dis);
-
 					}
 					if (dis < FLT_MAX) {
 						DirectX::XMFLOAT3 Worldpos = tempRay.getPosition(dis);
@@ -962,7 +886,6 @@ void GameApp::UpdateScene(float dt)
 	ImGui::End();
 #endif // USE_IMGUI
 }
-
 void GameApp::DrawScene()
 {
 	assert(m_pd3dImmediateContext);
@@ -1336,7 +1259,6 @@ void GameApp::drawRect(float prex, float prey, float endx, float endy)
 	m_pd3dImmediateContext->RSSetViewports(1, &m_ScreenViewport);
 	m_pd3dImmediateContext->Draw(5, 0);
 }
-
 bool GameApp::InitEffect()
 {
 
@@ -1452,7 +1374,6 @@ bool GameApp::InitResource()
 	//设置当前的绘制模式为观察模式
 	curDraw = VIEW;
 #pragma region VIEW配置
-
 	// ******************
 	// 初始化网格模型
 	//由于后来改变训练集测试集比例，此处并不对应，需要后期做修改
@@ -1474,24 +1395,19 @@ bool GameApp::InitResource()
     //markmodellist = listFiles("./data/PP2");
     markmodellist = listFiles(g_settings.originpath);
 	for (auto filepath : markmodellist) {
-		groundtruth_path[StrToID(getModelName(filepath))] = filepath;
-          
+		groundtruth_path[StrToID(getModelName(filepath))] = filepath;     
 	}
-
     //加载
     for (auto filepath : listFiles(g_settings.markpoipath)) {
-        
         std::ifstream f;
         f.open(filepath);
         std::vector<std::pair<DirectX::XMFLOAT3, DirectX::XMFLOAT3>> ans;
- 
         float x, y, z;
         while (f >> x >> y >> z) {
               ans.push_back(std::make_pair(DirectX::XMFLOAT3{-x ,y ,z }, DirectX::XMFLOAT3{ 1 ,0 ,0 }));
         }
         f.close();
         groundtruth_poi_pos[StrToID(getModelName(filepath))]=ans;
-       
     }
 	for (int i = 0; i < 601; i++) {
 		markitem[i] = new char[100];
@@ -1512,8 +1428,6 @@ bool GameApp::InitResource()
 	m_ScreenViewport.Height = static_cast<float>(m_ClientHeight);
 	m_ScreenViewport.MinDepth = 0.0f;
 	m_ScreenViewport.MaxDepth = 1.0f;
-
-
 
 	// ******************
 	// 设置常量缓冲区描述

@@ -117,7 +117,7 @@ namespace Geometry
 	}
 	inline MeshData<VertexPosNormalColorTex>loadFromFile(const char* path = nullptr) {
 		std::ifstream f;
-		f.open(path);f.sync_with_stdio(false);		
+		f.open(path);	
 
 		MeshData<VertexPosNormalColorTex> meshData;
         std::string op;
@@ -175,7 +175,6 @@ namespace Geometry
 		int num;
 		f >>num;
 		MeshData<VertexPosColor> meshData;
-	
 		float x, y, z;
 		for (int i = 0; i < num; i++) {
 			f >> x >> y >> z ;
@@ -304,7 +303,6 @@ namespace Geometry
 		f.close();
 	}
 	inline void StoreToFile(std::vector<std::pair<DirectX::XMFLOAT3, Geometry::MeshData<VertexPosNormalColorTex>>>* poi, const char* path = nullptr) {
-
 		std::ofstream f;
 		f.open(path, std::ios::out);
 		//先读取模型
