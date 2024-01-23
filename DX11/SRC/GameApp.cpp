@@ -773,11 +773,47 @@ void GameApp::UpdateScene(float dt)
 							resultpoi_pos[StrToID(cur_model)].push_back(std::make_pair(Worldpos, DirectX::XMFLOAT3(1.0,0.0,0.0)));
 						}
 					}
+
+					it.TopLeftX = static_cast<float>(m_ClientWidth) / 2;
+					tempRay = Ray::makeFromScreen(it, pos.x, pos.y, XMMatrixPerspectiveFovLH(XM_PIDIV4, AspectRatio() / 2, 0.1f, 1000.0f), XMMatrixMultiply(mWorld, mView), g_camera.GetEyePt());
+					//首先与已有小球求交，如果相交则需要销毁点中小球
+					index = -1;
+					for (int i = 0; i < groundtruth_poi_pos[StrToID(cur_model)].size(); i++) {
+						if (tempRay.IsHitShpere(groundtruth_poi_pos[StrToID(cur_model)][i].first, 0.015)) {
+							index = i;
+							break;
+						}
+					}
+					if (index != -1) {
+						for (int i = index; i < groundtruth_poi_pos[StrToID(cur_model)].size() - 1; i++) {
+							groundtruth_poi_pos[StrToID(cur_model)][i] = groundtruth_poi_pos[StrToID(cur_model)][i + 1];
+						}
+						groundtruth_poi_pos[StrToID(cur_model)].pop_back();
+					}
+					else {
+						//对射线求出与三维模型最近的交点
+						float dis = FLT_MAX;
+						for (int i = 0; i < result_mesh[StrToID(cur_model)].indexVec.size() / 3; i++) {
+							tempRay.Hit(XMLoadFloat3(&result_mesh[StrToID(cur_model)].vertexVec[result_mesh[StrToID(cur_model)].indexVec[3 * i]].pos),
+								XMLoadFloat3(&result_mesh[StrToID(cur_model)].vertexVec[result_mesh[StrToID(cur_model)].indexVec[3 * i + 1]].pos),
+								XMLoadFloat3(&result_mesh[StrToID(cur_model)].vertexVec[result_mesh[StrToID(cur_model)].indexVec[3 * i + 2]].pos), &dis, dis);
+						}
+						if (dis < FLT_MAX) {
+							DirectX::XMFLOAT3 Worldpos = tempRay.getPosition(dis);
+							groundtruth_poi_pos[StrToID(cur_model)].push_back(std::make_pair(Worldpos, DirectX::XMFLOAT3(1.0, 0.0, 0.0)));
+						}
+					}
+
 		    }
 			if (ImGui::IsKeyPressed('W', false)) {
 				std::string p = g_settings.correct_poi_path + cur_model + ".off.poicoord.txt";
 				Geometry::StoreToFile(resultpoi_pos[StrToID(cur_model)], p.c_str());
+				p = g_settings.markpoipath + cur_model + ".off.poicoord.txt";
+				Geometry::StoreToFile(groundtruth_poi_pos[StrToID(cur_model)], p.c_str());
 				MessageBox(nullptr, L"save done", L"success", 0);
+			}
+			if (ImGui::IsKeyPressed('C', false)) {
+				resultpoi_pos[StrToID(cur_model)] = groundtruth_poi_pos[StrToID(cur_model)];
 			}
 		    }
 
@@ -812,7 +848,6 @@ void GameApp::UpdateScene(float dt)
 				MessageBox(nullptr, L"HLSL//save done", L"HLSL//success", 0);
 			}
 			//展示可用列表
-
 			if (ImGui::Combo("ModelList", &markindex, markitem, markmodellist.size())) {
 				makr_meshdata.indexVec.clear();
 				makr_meshdata.vertexVec.clear();
@@ -1383,6 +1418,8 @@ bool GameApp::InitResource()
 		resultmodel_path[StrToID(getModelName(filepath))] = filepath;
 		item[i] = new char[100];
 		strcpy((char*)item[i], getModelName(filepath).c_str());
+		if (i == 0)
+			cur_model = getModelName(filepath);
 		i++;
 	}
 	for (auto filepath : listFiles(g_settings.resultpoipath)) {
@@ -1391,13 +1428,11 @@ bool GameApp::InitResource()
 #pragma endregion
 #pragma region mark配置
 	//加载人工标记的模型路径列表
-	//markmodellist = listFiles(g_settings.originpath);
-    //markmodellist = listFiles("./data/PP2");
     markmodellist = listFiles(g_settings.originpath);
 	for (auto filepath : markmodellist) {
 		groundtruth_path[StrToID(getModelName(filepath))] = filepath;     
 	}
-    //加载
+    //加载人工标记的兴趣点
     for (auto filepath : listFiles(g_settings.markpoipath)) {
         std::ifstream f;
         f.open(filepath);

@@ -140,7 +140,7 @@ namespace Geometry
             }
             else if (op=="f") {
                 f >> indexa>>indexb>>indexc;
-                meshData.indexVec.push_back(stoi(indexc.substr(0,indexc.find('/')))-1);
+                meshData.indexVec.push_back(stoi(indexc.substr(0,indexc.find('/')))-1); 
                 meshData.indexVec.push_back(stoi(indexb.substr(0, indexb.find('/')))-1);
                 meshData.indexVec.push_back(stoi(indexa.substr(0, indexa.find('/')))-1);
             }
@@ -158,11 +158,18 @@ namespace Geometry
 		std::ifstream f;
 		f.open(path);
 		std::vector<std::pair<DirectX::XMFLOAT3,DirectX::XMFLOAT3>> ans;
-		int num;
-		f >> num;
+		/*
+		//int num;
+		//f >> num;
+		//float x, y, z;
+		//for (int i = 0; i < num; i++) {
+			//f >> x >> y >> z;
+			//ans.push_back(std::make_pair(DirectX::XMFLOAT3{ -x ,y ,z }, DirectX::XMFLOAT3{ 1 ,0 ,0 }));
+		//}		
+		*/
+
 		float x, y, z;
-		for (int i = 0; i < num; i++) {
-			f >> x >> y >> z;
+		while (f>>x>>y>>z) {
 			ans.push_back(std::make_pair(DirectX::XMFLOAT3{ -x ,y ,z }, DirectX::XMFLOAT3{ 1 ,0 ,0 }));
 		}
 		f.close();
@@ -315,7 +322,7 @@ namespace Geometry
 		std::ofstream f;
 		f.open(path, std::ios::out);
 		//先读取模型
-		f << pos.size() << "\n";
+		//f << pos.size() << "\n";
 		for (int i = 0; i < pos.size(); i++) {
 			f << -pos[i].first.x << " " << pos[i].first.y << " " << pos[i].first.z << "\n";
 		}
