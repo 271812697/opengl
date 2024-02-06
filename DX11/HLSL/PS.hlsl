@@ -705,7 +705,8 @@ float4 PS(GSOutput pIn) : SV_Target
     }
     if (poiflag == 1) {
         //这里设置兴趣点的颜色
-        return c_color*color;
+        //return float4(1.0, 0.0, 0.0, 1.0);
+        return float4(poi_color.rgb * color.rgb,1.0);
     }
     if (moade == 0) {
       //pbr
@@ -714,6 +715,8 @@ float4 PS(GSOutput pIn) : SV_Target
     else if (moade == 1) { 
         //light
         float3 Lo = pIn.Color.xyz * color.xyz;
+        Lo = ApproxACES(Lo);
+        Lo = Linear2Gamma(Lo);
         return float4(Lo, 1.0);
     }
     else if (moade==2) { 

@@ -473,11 +473,13 @@ float4 PS(GSOutput pIn) : SV_Target
     ComputeDirectionalLight(g_Material, g_DirLight, pIn.Nor, g_EyePosW, A, D, S);
     float4 color = A + D;
     [unroll]
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i < 4; i++)
     {
     ComputePointLight(g_Material, g_PointLight[i], pIn.PosW, pIn.Nor, g_EyePosW, A, D, S);
     color+= D+A;  
     }
+    color.xyz = ApproxACES(color.xyz);
+    color.xyz = Linear2Gamma(color.xyz);
     return float4(color.xyz*vertex_color.xyz,1.0);
 
 }

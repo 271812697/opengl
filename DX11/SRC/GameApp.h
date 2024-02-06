@@ -21,6 +21,7 @@ private:
 	//PNG格式
 	void* getScreenRect(float prex, float prey, float endx, float endy,int* w,int*h);
 	void drawRect(float prex,float prey,float endx,float endy);
+	void DrawLight(ID3D11DeviceContext* m_pd3dImmediateContext);
 	bool InitEffect();
 	bool InitResource();
 	bool ResetMesh(const Geometry::MeshData<VertexPosNormalColorTex>& meshData);
@@ -54,7 +55,7 @@ private:
 	UINT m_IndexCount;							    // 绘制物体的索引数组大小
 
 	DirectionalLight m_DirLight;					// 默认环境光
-	PointLight m_PointLight;						// 默认点光
+	PointLight m_PointLight[4];						// 默认点光
 	SpotLight m_SpotLight;						    // 默认汇聚光
 	ComPtr<ID3D11RasterizerState> m_pRSWireframe;	// 光栅化状态: 线框模式
 	ComPtr<ID3D11RasterizerState> m_pRSnoCull;

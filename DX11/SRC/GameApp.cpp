@@ -328,7 +328,41 @@ void GameApp::VertexDraw(bool left)
     m_pd3dImmediateContext->DrawIndexedInstanced(m_IndexCount, pDesc.ByteWidth/ sizeof(VertexPosNormalColorTex), 0, 0, 0);
     m_pd3dImmediateContext->IASetInputLayout(m_pVertexLayout.Get());
 }
+void GameApp::DrawLight(ID3D11DeviceContext* m_pd3dImmediateContext) {
+	static ID3D11Buffer* m_pVertexBuffer = nullptr;			// 顶点缓冲区
+	static ID3D11Buffer* m_pIndexBuffer = nullptr;
+	static int m_IndexCount = 0;
+	if (m_pIndexBuffer == nullptr) {
+		auto meshData = Geometry::CreateSphere<VertexPosNormalColorTex>(0.015, 60, 60, { 0.0f,1.0f,0.0f,1.0f });
+		auto [VertexBuffer, IndexBuffer, IndexCount] = make_Buffer(meshData, m_pd3dImmediateContext);
+		m_pVertexBuffer = VertexBuffer;
+		m_pIndexBuffer = IndexBuffer;
+		m_IndexCount = IndexCount;
+	}
+	UINT stride = sizeof(VertexPosNormalColorTex);	// 跨越字节数
+	UINT offset = 0;							// 起始偏移量
+	m_pd3dImmediateContext->IASetVertexBuffers(0, 1, &m_pVertexBuffer, &stride, &offset);
+	m_pd3dImmediateContext->IASetIndexBuffer(m_pIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
+	auto m = DirectX::XMMatrixTranspose(DirectX::XMMatrixMultiply(DirectX::XMMatrixScaling(1.0f, 1.0f, 1.0f), DirectX::XMMatrixTranslation(m_PointLight[0].position.x, m_PointLight[0].position.y, m_PointLight[0].position.z)));
+	effect.GetConstantBufferVariable("g_World")->SetFloatMatrix(4, 4, (float*)m.r);
+	effect.GetEffectPass("Light")->Apply(m_pd3dImmediateContext);;
+	m_pd3dImmediateContext->DrawIndexed(m_IndexCount, 0, 0);
+	m = DirectX::XMMatrixTranspose(DirectX::XMMatrixMultiply(DirectX::XMMatrixScaling(1.0f, 1.0f, 1.0f), DirectX::XMMatrixTranslation(m_PointLight[1].position.x, m_PointLight[1].position.y, m_PointLight[1].position.z)));
+	effect.GetConstantBufferVariable("g_World")->SetFloatMatrix(4, 4, (float*)m.r);
+	effect.GetEffectPass("Light")->Apply(m_pd3dImmediateContext);;
+	m_pd3dImmediateContext->DrawIndexed(m_IndexCount, 0, 0);
+	m = DirectX::XMMatrixTranspose(DirectX::XMMatrixMultiply(DirectX::XMMatrixScaling(1.0f, 1.0f, 1.0f), DirectX::XMMatrixTranslation(m_PointLight[2].position.x, m_PointLight[2].position.y, m_PointLight[2].position.z)));
+	effect.GetConstantBufferVariable("g_World")->SetFloatMatrix(4, 4, (float*)m.r);
+	effect.GetEffectPass("Light")->Apply(m_pd3dImmediateContext);;
+	m_pd3dImmediateContext->DrawIndexed(m_IndexCount, 0, 0);
+	m = DirectX::XMMatrixTranspose(DirectX::XMMatrixMultiply(DirectX::XMMatrixScaling(1.0f, 1.0f, 1.0f), DirectX::XMMatrixTranslation(m_PointLight[3].position.x, m_PointLight[3].position.y, m_PointLight[3].position.z)));
+	effect.GetConstantBufferVariable("g_World")->SetFloatMatrix(4, 4, (float*)m.r);
+	effect.GetEffectPass("Light")->Apply(m_pd3dImmediateContext);;
+	m_pd3dImmediateContext->DrawIndexed(m_IndexCount, 0, 0);
 
+	effect.GetConstantBufferVariable("g_World")->SetFloatMatrix(4, 4, (float*)DirectX::XMMatrixIdentity().r);
+
+}
 void Drawpoi(std::string cur_model, ID3D11DeviceContext* m_pd3dImmediateContext, bool left = true) {
 	static ID3D11Buffer* m_pVertexBuffer = nullptr;			// 顶点缓冲区
 	static ID3D11Buffer* m_pIndexBuffer = nullptr;
@@ -360,7 +394,7 @@ void Drawpoi(std::string cur_model, ID3D11DeviceContext* m_pd3dImmediateContext,
 		effect.GetEffectPass("model")->Apply(m_pd3dImmediateContext);;
 		m_pd3dImmediateContext->DrawIndexed(m_IndexCount, 0, 0);
 	}
-	DirectX::XMMatrixIdentity();
+
 	effect.GetConstantBufferVariable("g_World")->SetFloatMatrix(4, 4, (float*)DirectX::XMMatrixIdentity().r);
 	effect.GetEffectPass("model")->Apply(m_pd3dImmediateContext);;
 }
@@ -723,11 +757,20 @@ void GameApp::UpdateScene(float dt)
 			effect.GetConstantBufferVariable("coffi")->SetSInt(coffi);
 			ImGui::InputText("savepicpath", savepicpath, len);
 			ImGui::SliderFloat("zoom", &g_camera.m_fRadius, 0.1, 4);
-			if (ImGui::SliderFloat("dis", &dis, 5, 30)) {
-				m_PointLight.position = XMFLOAT3(0.0f, 0.0f, -dis);
-				effect.GetConstantBufferVariable("g_PointLight")->SetRaw(&m_PointLight);
+			if (ImGui::SliderFloat3("PL1", &m_PointLight[0].position.x,-30,30)) {
+				effect.GetConstantBufferVariable("g_PointLight")->SetRaw(&m_PointLight[0]);
 			}
-			ImGui::SliderFloat("sphereradius", &sphere_radius, 1, 3);
+			if (ImGui::SliderFloat3("PL2", &m_PointLight[1].position.x, -30, 30)) {
+				effect.GetConstantBufferVariable("g_PointLight")->SetRaw(&m_PointLight[1], sizeof(PointLight) * 1, sizeof(PointLight));
+			}
+			if (ImGui::SliderFloat3("PL3", &m_PointLight[2].position.x, -30, 30)) {
+				effect.GetConstantBufferVariable("g_PointLight")->SetRaw(&m_PointLight[2], sizeof(PointLight) * 2, sizeof(PointLight));
+			}
+			if (ImGui::SliderFloat3("PL4", &m_PointLight[3].position.x, -30, 30)) {
+				effect.GetConstantBufferVariable("g_PointLight")->SetRaw(&m_PointLight[3], sizeof(PointLight) * 3, sizeof(PointLight));
+			}
+
+			ImGui::SliderFloat("sphereradius", &sphere_radius, 0.1, 3);
 			if (ImGui::TreeNode("pic")) {
 				for (auto it : picArray) {
 					ImGui::Image(it.SRV, { (float)it.w,(float)it.h });
@@ -745,11 +788,18 @@ void GameApp::UpdateScene(float dt)
 					//构建射线
 					auto it = m_ScreenViewport;
 					it.TopLeftX = 0;
-					Ray tempRay = Ray::makeFromScreen(it, pos.x, pos.y, XMMatrixPerspectiveFovLH(XM_PIDIV4, AspectRatio() / 2, 0.1f, 1000.0f), XMMatrixMultiply(mWorld, mView), g_camera.GetEyePt());
+					XMMATRIX P;
+					if (_OrthProj) {
+						P =XMMatrixOrthographicLH(_OrthViewWith, _OrthViewWith * 2 / AspectRatio(), 0.9f, 1000.0f);
+					}
+					else {
+						P = XMMatrixPerspectiveFovLH(XM_PIDIV4, AspectRatio() / 2, 0.9f, 1000.0f);
+					}
+					Ray tempRay = Ray::makeFromScreen(it, pos.x, pos.y, P, XMMatrixMultiply(mWorld, mView), g_camera.GetEyePt());
 					//首先与已有小球求交，如果相交则需要销毁点中小球
 					int index = -1;
 					for (int i = 0; i < resultpoi_pos[StrToID(cur_model)].size(); i++) {
-						if (tempRay.IsHitShpere(resultpoi_pos[StrToID(cur_model)][i].first, 0.015)) {
+						if (tempRay.IsHitShpere(resultpoi_pos[StrToID(cur_model)][i].first, 0.015* sphere_radius)) {
 							index = i;
 							break;
 						}
@@ -775,11 +825,11 @@ void GameApp::UpdateScene(float dt)
 					}
 
 					it.TopLeftX = static_cast<float>(m_ClientWidth) / 2;
-					tempRay = Ray::makeFromScreen(it, pos.x, pos.y, XMMatrixPerspectiveFovLH(XM_PIDIV4, AspectRatio() / 2, 0.1f, 1000.0f), XMMatrixMultiply(mWorld, mView), g_camera.GetEyePt());
+					tempRay = Ray::makeFromScreen(it, pos.x, pos.y, P, XMMatrixMultiply(mWorld, mView), g_camera.GetEyePt());
 					//首先与已有小球求交，如果相交则需要销毁点中小球
 					index = -1;
 					for (int i = 0; i < groundtruth_poi_pos[StrToID(cur_model)].size(); i++) {
-						if (tempRay.IsHitShpere(groundtruth_poi_pos[StrToID(cur_model)][i].first, 0.015)) {
+						if (tempRay.IsHitShpere(groundtruth_poi_pos[StrToID(cur_model)][i].first, 0.015 * sphere_radius)) {
 							index = i;
 							break;
 						}
@@ -966,6 +1016,8 @@ void GameApp::DrawScene()
             effect.GetEffectPass("modelLine")->Apply(m_pd3dImmediateContext.Get());;
             Draw(cur_model, m_pd3dImmediateContext.Get());
         }
+
+		DrawLight(m_pd3dImmediateContext.Get());
 
 
 		//设置右边视口
@@ -1310,6 +1362,8 @@ bool GameApp::InitEffect()
     effect.CreateShaderFromFile("WireFrameVS", L"HLSL//WireFrameVS.hlsl", m_pd3dDevice.Get(), "VS", "vs_5_0");
     effect.CreateShaderFromFile("WireFramePS", L"HLSL//WireFramePS.hlsl", m_pd3dDevice.Get(), "PS", "ps_5_0");
     effect.CreateShaderFromFile("WireFrameGS", L"HLSL//WireFrameGS.hlsl", m_pd3dDevice.Get(), "GS", "gs_5_0");
+	effect.CreateShaderFromFile("LightVS", L"HLSL//LightVS.hlsl", m_pd3dDevice.Get(), "VS", "vs_5_0");
+	effect.CreateShaderFromFile("LightPS", L"HLSL//LightPS.hlsl", m_pd3dDevice.Get(), "PS", "ps_5_0");
 
     effect.CreateShaderFromFile("VSLine", L"HLSL//VSLine.hlsl", m_pd3dDevice.Get(), "VS", "vs_5_0");
     effect.CreateShaderFromFile("LineGS", L"HLSL//GSLine.hlsl", m_pd3dDevice.Get(), "GS", "gs_5_0");
@@ -1331,9 +1385,6 @@ bool GameApp::InitEffect()
     // 创建并绑定顶点布局
     HR(m_pd3dDevice->CreateInputLayout(inputdesc, ARRAYSIZE(inputdesc),
         blob->GetBufferPointer(), blob->GetBufferSize(), m_pVertexLayoutInstance.GetAddressOf()));
-
-
-
 	effect.CreateShaderFromFile("PointPS", L"HLSL//PointPS.hlsl", m_pd3dDevice.Get(), "PS", "ps_5_0");
 	effect.CreateShaderFromFile("PointGS", L"HLSL//PointGS.hlsl", m_pd3dDevice.Get(), "main", "gs_5_0");
 	EffectPassDesc pass;
@@ -1371,6 +1422,13 @@ bool GameApp::InitEffect()
 	pass.nameDS = "";
 	pass.nameHS = "";
 	effect.AddEffectPass("point", m_pd3dDevice.Get(), &pass);
+
+	pass.nameVS = "LightVS";
+	pass.nameGS = "";
+	pass.namePS = "LightPS";
+	pass.nameDS = "";
+	pass.nameHS = "";
+	effect.AddEffectPass("Light", m_pd3dDevice.Get(), &pass);
 	
     auto it = Geometry::CreateSphere<VertexPos, unsigned int>(0.004, 7, 7);
 	float* p = new float[it.vertexVec.size() * 4];
@@ -1473,16 +1531,37 @@ bool GameApp::InitResource()
 	// 初始化默认光照
 	// 方向光
 	m_DirLight.ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
-	m_DirLight.diffuse = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
+	m_DirLight.diffuse = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
 	m_DirLight.specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
 	m_DirLight.direction = XMFLOAT3(0.0f, 0.0f, -1.0f);
 	// 点光
-	m_PointLight.position = XMFLOAT3(0.0f, 0.0f, -10.0f);
-	m_PointLight.ambient = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
-	m_PointLight.diffuse = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
-	m_PointLight.specular = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
-	m_PointLight.att = XMFLOAT3(0.0f, 0.1f, 0.0f);
-	m_PointLight.range = 25.0f;
+	m_PointLight[0].position = XMFLOAT3(0.0f, 0.0f, -10.0f);
+	m_PointLight[0].ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+	m_PointLight[0].diffuse = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
+	m_PointLight[0].specular = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
+	m_PointLight[0].att = XMFLOAT3(0.0f, 0.1f, 0.0f);
+	m_PointLight[0].range = 25.0f;
+
+	m_PointLight[1].position = XMFLOAT3(0.0f, 0.0f, 10.0f);
+	m_PointLight[1].ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+	m_PointLight[1].diffuse = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
+	m_PointLight[1].specular = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
+	m_PointLight[1].att = XMFLOAT3(0.0f, 0.1f, 0.0f);
+	m_PointLight[1].range = 25.0f;
+
+	m_PointLight[2].position = XMFLOAT3(10.0f, 0.0f, 0.0f);
+	m_PointLight[2].ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+	m_PointLight[2].diffuse = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
+	m_PointLight[2].specular = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
+	m_PointLight[2].att = XMFLOAT3(0.0f, 0.1f, 0.0f);
+	m_PointLight[2].range = 25.0f;
+
+	m_PointLight[3].position = XMFLOAT3(-10.0f, 0.0f, 0.0f);
+	m_PointLight[3].ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+	m_PointLight[3].diffuse = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
+	m_PointLight[3].specular = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
+	m_PointLight[3].att = XMFLOAT3(0.0f, 0.1f, 0.0f);
+	m_PointLight[3].range = 25.0f;
 
 	// 初始化用于VS的常量缓冲区的值
 	auto itt = effect.GetConstantBufferVariable("mode");
@@ -1499,19 +1578,14 @@ bool GameApp::InitResource()
 	float data[16] = {
 	0.58f, 0.58f, 0.58f, 1.0f,
 	0.58f, 0.58f, 0.58f, 1.0f,
-
 	};
 	effect.GetConstantBufferVariable("g_Material")->SetRaw(data);;
 	effect.GetConstantBufferVariable("g_DirLight")->SetRaw(&m_DirLight);
-    dis = 3;
-	m_PointLight.position = XMFLOAT3(0.0f, 0.0f, -dis);
-	effect.GetConstantBufferVariable("g_PointLight")->SetRaw(&m_PointLight);
-	m_PointLight.position= XMFLOAT3(0.0f, 0.0f, dis);
-	effect.GetConstantBufferVariable("g_PointLight")->SetRaw(&m_PointLight,sizeof(PointLight)*1,sizeof(PointLight));
-	m_PointLight.position = XMFLOAT3(dis, 0.0f, 0.0f);
-	effect.GetConstantBufferVariable("g_PointLight")->SetRaw(&m_PointLight, sizeof(PointLight) * 2, sizeof(PointLight));
-	m_PointLight.position = XMFLOAT3(-dis, 0.0f, 0.0f);
-	effect.GetConstantBufferVariable("g_PointLight")->SetRaw(&m_PointLight, sizeof(PointLight) * 3, sizeof(PointLight));
+
+	effect.GetConstantBufferVariable("g_PointLight")->SetRaw(&m_PointLight[0]);
+	effect.GetConstantBufferVariable("g_PointLight")->SetRaw(&m_PointLight[1], sizeof(PointLight) * 1, sizeof(PointLight));
+	effect.GetConstantBufferVariable("g_PointLight")->SetRaw(&m_PointLight[2], sizeof(PointLight) * 2, sizeof(PointLight));
+	effect.GetConstantBufferVariable("g_PointLight")->SetRaw(&m_PointLight[3], sizeof(PointLight) * 3, sizeof(PointLight));
 	effect.GetConstantBufferVariable("g_EyePosW")->Set(XMFLOAT3(0.0f, 0.0f, -5.0f));
 
 	// ******************
