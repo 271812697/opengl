@@ -169,6 +169,7 @@ namespace PathTrace
         void Present();
         void PresentPBR();
         void SaveFrame();
+        void SaveScene();
         void Update(float secondsElapsed);
         float GetProgress();
         int GetSampleCount();

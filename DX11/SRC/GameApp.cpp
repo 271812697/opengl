@@ -16,6 +16,7 @@
 #include<filesystem>
 #include <assert.h>
 #include <io.h>
+#include<stack>
 #include"Renderstate.h"
 using namespace DirectX;
 TextureManager textureManager;
@@ -1661,6 +1662,4 @@ std::string GameApp::getModelName(std::string path)
 	model = model.substr(0, model.find('.'));
 	return model;
 }
-
-
 

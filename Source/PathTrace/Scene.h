@@ -58,6 +58,7 @@ namespace PathTrace
 
         void ProcessScene();
         void RebuildInstances();
+        void Save();
 
         // Options
         RenderOptions renderOptions;
@@ -93,6 +94,7 @@ namespace PathTrace
         // To check if scene elements need to be resent to GPU
         bool instancesModified = false;
         bool envMapModified = false;
+        std::string path;
     private:
         RadeonRays::Bvh* sceneBvh;
         void createBLAS();

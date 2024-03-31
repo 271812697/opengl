@@ -28,13 +28,14 @@ namespace PathTrace
         float focalDist;
         float aperture;
         float fov;
+        Vec3 pivot;
         bool isMoving;
 
     private:
         void UpdateCamera();
 
         Vec3 worldUp;
-        Vec3 pivot;
+        
 
         float pitch;
         float radius;

@@ -757,6 +757,11 @@ namespace PathTrace
 
     }
 
+    void Renderer::SaveScene()
+    {
+        
+    }
+
     void Renderer::Present()
     {
         if (raster) {

@@ -9,6 +9,7 @@ namespace PathTrace
 
     bool LoadSceneFromFile(const std::string& filename, Scene* scene, RenderOptions& renderOptions)
     {
+        scene->path = filename;
         FILE* file;
         file = fopen(filename.c_str(), "r");
 
@@ -395,7 +396,7 @@ namespace PathTrace
                         &xform[0][2], &xform[1][2], &xform[2][2], &xform[3][2],
                         &xform[0][3], &xform[1][3], &xform[2][3], &xform[3][3]
                     ) != 0)
-                        matrixProvided = true;
+                    matrixProvided = true;
 
                     sscanf(line, " position %f %f %f", &translate.data[3][0], &translate.data[3][1], &translate.data[3][2]);
                     sscanf(line, " scale %f %f %f", &scale.data[0][0], &scale.data[1][1], &scale.data[2][2]);

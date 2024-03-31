@@ -201,6 +201,103 @@ namespace PathTrace
         dirty = true;
     }
 
+    void Scene::Save()
+    {
+        std::string prefix = R"(
+
+renderer
+{
+  resolution 800 800
+  maxdepth 2
+  tilewidth 200
+  tileheight 200
+  envmapintensity 2.0
+}
+material pa
+{
+  color 1.00 1.00 1.00
+  metallic 0.122
+  roughness 0.150
+}
+material red
+{
+  color 1.00 0.065 0.05
+  metallic 0.122
+  roughness 0.150
+}
+)";
+        std::string suffix=R"(
+
+material checker
+{
+	albedotexture Texture/checker.png
+	roughness 0.5
+}
+mesh
+{
+    scale 0.15 0.15 0.15
+	file Mesh050.obj
+	material checker
+}
+
+light
+{
+	position 1.0 1.0 1.0
+	emission 1.0 1.0 1.0
+	radius 0.01
+	v1 0.0 0.0 0.0
+	v2 0.0 0.0 0.0
+	type distant
+}
+
+
+)";
+
+        //std::string path = //"D:/Project/C++/opengl/res/PathTrace/Scenes/ObjNor/res.scene";
+        std::fstream file;
+        file.open(path,std::ios::out);
+        file << prefix;
+        file << "camera\n" << "{\n  position " << camera->position.x << " " << camera->position.y << " " << camera->position.z << std::endl;
+        file << "  lookat " << camera->pivot.x << " " << camera->pivot.y << " " << camera->pivot.z << std::endl;
+        file << "  fov " << Math::Degrees(camera->fov) << std::endl<<"}"<<std::endl;
+        
+            
+        //////
+        for (int i = 0; i < meshInstances.size(); i++) {   
+            if (meshInstances[i].parentID == -1&& (meshInstances[i].name!="Mesh050"|| meshInstances[i].name != "Mesh050.obj")) {
+                file << "mesh" << std::endl << "{" << std::endl;
+                file << "  file " << meshInstances[i].name << ".obj" << std::endl;
+                file << "  name " << meshInstances[i].name  << std::endl;
+                file << "  material pa" << std::endl;
+                file << "  matrix";
+                     for (int j = 0; j < 16; j++) {
+                    file << " " << meshInstances[i].transform.data[j % 4][j / 4];
+                }
+                file << std::endl;
+                file  << "}" << std::endl;
+            }
+        }
+
+        for (int i = 0; i < meshInstances.size(); i++) {
+            if (meshInstances[i].parentID != -1) {
+                file << "mesh" << std::endl<<"{" << std::endl;
+                file <<"  file "<< meshInstances[i].name<< std::endl;
+                file << "  parent " << meshInstances[meshInstances[i].parentID].name << std::endl;
+                file << "  material red" << std::endl;
+                file << "  matrix";
+                for (int j = 0; j < 16; j++) {
+                    file << " " << meshInstances[i].localform.data[j%4][j/4];
+                }
+                file << std::endl;  
+                file << "}" << std::endl;            
+            }
+        }
+        file << suffix;
+
+        file.close();
+       
+    }
+
     void Scene::ProcessScene()
     {
 

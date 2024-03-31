@@ -40,10 +40,14 @@ void PathInspector::InstallUI()
 
 	};
 	m_inspectorHeader->CreateWidget<UI::Widgets::Buttons::Button>("Save Frame").ClickedEvent += []() {
-
 		GetRenderer()->SaveFrame();
-
 	};
+	m_inspectorHeader->CreateWidget<UI::Widgets::Buttons::Button>("Save Scene").ClickedEvent += []() {
+
+		GetScene()->Save();
+
+     };
+
 	CreateWidget<UI::Widgets::Selection::CheckBox>(false, "Raster").AddPlugin<UI::Plugins::DataDispatcher<bool>>().RegisterReference(raster);
 	auto& Sample = (CreateWidget<UI::Widgets::Texts::TextColored>("Samples", UI::Types::Color(1.0f, 1.0f, 0.0f, 1.0f))).AddPlugin<UI::Plugins::DataDispatcher<std::string>>();
 	Sample.RegisterGatherer([]() {
