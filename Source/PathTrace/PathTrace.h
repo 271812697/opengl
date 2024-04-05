@@ -11,6 +11,8 @@ namespace PathTrace{
     extern int envMapIdx;
     extern std::vector<string> envMaps;
     extern int selectedInstance;
+    extern int selectedMat;
+    
     extern float CameraMoveSpeed;
     extern bool objectPropChanged;
     extern bool showTransform;

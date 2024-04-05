@@ -4,26 +4,26 @@
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
 #include <stdio.h>
-#include<iostream>
-#include<glad/glad.h>
+#include <iostream>
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include"Window/Device.h"
-#include"Window/WindowSettings.h"
-#include"Window/Window.h"
-#include"Window/InputManager.h"
-#include"UI/Core/UIManager.h"
-#include"UI/Styling/EStyle.h"
-#include"tools/Clock.h"
-#include"UI/Panels/PanelsManager.h"
-#include"UI/Panels/AView.h"
+#include "Window/Device.h"
+#include "Window/WindowSettings.h"
+#include "Window/Window.h"
+#include "Window/InputManager.h"
+#include "UI/Core/UIManager.h"
+#include "UI/Styling/EStyle.h"
+#include "tools/Clock.h"
+#include "UI/Panels/PanelsManager.h"
+#include "UI/Panels/AView.h"
 #include "Panels/PathInspector.h"
 #include "Panels/TransformInspector.h"
-#include"Opengl/core/log.h"
-#include"ImGuizmo.h"
-#include<string>
-#include"LoadScene.h"
-#include"Renderer.h"
-#include"PathTrace.h"
+#include "Opengl/core/log.h"
+#include "ImGuizmo.h"
+#include <string>
+#include "LoadScene.h"
+#include "Renderer.h"
+#include "PathTrace.h"
 using namespace std;
 using namespace PathTrace;
 
@@ -116,16 +116,24 @@ int main(int, char**)
             float projMatrix[16];
            
             GetScene()->camera->ComputeViewProjectionMatrix(viewMatrix, projMatrix, size.x / size.y);
-            Mat4 xform = GetScene()->meshInstances[selectedInstance].localform;
+            //if (GetScene()->meshInstances[selectedInstance].parentID != -1);
+            Mat4 xform = GetScene()->meshInstances[selectedInstance].transform;
            
             ImGuizmo::SetRect(pos.x, pos.y, size.x, size.y);
             ImGuizmo::SetOrthographic(false);
             ImGuizmo::SetDrawlist();
             ImGuizmo::Manipulate(viewMatrix, projMatrix, ImGuizmo::UNIVERSAL, ImGuizmo::LOCAL, (float*)&xform, NULL, NULL);
 
-            if (memcmp(&xform, &GetScene()->meshInstances[selectedInstance].localform, sizeof(float) * 16))
+            if (memcmp(&xform, &GetScene()->meshInstances[selectedInstance].transform, sizeof(float) * 16))
             {
-                GetScene()->meshInstances[selectedInstance].localform = xform;
+                if (GetScene()->meshInstances[selectedInstance].parentID != -1) {
+                    Mat4 pform = GetScene()->meshInstances[GetScene()->meshInstances[selectedInstance].parentID].transform.Inverse();
+                    GetScene()->meshInstances[selectedInstance].localform = xform*pform;
+
+                }
+                else {
+                   GetScene()->meshInstances[selectedInstance].localform = xform;
+                }
                 objectPropChanged = true;
             }
         }
@@ -183,9 +191,20 @@ int main(int, char**)
                 ImGui::ResetMouseDragDelta(0);
                 flag = true;
             }
-            GetScene()->dirty = flag;
-
-            
+            if (ImGui::IsMouseClicked(ImGuiMouseButton_::ImGuiMouseButton_Right)&&showTransform)
+            {
+                ImVec2 mousePos = ImGui::GetMousePos();
+                auto [xx, yy] = m_panelsManager->GetPanelAs<UI::Panels::AView>("Scene View").GetPosition();
+                auto [sizew, sizeh] = m_panelsManager->GetPanelAs<UI::Panels::AView>("Scene View").GetSafeSize();
+                float x = (mousePos.x - xx) / sizew;
+                float y = (mousePos.y - yy-25.0f) / sizeh;
+                y = 1 - y;
+                int selecd =GetScene()->IntersectionByScreen(x,y);
+                if (selecd != -1) {
+                    selectedInstance = selecd;
+                } 
+            }
+            GetScene()->dirty = flag;    
         }
         if (ImGui::IsKeyPressed(ImGuiKey_::ImGuiKey_Space,false)) {
             ImVec2 mousePos = ImGui::GetMousePos();

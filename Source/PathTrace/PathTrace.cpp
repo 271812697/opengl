@@ -10,6 +10,7 @@ namespace PathTrace {
     std::vector<string> envMaps;
     int sampleSceneIdx = 0;
     int selectedInstance = -1;
+    int selectedMat = 0;
     int envMapIdx = 0;
     float CameraMoveSpeed = 3.0f;
     bool objectPropChanged=false;
@@ -20,6 +21,7 @@ namespace PathTrace {
 
     std::string shadersDir = "../../../res/PathTrace/shaders/";
     std::string assetsDir = "../../../res/PathTrace/Scenes/ObjNor/";
+    //std::string assetsDir = "../../../res/PathTrace/Scenes/assets/";
     std::string envMapDir = "../../../res/PathTrace/Scenes/HDR/";
 
     RenderOptions renderOptions;
@@ -81,6 +83,7 @@ namespace PathTrace {
         }
 
         selectedInstance = 0;
+        selectedMat = 0;
         // Add a default HDR if there are no lights in the scene
         if (!scene->envMap && !envMaps.empty())
         {

@@ -11,6 +11,21 @@
 
 namespace PathTrace
 {
+    float AABBIntersect(Vec3 minCorner, Vec3 maxCorner, Vec3 p,Vec3 d)
+    {
+        Vec3 invDir = {1.0f / d.x,1.0f / d.y, 1.0f / d.z};
+
+        Vec3 f = (maxCorner - p) * invDir;
+        Vec3 n = (minCorner - p) * invDir;
+
+        Vec3 tmax = Vec3::Max(f,n); 
+        Vec3 tmin = Vec3::Min(f, n);
+
+        float t1 = std::min(tmax.x, std::min(tmax.y, tmax.z));
+        float t0 = std::max(tmin.x, std::max(tmin.y, tmin.z));
+
+        return (t1 >= t0) ? (t0 > 0.f ? t0 : t1) : -1.0;
+    }
     Scene::~Scene()
     {
         for (int i = 0; i < meshes.size(); i++)
@@ -109,6 +124,163 @@ namespace PathTrace
         dirty = true;
     }
 
+    int Scene::IntersectionByScreen(float x, float y)
+    {
+        struct Ray
+        {
+            Vec3 origin;
+            Vec3 direction;
+        };
+        Vec2 dd = {2*x-1.0f,2*y-1.0f};
+        float scale=tan(camera->fov*0.5);
+        //fov水平方向的张角
+        dd.y *= renderOptions.renderResolution.y * 1.0f / renderOptions.renderResolution.x * scale;
+        dd.x *= scale;
+        Vec3 RayDir = camera->right* dd.x  +  camera->up *dd.y + camera->forward;
+        RayDir = Vec3::Normalize(RayDir);
+        Vec3 RayPos = camera->position;
+        Ray r = { RayPos ,RayDir };
+        float t = 9999.0f;
+        float d=0.0f;
+
+        // Intersect BVH and tris
+        int stack[64];
+        int ptr = 0;
+        stack[ptr++] = -1;
+
+        int index = bvhTranslator.topLevelIndex;
+        float leftHit = 0.0;
+        float rightHit = 0.0;
+
+        int currMatID = 0;
+        bool BLAS = false;
+
+        Indices triID = {-1,-1,-1};
+        Mat4 transMat;
+        int instanceId = -1;
+        int transInstanceId = 0;
+        Vec3 bary;
+        Vec4 vert0, vert1, vert2;
+
+        Ray rTrans;
+        rTrans.origin = r.origin;
+        rTrans.direction = r.direction;
+
+
+        while (index!=-1)
+        {
+            Vec3 LRLeaf=bvhTranslator.nodes[index].LRLeaf;
+            int leftIndex = int(LRLeaf.x);
+            int rightIndex = int(LRLeaf.y);
+            int leaf = int(LRLeaf.z);
+            if (leaf > 0) // Leaf node of BLAS
+            {
+                for (int i = 0; i < rightIndex; i++) // Loop through tris
+                {
+                   // Vec3 vIx= vertIndices[leftIndex + i]; //ivec3(texelFetch(vertexIndicesTex, leftIndex + i).xyz);
+           
+                    Vec4 v0 = verticesUVX[vertIndices[leftIndex + i].x];
+                    Vec4 v1 = verticesUVX[vertIndices[leftIndex + i].y];
+                    Vec4 v2 = verticesUVX[vertIndices[leftIndex + i].z];
+
+                    Vec3 e0 = {v1.x-v0.x,v1.y-v0.y,v1.z-v0.z}; 
+                    Vec3 e1 = { v2.x - v0.x,v2.y - v0.y,v2.z - v0.z };
+                    Vec3 pv = Vec3::Cross(rTrans.direction, e1);
+                    float det = Vec3::Dot(e0, pv);
+
+                    Vec3 tv = { rTrans.origin.x - v0.x ,rTrans.origin.y - v0.y ,rTrans.origin.z - v0.z };
+                    Vec3 qv = Vec3::Cross(tv, e0);
+
+                    Vec4 uvt;
+                    uvt.x = Vec3::Dot(tv, pv);
+                    uvt.y = Vec3::Dot(rTrans.direction, qv);
+                    uvt.z = Vec3::Dot(e1, qv);
+                    uvt.x = uvt.x / det;
+                    uvt.y = uvt.y / det;
+                    uvt.z = uvt.z / det;
+                    uvt.w = 1.0 - uvt.x - uvt.y;
+
+                    if (uvt.x>=0&& uvt.y >= 0 && uvt.z >= 0 && uvt.w >= 0 && uvt.z < t)
+                    {
+                        t = uvt.z;
+                        triID = vertIndices[leftIndex + i];
+                       
+                        bary = { uvt.w ,uvt.x,uvt.y};
+                        vert0 = v0, vert1 = v1, vert2 = v2;
+                       
+                        instanceId=transInstanceId;
+                    }
+                }
+            }
+            else if (leaf < 0) // Leaf node of TLAS
+            { 
+                transInstanceId = -leaf - 1;
+                transMat = transforms[-leaf - 1];
+                Mat4 inver=transMat.Inverse();
+               
+                rTrans.origin = inver.MulPoint(r.origin);
+                rTrans.direction = inver.MulDir(r.direction);
+
+                // Add a marker. We'll return to this spot after we've traversed the entire BLAS
+                stack[ptr++] = -1;
+                index = leftIndex;
+                BLAS = true;
+                currMatID = rightIndex;
+                continue;
+            }
+            else
+            {
+   
+                leftHit = AABBIntersect(bvhTranslator.nodes[leftIndex].bboxmax, bvhTranslator.nodes[leftIndex].bboxmin, rTrans.origin, rTrans.direction);
+                rightHit = AABBIntersect(bvhTranslator.nodes[rightIndex].bboxmax, bvhTranslator.nodes[rightIndex].bboxmin, rTrans.origin, rTrans.direction);
+
+                if (leftHit > 0.0 && rightHit > 0.0)
+                {
+                    int deferred = -1;
+                    if (leftHit > rightHit)
+                    {
+                        index = rightIndex;
+                        deferred = leftIndex;
+                    }
+                    else
+                    {
+                        index = leftIndex;
+                        deferred = rightIndex;
+                    }
+
+                    stack[ptr++] = deferred;
+                    continue;
+                }
+                else if (leftHit > 0.)
+                {
+                    index = leftIndex;
+                    continue;
+                }
+                else if (rightHit > 0.)
+                {
+                    index = rightIndex;
+                    continue;
+                }
+            }
+            index = stack[--ptr];
+
+
+            // If we've traversed the entire BLAS then switch to back to TLAS and resume where we left off
+            if (BLAS && index == -1)
+            {
+                BLAS = false;
+
+                index = stack[--ptr];
+
+                rTrans.origin = r.origin;
+                rTrans.direction = r.direction;
+            }
+
+        }
+  
+        return instanceId;
+    }
+
     int Scene::AddMeshInstance(const MeshInstance& meshInstance)
     {
         int id = meshInstances.size();
@@ -204,14 +376,13 @@ namespace PathTrace
     void Scene::Save()
     {
         std::string prefix = R"(
-
 renderer
 {
   resolution 800 800
-  maxdepth 2
+  maxdepth 3
   tilewidth 200
   tileheight 200
-  envmapintensity 2.0
+  envmapintensity 0.5
 }
 material pa
 {
@@ -225,35 +396,30 @@ material red
   metallic 0.122
   roughness 0.150
 }
-)";
-        std::string suffix=R"(
 
-material checker
+material off_Platform
 {
-	albedotexture Texture/checker.png
-	roughness 0.5
+	color 1.0 0.94 0.8
+	roughness 1.0
+	specular 0.5
 }
 mesh
 {
-    scale 0.15 0.15 0.15
-	file Mesh050.obj
-	material checker
+	name Platform
+	file plate.obj
+	material off_Platform
+	position -1.06 -0.36 0.031
+    scale 0.4 0.236 0.25
 }
-
 light
 {
-	position 1.0 1.0 1.0
-	emission 1.0 1.0 1.0
-	radius 0.01
-	v1 0.0 0.0 0.0
-	v2 0.0 0.0 0.0
-	type distant
+	emission 100 100 100
+	position 40.9 39.0 43.9
+	radius 6.0
+	type sphere
 }
-
-
 )";
 
-        //std::string path = //"D:/Project/C++/opengl/res/PathTrace/Scenes/ObjNor/res.scene";
         std::fstream file;
         file.open(path,std::ios::out);
         file << prefix;
@@ -264,7 +430,7 @@ light
             
         //////
         for (int i = 0; i < meshInstances.size(); i++) {   
-            if (meshInstances[i].parentID == -1&& (meshInstances[i].name!="Mesh050"|| meshInstances[i].name != "Mesh050.obj")) {
+            if (meshInstances[i].parentID == -1&& (meshInstances[i].name!="plate.obj"|| meshInstances[i].name != "plate")) {
                 file << "mesh" << std::endl << "{" << std::endl;
                 file << "  file " << meshInstances[i].name << ".obj" << std::endl;
                 file << "  name " << meshInstances[i].name  << std::endl;
@@ -277,7 +443,7 @@ light
                 file  << "}" << std::endl;
             }
         }
-
+        //poi
         for (int i = 0; i < meshInstances.size(); i++) {
             if (meshInstances[i].parentID != -1) {
                 file << "mesh" << std::endl<<"{" << std::endl;
@@ -292,8 +458,6 @@ light
                 file << "}" << std::endl;            
             }
         }
-        file << suffix;
-
         file.close();
        
     }
