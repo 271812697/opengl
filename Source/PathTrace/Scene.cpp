@@ -276,8 +276,7 @@ namespace PathTrace
                 rTrans.direction = r.direction;
             }
 
-        }
-  
+        }  
         return instanceId;
     }
 
@@ -430,9 +429,9 @@ light
             
         //////
         for (int i = 0; i < meshInstances.size(); i++) {   
-            if (meshInstances[i].parentID == -1&& (meshInstances[i].name!="plate.obj"|| meshInstances[i].name != "plate")) {
+            if (meshInstances[i].parentID == -1&& (meshInstances[i].name!="Platform.obj"&& meshInstances[i].name != "Platform")) {
                 file << "mesh" << std::endl << "{" << std::endl;
-                file << "  file " << meshInstances[i].name << ".obj" << std::endl;
+                file << "  file " <<meshes[meshInstances[i].meshID] ->name.substr(meshes[meshInstances[i].meshID]->name.find_last_of("/")+1) << std::endl;
                 file << "  name " << meshInstances[i].name  << std::endl;
                 file << "  material pa" << std::endl;
                 file << "  matrix";

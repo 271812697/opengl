@@ -32,7 +32,7 @@ void UI::Widgets::Layout::TreeNode::_Draw_Impl()
 
 	if (m_shouldOpen)
 	{
-        ImGui::SetNextItemOpen(false);
+        ImGui::SetNextItemOpen(true);
 		m_shouldOpen = false;
 	}
 	else if (m_shouldClose)
