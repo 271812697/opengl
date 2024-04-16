@@ -18,6 +18,7 @@ FORCE_DEDICATED_GPU
 
 void UpdateWorkingDirectory(const std::string& p_executablePath)
 {
+	//检查当前运行的程序是否正在调试
 	if (!IsDebuggerPresent())
 	{
 		std::filesystem::current_path(Tools::Utils::PathParser::GetContainingFolder(p_executablePath));
@@ -55,12 +56,12 @@ int main(int argc, char** argv)
 			// Project file given as argument ==> Open the project
 			std::string projectFile = argv[1];
 
-			if (Tools::Utils::PathParser::GetExtension(projectFile) == "ovproject")
+			if (Tools::Utils::PathParser::GetExtension(projectFile) == "project")
 			{
 				ready = true;
 				projectPath = Tools::Utils::PathParser::GetContainingFolder(projectFile);
 				projectName = Tools::Utils::PathParser::GetElementName(projectFile);
-				Tools::Utils::String::Replace(projectName, ".ovproject", "");
+				Tools::Utils::String::Replace(projectName, ".project", "");
 			}
 
 			hub.RegisterProject(projectPath);

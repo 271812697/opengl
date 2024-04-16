@@ -49,13 +49,13 @@ void Core::Resources::Material::Bind(Rendering::Resources::Texture* p_emptyTextu
                 switch (uniformData->type)
                 {
                 case Rendering::Resources::UniformType::UNIFORM_BOOL:			if (value.type() == typeid(bool))		  m_shader->SetUniformInt(name, std::any_cast<bool>(value));			break;
-                case Rendering::Resources::UniformType::UNIFORM_INT:			if (value.type() == typeid(int))		  m_shader->SetUniformInt(name, std::any_cast<int>(value));			break;
-                case Rendering::Resources::UniformType::UNIFORM_UINT:			if (value.type() == typeid(unsigned int)) m_shader->SetUniformUint(name, std::any_cast<unsigned int>(value));			break;
-                case Rendering::Resources::UniformType::UNIFORM_FLOAT:		if (value.type() == typeid(float))		  m_shader->SetUniformFloat(name, std::any_cast<float>(value));		break;
-                case Rendering::Resources::UniformType::UNIFORM_FLOAT_VEC2:	if (value.type() == typeid(FVector2))	  m_shader->SetUniformVec2(name, std::any_cast<FVector2>(value));		break;
-                case Rendering::Resources::UniformType::UNIFORM_FLOAT_VEC3:	if (value.type() == typeid(FVector3))	  m_shader->SetUniformVec3(name, std::any_cast<FVector3>(value));		break;
-                case Rendering::Resources::UniformType::UNIFORM_FLOAT_VEC4:	if (value.type() == typeid(FVector4))	  m_shader->SetUniformVec4(name, std::any_cast<FVector4>(value));		break;
-                case Rendering::Resources::UniformType::UNIFORM_FLOAT_MAT4:	if (value.type() == typeid(FMatrix4))	  m_shader->SetUniformMat4(name, std::any_cast<FMatrix4>(value));		break;
+                case Rendering::Resources::UniformType::UNIFORM_INT:			if (value.type() == typeid(int))		  m_shader->SetUniformInt(name, std::any_cast<int>(value));			    break;
+                case Rendering::Resources::UniformType::UNIFORM_UINT:			if (value.type() == typeid(unsigned int)) m_shader->SetUniformUint(name, std::any_cast<unsigned int>(value));   break;
+                case Rendering::Resources::UniformType::UNIFORM_FLOAT:		    if (value.type() == typeid(float))		  m_shader->SetUniformFloat(name, std::any_cast<float>(value));		    break;
+                case Rendering::Resources::UniformType::UNIFORM_FLOAT_VEC2:	    if (value.type() == typeid(FVector2))	  m_shader->SetUniformVec2(name, std::any_cast<FVector2>(value));		break;
+                case Rendering::Resources::UniformType::UNIFORM_FLOAT_VEC3:	    if (value.type() == typeid(FVector3))	  m_shader->SetUniformVec3(name, std::any_cast<FVector3>(value));		break;
+                case Rendering::Resources::UniformType::UNIFORM_FLOAT_VEC4:	    if (value.type() == typeid(FVector4))	  m_shader->SetUniformVec4(name, std::any_cast<FVector4>(value));		break;
+                case Rendering::Resources::UniformType::UNIFORM_FLOAT_MAT4:	    if (value.type() == typeid(FMatrix4))	  m_shader->SetUniformMat4(name, std::any_cast<FMatrix4>(value));		break;
                 case Rendering::Resources::UniformType::UNIFORM_SAMPLER_2D:
                 {
                     if (value.type() == typeid(Texture*))

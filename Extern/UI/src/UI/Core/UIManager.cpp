@@ -27,7 +27,7 @@ void UI::Core::UIManager::ApplyStyle(Styling::EStyle p_style)
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
     switch (p_style)
     {
-    case UI::Styling::EStyle::IM_CLASSIC_STYLE:	ImGui::StyleColorsClassic();	break;
+    case UI::Styling::EStyle::IM_CLASSIC_STYLE:	    ImGui::StyleColorsClassic();	break;
     case UI::Styling::EStyle::IM_DARK_STYLE:		ImGui::StyleColorsDark();		break;
     case UI::Styling::EStyle::IM_LIGHT_STYLE:		ImGui::StyleColorsLight();		break;
 

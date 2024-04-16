@@ -1,8 +1,4 @@
-/**
-* @project: erload
-* @author: erload Tech.
-* @licence: MIT
-*/
+
 
 #define _CRT_SECURE_NO_WARNINGS
 
@@ -67,7 +63,7 @@ public:
 		openProjectButton.ClickedEvent += [this]
 		{
 			Windowing::Dialogs::OpenFileDialog dialog("Open project");
-			dialog.AddFileType("erload Project", "*.ovproject");
+			dialog.AddFileType("load Project", "*.project");
 			dialog.Show();
 
 			std::string ovProjectPath = dialog.GetSelectedFilePath();
@@ -83,7 +79,7 @@ public:
 		newProjectButton.ClickedEvent += [this, &pathField]
 		{
 			Windowing::Dialogs::SaveFileDialog dialog("New project location");
-			dialog.DefineExtension("erload Project", "..");
+			dialog.DefineExtension("load Project", "..");
 			dialog.Show();
 			if (dialog.HasSucceeded())
 			{
@@ -181,7 +177,7 @@ public:
 			std::filesystem::create_directory(p_path);
 			std::filesystem::create_directory(p_path + "Assets\\");
 			std::filesystem::create_directory(p_path + "Scripts\\");
-			std::ofstream projectFile(p_path + '\\' + Tools::Utils::PathParser::GetElementName(std::string(p_path.data(), p_path.data() + p_path.size() - 1)) + ".ovproject");
+			std::ofstream projectFile(p_path + '\\' + Tools::Utils::PathParser::GetElementName(std::string(p_path.data(), p_path.data() + p_path.size() - 1)) + ".project");
 		}
 	}
 
@@ -307,7 +303,7 @@ void Editor::Core::ProjectHub::SetupContext()
 	m_renderer->SetCapability(Rendering::Settings::ERenderingCapability::MULTISAMPLE, true);
 
 	m_uiManager = std::make_unique<UI::Core::UIManager>(m_window->GetGlfwWindow(), UI::Styling::EStyle::CUSTOM);
-	m_uiManager->LoadFont("Ruda_Big", "res\\Data\\Editor\\Fonts\\Ruda-Bold.ttf", 18);
+	m_uiManager->LoadFont("Ruda_Big", "res\\Data\\Editor\\Fonts\\Ruda-Bold.ttf", 24);
 	m_uiManager->UseFont("Ruda_Big");
 	m_uiManager->EnableEditorLayoutSave(false);
 	m_uiManager->EnableDocking(false);

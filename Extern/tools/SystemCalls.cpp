@@ -22,7 +22,10 @@ void Tools::Utils::SystemCalls::EditFile(const std::string & p_file)
 
 void Tools::Utils::SystemCalls::OpenURL(const std::string& p_url)
 {
-	
-	
-	ShellExecute(0, 0, (LPCWSTR)p_url.c_str(), 0, 0, SW_SHOW);
+	size_t origsize = p_url.size() + 1;
+	const size_t newsize = 100;
+	size_t convertedChars = 0;
+	wchar_t* wcstring = (wchar_t*)malloc(sizeof(wchar_t)*(p_url.length()-1));
+	mbstowcs_s(&convertedChars,wcstring,origsize,p_url.c_str(),_TRUNCATE);
+	ShellExecute(0, 0, wcstring, 0, 0, SW_SHOW);
 }

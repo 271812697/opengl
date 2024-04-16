@@ -192,14 +192,8 @@ void Editor::Panels::MenuBar::CreateLayoutMenu()
 void Editor::Panels::MenuBar::CreateHelpMenu()
 {
     auto& helpMenu = CreateWidget<MenuList>("Help");
-    helpMenu.CreateWidget<MenuItem>("GitHub").ClickedEvent += [] {::Tools::Utils::SystemCalls::OpenURL("https://github.com/adriengivry/erload"); };
-    helpMenu.CreateWidget<MenuItem>("Tutorials").ClickedEvent += [] {::Tools::Utils::SystemCalls::OpenURL("https://github.com/adriengivry/erload/wiki/Tutorials"); };
-    helpMenu.CreateWidget<MenuItem>("Scripting API").ClickedEvent += [] {::Tools::Utils::SystemCalls::OpenURL("https://github.com/adriengivry/erload/wiki/Scripting-API"); };
-    helpMenu.CreateWidget<Visual::Separator>();
-    helpMenu.CreateWidget<MenuItem>("Bug Report").ClickedEvent += [] {::Tools::Utils::SystemCalls::OpenURL("https://github.com/adriengivry/erload/issues/new?assignees=&labels=Bug&template=bug_report.md&title="); };
-    helpMenu.CreateWidget<MenuItem>("Feature Request").ClickedEvent += [] {::Tools::Utils::SystemCalls::OpenURL("https://github.com/adriengivry/erload/issues/new?assignees=&labels=Feature&template=feature_request.md&title="); };
-    helpMenu.CreateWidget<Visual::Separator>();
-    helpMenu.CreateWidget<Texts::Text>("Version: 1.3.0");
+    helpMenu.CreateWidget<MenuItem>("GitHub").ClickedEvent += [] {::Tools::Utils::SystemCalls::OpenURL("https://github.com/271812697/opengl"); };
+
 }
 
 void Editor::Panels::MenuBar::RegisterPanel(const std::string& p_name, UI::Panels::PanelWindow& p_panel)

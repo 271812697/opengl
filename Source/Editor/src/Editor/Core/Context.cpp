@@ -8,7 +8,7 @@ using namespace Core::ResourceManagement;
 Editor::Core::Context::Context(const std::string& p_projectPath, const std::string& p_projectName) :
 	projectPath(p_projectPath),
 	projectName(p_projectName),
-	projectFilePath(p_projectPath + p_projectName + ".ovproject"),
+	projectFilePath(p_projectPath + p_projectName + ".project"),
 	engineAssetsPath(std::filesystem::canonical("res\\Data\\Engine").string() + "\\"),
 	projectAssetsPath(p_projectPath + "Assets\\"),
 	projectScriptsPath(p_projectPath + "Scripts\\"),
@@ -56,7 +56,7 @@ Editor::Core::Context::Context(const std::string& p_projectPath, const std::stri
 	std::filesystem::create_directories(std::string(getenv("APPDATA")) + "\\erloadTech\\Editor\\");
 
 	uiManager = std::make_unique<UI::Core::UIManager>(window->GetGlfwWindow(), UI::Styling::EStyle::CUSTOM);
-	uiManager->LoadFont("Ruda_Big", editorAssetsPath + "\\Fonts\\Ruda-Bold.ttf", 18);
+	uiManager->LoadFont("Ruda_Big", editorAssetsPath + "\\Fonts\\Ruda-Bold.ttf", 24);
 	uiManager->LoadFont("Ruda_Small", editorAssetsPath + "\\Fonts\\Ruda-Bold.ttf", 12);
 	uiManager->LoadFont("Ruda_Medium", editorAssetsPath + "\\Fonts\\Ruda-Bold.ttf", 14);
 	uiManager->UseFont("Ruda_Big");
