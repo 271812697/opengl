@@ -13,10 +13,9 @@ namespace Ext {
     using namespace utils;
 	std::tuple< asset_ref<Texture>, asset_ref<Texture>, asset_ref<Texture>> PrecomputeIBL(const std::string& hdri) {
 
-
-        auto irradiance_shader = CShader("res\\shaders\\irradiance_map.glsl");
-        auto prefilter_shader = CShader("res\\shaders\\prefilter_envmap.glsl");
-        auto envBRDF_shader = CShader("res\\shaders\\environment_BRDF.glsl");
+        auto irradiance_shader = CShader("res\\Data\\Editor\\shaders\\irradiance_map.glsl");
+        auto prefilter_shader = CShader("res\\Data\\Editor\\shaders\\prefilter_envmap.glsl");
+        auto envBRDF_shader = CShader("res\\Data\\Editor\\shaders\\environment_BRDF.glsl");
 
         auto env_map = MakeAsset<Texture>(hdri, 2048, 0);
         env_map->Bind(0);

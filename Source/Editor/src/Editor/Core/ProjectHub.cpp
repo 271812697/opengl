@@ -37,10 +37,10 @@ public:
 		titleBar = false;
 
 		std::filesystem::create_directories(std::string(getenv("APPDATA")) + "\\erloadTech\\Editor\\");
-		SetSize({ 1000, 580 });
+		SetSize({ 1600, 580 });
 		SetPosition({ 0.f, 0.f });
 
-		auto& openProjectButton = CreateWidget<UI::Widgets::Buttons::Button>("Open Project");
+		auto& openProjectButton = CreateWidget<UI::Widgets::Buttons::Button>("Open PProject");
 		auto& newProjectButton = CreateWidget<UI::Widgets::Buttons::Button>("New Project");
 		auto& pathField = CreateWidget<UI::Widgets::InputFields::InputText>("");
 		m_goButton = &CreateWidget<UI::Widgets::Buttons::Button>("GO");
@@ -281,10 +281,10 @@ void Editor::Core::ProjectHub::SetupContext()
 	Windowing::Settings::DeviceSettings deviceSettings;
 	Windowing::Settings::WindowSettings windowSettings;
 	windowSettings.title = "Project Hub";
-	windowSettings.width = 1000;
+	windowSettings.width = 1600;
 	windowSettings.height = 580;
 	windowSettings.maximized = false;
-	windowSettings.resizable = false;
+	windowSettings.resizable = true;
 	windowSettings.decorated = true;
 
 	/* Window creation */

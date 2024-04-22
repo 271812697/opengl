@@ -43,7 +43,8 @@ Editor::Panels::AssetView::AssetView
     m_resfbo->AddColorTexture(1);
     m_resfbo->AddDepStRenderBuffer();
     glCreateVertexArrays(1, &Quad);
-    postprocess_shader = std::make_shared<asset::Shader>("res\\shaders\\post_process.glsl");
+	auto& context = ::Core::Global::ServiceLocator::Get<::Editor::Core::Context>();
+    postprocess_shader = std::make_shared<asset::Shader>(context.editorAssetsPath+"shaders\\post_process.glsl");
 
 }
 

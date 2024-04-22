@@ -148,7 +148,6 @@ void Editor::Core::Editor::UpdatePlayMode(float p_deltaTime)
 		m_context.audioEngine->Update();
 	}
 
-    //ImGui::GetIO().WantCaptureMouse = (m_context.window->GetCursorMode() == Windowing::Cursor::ECursorMode::DISABLED);
 
 	if (m_editorActions.GetCurrentEditorMode() == EditorActions::EEditorMode::FRAME_BY_FRAME)
 		m_editorActions.PauseGame();

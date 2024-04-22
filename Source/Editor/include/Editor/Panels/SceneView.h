@@ -51,6 +51,13 @@ namespace Editor::Panels
 		void HandleActorPicking();
 
 	private:
+		std::shared_ptr<asset::Shader>skys;
+		std::shared_ptr<Rendering::Resources::Texture2D>env_map;
+		std::shared_ptr<asset::CShader>bloom_shader;
+		std::shared_ptr<asset::Shader>postprocess_shader;
+		std::shared_ptr<asset::Shader>shadow_shader;
+		unsigned int Quad = 0;
+
         std::unique_ptr<Rendering::Buffers::Framebuffer> m_mulfbo;
         std::unique_ptr<Rendering::Buffers::Framebuffer> m_resfbo;
         std::unique_ptr<Rendering::Buffers::Framebuffer> m_bloomfbo;

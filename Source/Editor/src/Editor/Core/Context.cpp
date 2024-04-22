@@ -40,7 +40,7 @@ Editor::Core::Context::Context(const std::string& p_projectPath, const std::stri
 	/* Window creation */
 	device = std::make_unique<Windowing::Context::Device>(deviceSettings);
 	window = std::make_unique<Windowing::Window>(*device, windowSettings);
-    window->SetIcon("res\\texture\\awesomeface.png");;
+    window->SetIcon(editorAssetsPath+"texture\\awesomeface.png");;
     
 	inputManager = std::make_unique<Windowing::Inputs::InputManager>(*window);
 	window->MakeCurrentContext();
@@ -79,8 +79,10 @@ Editor::Core::Context::Context(const std::string& p_projectPath, const std::stri
 	physicsEngine = std::make_unique<Physics::Core::PhysicsEngine>(Physics::Settings::PhysicsSettings{ {0.0f, -9.81f, 0.0f } });
 
 	/* Service Locator providing */
+	ServiceLocator::Provide<Context>(*this);
 	ServiceLocator::Provide<Physics::Core::PhysicsEngine>(*physicsEngine);
 	ServiceLocator::Provide<ModelManager>(modelManager);
+	
 	ServiceLocator::Provide<TextureManager>(textureManager);
 	ServiceLocator::Provide<ShaderManager>(shaderManager);
 	ServiceLocator::Provide<MaterialManager>(materialManager);

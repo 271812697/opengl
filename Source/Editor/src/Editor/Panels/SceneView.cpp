@@ -9,12 +9,6 @@
 #include "Opengl//asset/shader.h"
 #include "Rendering/Resources/Texture2D.h"
 
-std::shared_ptr<asset::Shader>skys;
-std::shared_ptr<Rendering::Resources::Texture2D>env_map;
-std::shared_ptr<asset::CShader>bloom_shader;
-std::shared_ptr<asset::Shader>postprocess_shader;
-std::shared_ptr<asset::Shader>shadow_shader;
-unsigned int Quad=0;
 
 Editor::Panels::SceneView::SceneView
 (
@@ -42,9 +36,10 @@ m_sceneManager(EDITOR_CONTEXT(sceneManager))
 
 
     glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+    auto& context=::Core::Global::ServiceLocator::Get<::Editor::Core::Context>();
     std::tie(irradiance_map, prefiltered_map, BRDF_LUT) =
-        Ext::PrecomputeIBL("res\\texture\\HDRI\\Field-Path-Fence-Steinbacher-Street-4K.hdr");
-    skys = std::make_shared<asset::Shader>("res\\shaders\\skybox01.glsl");
+        Ext::PrecomputeIBL(context.editorAssetsPath+"texture\\Field-Path-Fence-Steinbacher-Street-4K.hdr");
+    skys = std::make_shared<asset::Shader>(context.editorAssetsPath + "shaders\\skybox01.glsl");
     skys->SetUniform(0, 1.0f);
     skys->SetUniform(1, 0.0f);
 
@@ -71,11 +66,11 @@ m_sceneManager(EDITOR_CONTEXT(sceneManager))
     };
     ;
 
-    bloom_shader = std::make_shared<asset::CShader>("res\\shaders\\bloom.glsl");
-    postprocess_shader = std::make_shared<asset::Shader>("res\\shaders\\post_process05.glsl");
+    bloom_shader = std::make_shared<asset::CShader>(context.editorAssetsPath + "shaders\\bloom.glsl");
+    postprocess_shader = std::make_shared<asset::Shader>(context.editorAssetsPath + "shaders\\post_process05.glsl");
     glCreateVertexArrays(1, &Quad);
 
-    shadow_shader= std::make_shared<asset::Shader>("res\\shaders\\shadow.glsl");
+    shadow_shader= std::make_shared<asset::Shader>(context.editorAssetsPath + "shaders\\shadow.glsl");
 
 }
 

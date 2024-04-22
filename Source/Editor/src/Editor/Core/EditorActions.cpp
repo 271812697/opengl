@@ -179,128 +179,138 @@ void Editor::Core::EditorActions::BuildAtLocation(const std::string & p_configur
 
 	std::filesystem::remove_all(buildPath);
 
+
 	if (std::filesystem::create_directory(buildPath))
-	{
+	{			
 		OVLOG_INFO("Build directory created");
-
-		if (std::filesystem::create_directory(buildPath + "Data\\"))
-		{
-			OVLOG_INFO("Data directory created");
-
-			if (std::filesystem::create_directory(buildPath + "Data\\User\\"))
+		if (std::filesystem::create_directory(buildPath + "res\\")) {
+			OVLOG_INFO("res directory created");
+			if (std::filesystem::create_directory(buildPath + "\\res\\Data\\"))
 			{
-				OVLOG_INFO("Data\\User directory created");
+				OVLOG_INFO("Data directory created");
 
-				std::error_code err;
-
-				std::filesystem::copy(m_context.projectFilePath, buildPath + "Data\\User\\Game.ini", err);
-
-				if (!err)
+				if (std::filesystem::create_directory(buildPath + "\\res\\Data\\User\\"))
 				{
-					OVLOG_INFO("Data\\User\\Game.ini file generated");
-		
-					std::filesystem::copy(m_context.projectAssetsPath, buildPath + "Data\\User\\Assets\\", std::filesystem::copy_options::recursive, err);
+					OVLOG_INFO("Data\\User directory created");
 
-					if (!std::filesystem::exists(buildPath + "Data\\User\\Assets\\" + (m_context.projectSettings.Get<std::string>("start_scene"))))
-					{
-						OVLOG_ERROR("Failed to find Start Scene at expected path. Verify your Project Setings.");
-						Windowing::Dialogs::MessageBox message("Build Failure", "An error occured during the building of your game.\nCheck the console for more information", Windowing::Dialogs::MessageBox::EMessageType::ERROR, Windowing::Dialogs::MessageBox::EButtonLayout::OK, true);
-						std::filesystem::remove_all(buildPath);
-						return;						
-					}
+					std::error_code err;
+
+					std::filesystem::copy(m_context.projectFilePath, buildPath + "\\res\\Data\\User\\Game.ini", err);
 
 					if (!err)
 					{
-						OVLOG_INFO("Data\\User\\Assets\\ directory copied");
+						OVLOG_INFO("\\res\\Data\\User\\Game.ini file generated");
 
-						std::filesystem::copy(m_context.projectScriptsPath, buildPath + "Data\\User\\Scripts\\", std::filesystem::copy_options::recursive, err);
+						std::filesystem::copy(m_context.projectAssetsPath, buildPath + "\\res\\Data\\User\\Assets\\", std::filesystem::copy_options::recursive, err);
+
+						if (!std::filesystem::exists(buildPath + "\\res\\Data\\User\\Assets\\" + (m_context.projectSettings.Get<std::string>("start_scene"))))
+						{
+							OVLOG_ERROR("Failed to find Start Scene at expected path. Verify your Project Setings.");
+							Windowing::Dialogs::MessageBox message("Build Failure", "An error occured during the building of your game.\nCheck the console for more information", Windowing::Dialogs::MessageBox::EMessageType::ERROR, Windowing::Dialogs::MessageBox::EButtonLayout::OK, true);
+							std::filesystem::remove_all(buildPath);
+							return;
+						}
 
 						if (!err)
 						{
-							OVLOG_INFO("Data\\User\\Scripts\\ directory copied");
+							OVLOG_INFO("\\res\\Data\\User\\Assets\\ directory copied");
 
-							std::filesystem::copy(m_context.engineAssetsPath, buildPath + "Data\\Engine\\", std::filesystem::copy_options::recursive, err);
+							std::filesystem::copy(m_context.projectScriptsPath, buildPath + "\\res\\Data\\User\\Scripts\\", std::filesystem::copy_options::recursive, err);
 
 							if (!err)
 							{
-								OVLOG_INFO("Data\\Engine\\ directory copied");
+								OVLOG_INFO("\\res\\Data\\User\\Scripts\\ directory copied");
+
+								std::filesystem::copy(m_context.engineAssetsPath, buildPath + "\\res\\Data\\Engine\\", std::filesystem::copy_options::recursive, err);
+								std::filesystem::copy(m_context.editorAssetsPath, buildPath + "\\res\\Data\\Editor\\", std::filesystem::copy_options::recursive, err);
+
+								if (!err)
+								{
+									OVLOG_INFO("\\res\\Data\\Engine\\ directory copied");
+									OVLOG_INFO("\\res\\Data\\Editor\\ directory copied");
+								}
+								else
+								{
+									OVLOG_ERROR("\\res\\Data\\Engine\\ directory failed to copy");
+									OVLOG_ERROR("\\res\\Data\\Editor\\ directory failed to copy");
+									failed = true;
+								}
 							}
 							else
 							{
-								OVLOG_ERROR("Data\\Engine\\ directory failed to copy");
+								OVLOG_ERROR("\\res\\Data\\User\\Scripts\\ directory failed to copy");
 								failed = true;
 							}
 						}
 						else
 						{
-							OVLOG_ERROR("Data\\User\\Scripts\\ directory failed to copy");
+							OVLOG_ERROR("\\res\\Data\\User\\Assets\\ directory failed to copy");
 							failed = true;
 						}
 					}
 					else
 					{
-						OVLOG_ERROR("Data\\User\\Assets\\ directory failed to copy");
+						OVLOG_ERROR("\\res\\Data\\User\\Game.ini file failed to generate");
 						failed = true;
 					}
-				}
-				else
-				{
-					OVLOG_ERROR("Data\\User\\Game.ini file failed to generate");
-					failed = true;
-				}
 
-				std::string builderFolder = "Builder\\" + p_configuration + "\\";
-
-				if (std::filesystem::exists(builderFolder))
-				{
-					std::error_code err;
-
-					std::filesystem::copy(builderFolder, buildPath, err);
-
-					if (!err)
+					//std::string builderFolder = "Builder\\" + p_configuration + "\\";
+					std::string builderFolder = "D:\\Project\\C++\\opengl\\Build\\Source\\Editor\\Debug\\";
+					if (std::filesystem::exists(builderFolder))
 					{
-						OVLOG_INFO("Builder data (Dlls and executatble) copied");
+						std::error_code err;
 
-						std::filesystem::rename(buildPath + "Game.exe", buildPath + executableName, err);
+						std::filesystem::copy(builderFolder, buildPath, err);
 
 						if (!err)
 						{
-							OVLOG_INFO("Game executable renamed to " + executableName);
+							OVLOG_INFO("Builder data (Dlls and executatble) copied");
 
-							if (p_autoRun)
+							std::filesystem::rename(buildPath + "Editor.exe", buildPath + executableName, err);
+
+							if (!err)
 							{
-								std::string exePath = buildPath + executableName;
-								OVLOG_INFO("Launching the game at location: \"" + exePath + "\"");
-								if (std::filesystem::exists(exePath))
-									Tools::Utils::SystemCalls::OpenFile(exePath, buildPath);
-								else
+								OVLOG_INFO("Game executable renamed to " + executableName);
+
+								if (p_autoRun)
 								{
-									OVLOG_ERROR("Failed to start the game: Executable not found");
-									failed = true;
+									std::string exePath = buildPath + executableName;
+									OVLOG_INFO("Launching the game at location: \"" + exePath + "\"");
+									if (std::filesystem::exists(exePath))
+										Tools::Utils::SystemCalls::OpenFile(exePath, buildPath);
+									else
+									{
+										OVLOG_ERROR("Failed to start the game: Executable not found");
+										failed = true;
+									}
 								}
+							}
+							else
+							{
+								OVLOG_ERROR("Game executable failed to rename");
+								failed = true;
 							}
 						}
 						else
 						{
-							OVLOG_ERROR("Game executable failed to rename");
+							OVLOG_ERROR("Builder data (Dlls and executatble) failed to copy");
 							failed = true;
 						}
 					}
 					else
 					{
-						OVLOG_ERROR("Builder data (Dlls and executatble) failed to copy");
+						const std::string buildConfiguration = p_configuration == "Development" ? "Debug" : "Release";
+						OVLOG_ERROR("Builder folder for \"" + p_configuration + "\" not found. Verify you have compiled Engine source code in '" + buildConfiguration + "' configuration.");
 						failed = true;
 					}
 				}
-				else
-				{
-					const std::string buildConfiguration = p_configuration == "Development" ? "Debug" : "Release";
-					OVLOG_ERROR("Builder folder for \"" + p_configuration + "\" not found. Verify you have compiled Engine source code in '" + buildConfiguration + "' configuration.");
-					failed = true;
-				}
 			}
 		}
-	}
+
+	    }
+
+
+
 	else
 	{
 		OVLOG_ERROR("Build directory failed to create");
