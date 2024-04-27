@@ -323,6 +323,22 @@ if(NOT TARGET core)
     #target_compile_options(core PRIVATE /bigobj )
 endif()
 
+#[[
+if(NOT TARGET box2d)
+    set(TARGETNAME box2d)
+    set(TARGETDIR Box2D)
+    set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/${TARGETDIR})
+    file(GLOB_RECURSE SRC_impl CONFIGURE_DEPENDS  
+    "${SRC_DIR}/*.cpp")
+    file(GLOB_RECURSE SRC_head CONFIGURE_DEPENDS  
+    "${SRC_DIR}/*.h" )
+    source_group(TREE "${SRC_DIR}" FILES ${SRC_impl} ${SRC_head})
+    add_library(${TARGETNAME} STATIC ${SRC_impl} ${SRC_head})
+    target_include_directories(${TARGETNAME} PUBLIC $<BUILD_INTERFACE:${SRC_DIR}/include>)
+    set_target_properties(${TARGETNAME} PROPERTIES FOLDER ${lib_folder}/${TARGETNAME})
+endif()
+
+]]
 
 
 
