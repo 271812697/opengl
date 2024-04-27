@@ -778,7 +778,7 @@ macro (create_symlink SOURCE DESTINATION)
     if (IS_ABSOLUTE ${SOURCE})
         set (ABS_SOURCE ${SOURCE})
     else ()
-        set (ABS_SOURCE ${CMAKE_SOURCE_DIR}/${SOURCE})
+        set (ABS_SOURCE ${CMAKE_SOURCE_DIR}/urho3d/${SOURCE})
     endif ()
     if (IS_ABSOLUTE ${DESTINATION})
         set (ABS_DESTINATION ${DESTINATION})
@@ -1013,8 +1013,8 @@ macro (define_source_files)
     endif ()
 endmacro ()
 
-# Macro for defining resource directories with optional arguments as follows:
-#  GLOB_PATTERNS <list> - Use the provided globbing patterns for resource directories, default to "${CMAKE_SOURCE_DIR}/bin/*Data"
+#  Macro for defining resource directories with optional arguments as follows:
+#  GLOB_PATTERNS <list> - Use the provided globbing patterns for resource directories, default to "${CMAKE_SOURCE_DIR}/urho3d/bin/*Data"
 #  EXCLUDE_PATTERNS <list> - Use the provided regex patterns for excluding the unwanted matched directories
 #  EXTRA_DIRS <list> - Include the provided list of directories into globbing result
 #  HTML_SHELL <value> - An absolute path to the HTML shell file (only applicable for Web platform)
@@ -1026,7 +1026,7 @@ macro (define_resource_dirs)
     endif ()
     # If not explicitly specified then use the Urho3D project structure convention
     if (NOT ARG_GLOB_PATTERNS)
-        set (ARG_GLOB_PATTERNS ${CMAKE_SOURCE_DIR}/bin/*Data)
+        set (ARG_GLOB_PATTERNS ${CMAKE_SOURCE_DIR}/urho3d/bin/*)
     endif ()
     file (GLOB GLOB_RESULTS ${ARG_GLOB_PATTERNS})
     unset (GLOB_DIRS)
@@ -1098,10 +1098,10 @@ macro (define_resource_dirs)
     if (XCODE)
         if (NOT RESOURCE_FILES)
             # Default app bundle icon
-            set (RESOURCE_FILES ${CMAKE_SOURCE_DIR}/bin/Data/Textures/UrhoIcon.icns)
+            set (RESOURCE_FILES ${CMAKE_SOURCE_DIR}/urho3d/bin/Data/Textures/UrhoIcon.icns)
             if (ARM)
                 # Default app icon on the iOS/tvOS home screen
-                list (APPEND RESOURCE_FILES ${CMAKE_SOURCE_DIR}/bin/Data/Textures/UrhoIcon.png)
+                list (APPEND RESOURCE_FILES ${CMAKE_SOURCE_DIR}/urho3d/bin/Data/Textures/UrhoIcon.png)
             endif ()
         endif ()
         # Group them together under 'Resources' in Xcode IDE
@@ -1124,14 +1124,14 @@ macro (add_html_shell)
             set (HTML_SHELL ${ARGN})
         else ()
             # Create Urho3D custom HTML shell that also embeds our own project logo
-            if (NOT EXISTS ${CMAKE_SOURCE_DIR}/bin/shell.html)
+            if (NOT EXISTS ${CMAKE_SOURCE_DIR}/urho3d/bin/shell.html)
                 file (READ ${EMSCRIPTEN_ROOT_PATH}/src/shell.html HTML_SHELL)
                 string (REPLACE "<!doctype html>" "<!-- This is a generated file. DO NOT EDIT!-->\n\n<!doctype html>" HTML_SHELL "${HTML_SHELL}")     # Stringify to preserve semicolons
                 string (REPLACE "<body>" "<body>\n<script>document.body.innerHTML=document.body.innerHTML.replace(/^#!.*\\n/, '');</script>\n<a href=\"https://urho3d.io\" title=\"Urho3D Homepage\"><img src=\"https://urho3d.io/assets/images/logo.png\" alt=\"link to https://urho3d.io\" height=\"80\" width=\"160\" /></a>\n" HTML_SHELL "${HTML_SHELL}")
                 file (WRITE ${CMAKE_BINARY_DIR}/Source/shell.html "${HTML_SHELL}")
                 set (HTML_SHELL ${CMAKE_BINARY_DIR}/Source/shell.html)
             else ()
-                set (HTML_SHELL ${CMAKE_SOURCE_DIR}/bin/shell.html)
+                set (HTML_SHELL ${CMAKE_SOURCE_DIR}/urho3d/bin/shell.html)
             endif ()
         endif ()
         list (APPEND SOURCE_FILES ${HTML_SHELL})
