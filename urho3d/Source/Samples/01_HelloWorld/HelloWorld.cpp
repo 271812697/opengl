@@ -13,8 +13,17 @@
 #include <Urho3D/DebugNew.h>
 
 // Expands to this example's entry-point
-URHO3D_DEFINE_APPLICATION_MAIN(HelloWorld)
 
+
+
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance, PSTR cmdLine, int showCmd) 
+{ 
+    _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF); 
+    Urho3D::ParseArguments(GetCommandLineW()); 
+    Urho3D::SharedPtr<Urho3D::Context> context(new Urho3D::Context());
+    Urho3D::SharedPtr<HelloWorld> application(new HelloWorld(context));
+    return application->Run();
+}
 HelloWorld::HelloWorld(Context* context) :
     Sample(context)
 {

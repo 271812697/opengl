@@ -1014,7 +1014,7 @@ macro (define_source_files)
 endmacro ()
 
 #  Macro for defining resource directories with optional arguments as follows:
-#  GLOB_PATTERNS <list> - Use the provided globbing patterns for resource directories, default to "${CMAKE_SOURCE_DIR}/urho3d/bin/*Data"
+#  GLOB_PATTERNS <list> - Use the provided globbing patterns for resource directories, default to "${CMAKE_SOURCE_DIR}/urho3d/bin/*"
 #  EXCLUDE_PATTERNS <list> - Use the provided regex patterns for excluding the unwanted matched directories
 #  EXTRA_DIRS <list> - Include the provided list of directories into globbing result
 #  HTML_SHELL <value> - An absolute path to the HTML shell file (only applicable for Web platform)

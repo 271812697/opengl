@@ -30,6 +30,11 @@ add_subdirectory(scene07)
 add_subdirectory(scene08)
 add_subdirectory(PathTrace)
 add_subdirectory(Editor)
+add_subdirectory(Test)
+add_subdirectory(glslang/tnt)
+add_subdirectory(spirv-cross)
+add_subdirectory(spirv-headers)
+add_subdirectory(spirv-tools)
 
 
 
